@@ -13,6 +13,13 @@
   position: absolute;
 }
 
+/* Holds the captcha warp filter; takes no space. */
+.hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
 /* Kaonashi's see-through canvas: above the clocks, below the panel, lets clicks through. */
 .kaonashi {
   position: absolute;
@@ -153,6 +160,7 @@
 }
 
 .button:hover,
+.button[data-active="true"],
 .segmented button:hover,
 .segmented button[data-active="true"] {
   background: var(--clock);

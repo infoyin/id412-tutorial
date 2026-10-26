@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import Kaonashi, { type Ghost } from "./Kaonashi";
+import { distortDigit, noiseLines, wobblyCircle } from "./captcha";
 
 // A page full of abstract clocks. Each one sweeps smoothly from 1 to 9, then a void step,
 // then starts again. A floating panel adjusts colours, glow, layout and timing.
 // Kaonashi (No-Face) follows the mouse and swallows the clocks near it.
+// Captcha mode turns borders and digits into warped, scratched captcha shapes.
 
 // ---- Edit these to change how the page starts. Every one also has a control in the panel. ----
 const DEFAULTS = {
@@ -19,6 +21,8 @@ const DEFAULTS = {
   numerals: false, // false = wedges, true = digits
   layout: "grid" as "grid" | "random",
   kaonashi: true, // No-Face on/off
+  captcha: false, // false = clean circles, true = warped captcha shapes
+  warp: 8, // px of captcha warp, 0 = none
 };
 const NEON_COLORS = ["#ff2bd6", "#00f0ff", "#39ff14", "#ffe600", "#ff6b00", "#9d4dff", "#ffffff"];
 const STEPS = 10; // 1–9 and one void
@@ -82,7 +86,10 @@ export default function TimeInterval() {
   const neon =
     glow > 0
       ? `drop-shadow(0 0 ${glow / 2}px ${clockColor}) drop-shadow(0 0 ${glow * 2}px ${clockColor})`
-      : "none";
+      : "";
+  // Captcha warp: the SVG filter below bends the whole clock layer like captcha text.
+  const warp = settings.captcha && settings.warp > 0 ? "url(#captcha-warp)" : "";
+  const filter = `${warp} ${neon}`.trim() || "none";
   const Clock = settings.numerals ? NumeralClock : WedgeClock;
 
   return (
@@ -90,7 +97,14 @@ export default function TimeInterval() {
       className={styles.container}
       style={{ "--clock": clockColor, background: settings.backgroundColor } as React.CSSProperties}
     >
-      <div className={styles.canvas} style={{ filter: neon }}>
+      <svg className={styles.hidden} aria-hidden>
+        <filter id="captcha-warp">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7" />
+          <feDisplacementMap in="SourceGraphic" scale={settings.warp} />
+        </filter>
+      </svg>
+
+      <div className={styles.canvas} style={{ filter }}>
         {spots.map((spot, i) => {
           // 0 = far from Kaonashi, 1 = swallowed: the clock shrinks and fades.
           const distance = Math.hypot(spot.x - ghostAt.x, spot.y - ghostAt.y);
@@ -108,7 +122,12 @@ export default function TimeInterval() {
                 opacity: 1 - eaten,
               }}
             >
-              <Clock phase={(((time - spot.offset) % STEPS) + STEPS) % STEPS} line={settings.line} />
+              <Clock
+                phase={(((time - spot.offset) % STEPS) + STEPS) % STEPS}
+                line={settings.line}
+                captcha={settings.captcha}
+                seed={i + 1}
+              />
             </div>
           );
         })}
@@ -172,6 +191,16 @@ export default function TimeInterval() {
             <button className={styles.button} onClick={() => set("numerals", !settings.numerals)}>
               {settings.numerals ? "◔ Wedges" : "123 Numerals"}
             </button>
+            <button
+              className={styles.button}
+              data-active={settings.captcha}
+              onClick={() => set("captcha", !settings.captcha)}
+            >
+              Captcha
+            </button>
+            {settings.captcha && (
+              <Slider label="Warp" value={settings.warp} min={0} max={30} step={1} onChange={(v) => set("warp", v)} />
+            )}
             <button className={styles.button} onClick={() => set("kaonashi", !settings.kaonashi)}>
               {settings.kaonashi ? "Hide No-Face" : "Show No-Face"}
             </button>
@@ -223,10 +252,25 @@ function makeSpots(layout: Settings["layout"], size: number, width: number, heig
   return spots;
 }
 
-type ClockProps = { phase: number; line: number };
+type ClockProps = { phase: number; line: number; captcha: boolean; seed: number };
+
+// The clock's border: a clean circle, or in captcha mode a wobbly double outline with scratches.
+function Face({ line, captcha, seed }: Omit<ClockProps, "phase">) {
+  if (!captcha) return <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />;
+
+  return (
+    <>
+      <path d={wobblyCircle(seed)} className={styles.face} strokeWidth={line} />
+      <path d={wobblyCircle(seed + 100, 10)} className={styles.face} strokeWidth={line / 2} opacity={0.6} />
+      {noiseLines(seed).map((l, k) => (
+        <line key={k} {...l} className={styles.hand} strokeWidth={line / 2} />
+      ))}
+    </>
+  );
+}
 
 // phase 0–9: the wedge grows smoothly to a full circle. phase 9–10: void (nothing drawn).
-function WedgeClock({ phase, line }: ClockProps) {
+function WedgeClock({ phase, line, captcha, seed }: ClockProps) {
   if (phase >= 9) return null;
 
   const angle = (phase / 9) * 2 * Math.PI;
@@ -236,7 +280,7 @@ function WedgeClock({ phase, line }: ClockProps) {
 
   return (
     <svg className={styles.clock} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />
+      <Face line={line} captcha={captcha} seed={seed} />
       <path d={`M 50 50 L 50 10 A 40 40 0 ${largeArc} 1 ${x} ${y} Z`} className={styles.wedge} />
       <line x1="50" y1="50" x2={x} y2={y} className={styles.hand} strokeWidth={line * 2} />
     </svg>
@@ -244,7 +288,7 @@ function WedgeClock({ phase, line }: ClockProps) {
 }
 
 // phase 0–9: shows the digit 1–9, with a dot running once round the rim per digit. phase 9–10: void.
-function NumeralClock({ phase, line }: ClockProps) {
+function NumeralClock({ phase, line, captcha, seed }: ClockProps) {
   if (phase >= 9) return null;
 
   const digit = Math.floor(phase) + 1;
@@ -254,12 +298,30 @@ function NumeralClock({ phase, line }: ClockProps) {
 
   return (
     <svg className={styles.clock} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />
-      <text x="50" y="52" className={styles.digit}>
-        {digit}
-      </text>
+      <Face line={line} captcha={captcha} seed={seed} />
+      {captcha ? (
+        <CaptchaDigit digit={digit} seed={seed * 10 + digit} />
+      ) : (
+        <text x="50" y="52" className={styles.digit}>
+          {digit}
+        </text>
+      )}
       <circle cx={x} cy={y} r={2 + line * 1.5} className={styles.wedge} />
     </svg>
+  );
+}
+
+// A digit tilted, skewed and set in a random font, like one letter of a captcha.
+function CaptchaDigit({ digit, seed }: { digit: number; seed: number }) {
+  const d = distortDigit(seed);
+  return (
+    <text
+      className={styles.digit}
+      transform={`translate(${50 + d.dx} 52) rotate(${d.rotate}) skewX(${d.skew})`}
+      style={{ fontFamily: d.fontFamily, fontSize: d.fontSize, fontWeight: 700 }}
+    >
+      {digit}
+    </text>
   );
 }
 
