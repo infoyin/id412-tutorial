@@ -1,21 +1,21 @@
 # Time Interval
 
-A screen full of neon clocks. Each clock sweeps smoothly from 1 to 9, goes blank for one step (the void), and repeats; neighbouring clocks are one step apart, so the count ripples diagonally across the page. A floating panel at the bottom picks colours, neon glow, and wedge or numeral clocks.
+A screen full of neon clocks. Each clock sweeps smoothly from 1 to 9, goes blank for one step (the void), and repeats; neighbouring clocks are one step apart, so the count ripples diagonally across the page. Kaonashi (No-Face) drifts after the mouse and swallows the clocks near its mask. A floating panel picks colours, glow, layout, size, speed and line.
 
 - Route: /experiments/w1/time-interval
-- Week: W1 · Tech: React state + requestAnimationFrame, SVG, CSS Modules
-- Inputs: time, the panel (colour swatches + pickers, neon slider, wedges/numerals button)
-- Parameters: STEPS (10 = 1–9 + void), STEP_TIME (400 ms), CELL_SIZE (110 px), NEON_COLORS
+- Week: W1 · Tech: React state + requestAnimationFrame, SVG, Canvas, CSS Modules
+- Inputs: time, mouse position and speed, the panel
+- Parameters: DEFAULTS (colours, glow, size, speed, line, numerals, layout, kaonashi) in `page.tsx`; FOLLOW, LEAN, FADE_SPEED in `Kaonashi.tsx`
 
 ## How it works
-- One `requestAnimationFrame` loop sets `time` (in steps, with fractions) every frame; every clock reads from it.
-- Each clock's phase is `(time - (row + col)) % STEPS`: 0–9 is drawn, 9–10 is the void.
-- `WedgeClock` fills phase/9 of the circle; `NumeralClock` shows the digit 1–9 with a dot running round the rim once per digit.
-- Colour sets a `--clock` CSS variable used by every stroke and fill. Neon is two `drop-shadow` filters on the whole grid, sized by the slider (0 = off).
-- The grid fills the window above the panel; columns and rows come from the window size ÷ CELL_SIZE, recomputed on resize.
+- One `requestAnimationFrame` loop in `page.tsx` advances `time` (in steps, with fractions); every clock reads from it.
+- Each clock's phase is `(time - offset) % STEPS`: 0–9 is drawn, 9–10 is the void. Grid offset is `row + col`; Random scatters it.
+- `Kaonashi.tsx` is a see-through canvas over the clocks with its own loop (copied from `../simple-kaonashi`): the body eases toward the mouse, leans into the motion, and fades when the mouse moves fast.
+- Each frame Kaonashi writes its mask position into the `ghost` ref; the page copies it into state, and clocks within `reach` shrink and fade (`eaten`, 0–1).
+- Neon is two `drop-shadow` filters on the clock layer; the body's rim uses the same clock colour.
 
 ## Run
 pnpm dev → open /experiments/w1/time-interval
 
 ## Status / next
-Works. Next: a speed slider, or a pulsing glow that beats with the count.
+Works. Next: swallowed clocks stop counting and catch up when Kaonashi leaves.

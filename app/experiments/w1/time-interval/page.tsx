@@ -1,134 +1,233 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
+import Kaonashi, { type Ghost } from "./Kaonashi";
 
 // A page full of abstract clocks. Each one sweeps smoothly from 1 to 9, then a void step,
-// then starts again. Neighbouring clocks are offset, so the count ripples across.
-// A floating panel picks colours, neon glow, and wedge or numeral clocks.
-const STEPS = 10; // 1–9 and one void
-const STEP_TIME = 400; // ms per step
-const CELL_SIZE = 110; // px, roughly the size of one clock
-const PANEL_SPACE = 90; // px kept free at the bottom for the panel
+// then starts again. A floating panel adjusts colours, glow, layout and timing.
+// Kaonashi (No-Face) follows the mouse and swallows the clocks near it.
+
+// ---- Edit these to change how the page starts. Every one also has a control in the panel. ----
+const DEFAULTS = {
+  clockColor: "#00f0ff",
+  backgroundColor: "#000000",
+  glow: 8, // px of neon glow, 0 = off
+  size: 110, // px, roughly the size of one clock
+  speed: 2.5, // counts per second
+  line: 1.5, // outline thickness
+  numerals: false, // false = wedges, true = digits
+  layout: "grid" as "grid" | "random",
+  kaonashi: true, // No-Face on/off
+};
 const NEON_COLORS = ["#ff2bd6", "#00f0ff", "#39ff14", "#ffe600", "#ff6b00", "#9d4dff", "#ffffff"];
+const STEPS = 10; // 1–9 and one void
+const PANEL_SPACE = 130; // px kept free at the bottom while the panel is open
+// -----------------------------------------------------------------------------------------------
+
+type Settings = typeof DEFAULTS;
+type Spot = { x: number; y: number; size: number; offset: number }; // one clock: centre, size, delay in steps
 
 export default function TimeInterval() {
+  const [settings, setSettings] = useState(DEFAULTS);
   const [time, setTime] = useState(0); // in steps, with fractions (2.5 = halfway through step 3)
-  const [grid, setGrid] = useState({ cols: 0, rows: 0 });
-  const [clockColor, setClockColor] = useState("#00f0ff");
-  const [backgroundColor, setBackgroundColor] = useState("#000000");
-  const [glow, setGlow] = useState(8); // px of neon glow, 0 = off
-  const [numerals, setNumerals] = useState(false);
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [shuffle, setShuffle] = useState(0); // bump to re-scatter the random layout
+  const speed = useRef(DEFAULTS.speed);
+  const ghost = useRef<Ghost>({ x: -9999, y: -9999, reach: 0, alpha: 0 }); // written by <Kaonashi> every frame
+  const [ghostAt, setGhostAt] = useState(ghost.current); // copied once per frame, read by the clocks
+
+  // Change one setting, keep the rest.
+  const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
+    setSettings((previous) => ({ ...previous, [key]: value }));
+
+  // The loop reads speed from a ref, so moving the slider doesn't restart it.
+  useEffect(() => {
+    speed.current = settings.speed;
+  }, [settings.speed]);
 
   // One animation loop drives every clock, every frame.
   useEffect(() => {
     let frame = 0;
+    let last = performance.now();
     const loop = (now: number) => {
-      setTime(now / STEP_TIME);
+      setTime((previous) => previous + ((now - last) / 1000) * speed.current);
+      setGhostAt(ghost.current);
+      last = now;
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  // Fill the window (above the panel) with as many clocks as fit.
+  // Place the clocks: again on resize, layout or size change, and on Shuffle.
   useEffect(() => {
-    const resize = () =>
-      setGrid({
-        cols: Math.max(1, Math.round(window.innerWidth / CELL_SIZE)),
-        rows: Math.max(1, Math.round((window.innerHeight - PANEL_SPACE) / CELL_SIZE)),
-      });
-    resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, []);
-
-  const clocks = [];
-  for (let row = 0; row < grid.rows; row++) {
-    for (let col = 0; col < grid.cols; col++) {
-      // Diagonal offset: each clock is one step behind its neighbour.
-      const phase = (time - (row + col) + STEPS * 1000) % STEPS;
-      const Clock = numerals ? NumeralClock : WedgeClock;
-      clocks.push(<Clock key={`${row}-${col}`} phase={phase} />);
-    }
-  }
+    const place = () =>
+      setSpots(
+        makeSpots(
+          settings.layout,
+          settings.size,
+          window.innerWidth,
+          window.innerHeight - (panelOpen ? PANEL_SPACE : 0),
+        ),
+      );
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [settings.layout, settings.size, panelOpen, shuffle]);
 
   // Neon: two coloured shadows around everything drawn, one tight and one wide.
+  const { clockColor, glow } = settings;
   const neon =
     glow > 0
       ? `drop-shadow(0 0 ${glow / 2}px ${clockColor}) drop-shadow(0 0 ${glow * 2}px ${clockColor})`
       : "none";
+  const Clock = settings.numerals ? NumeralClock : WedgeClock;
 
   return (
     <main
       className={styles.container}
-      style={{ "--clock": clockColor, background: backgroundColor } as React.CSSProperties}
+      style={{ "--clock": clockColor, background: settings.backgroundColor } as React.CSSProperties}
     >
-      <div
-        className={styles.grid}
-        style={{
-          gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-          paddingBottom: PANEL_SPACE,
-          filter: neon,
-        }}
-      >
-        {clocks}
+      <div className={styles.canvas} style={{ filter: neon }}>
+        {spots.map((spot, i) => {
+          // 0 = far from Kaonashi, 1 = swallowed: the clock shrinks and fades.
+          const distance = Math.hypot(spot.x - ghostAt.x, spot.y - ghostAt.y);
+          const eaten = settings.kaonashi ? Math.max(0, 1 - distance / ghostAt.reach) * ghostAt.alpha : 0;
+          return (
+            <div
+              key={i}
+              className={styles.spot}
+              style={{
+                left: spot.x - spot.size / 2,
+                top: spot.y - spot.size / 2,
+                width: spot.size,
+                height: spot.size,
+                transform: `scale(${1 - eaten * 0.9})`,
+                opacity: 1 - eaten,
+              }}
+            >
+              <Clock phase={(((time - spot.offset) % STEPS) + STEPS) % STEPS} line={settings.line} />
+            </div>
+          );
+        })}
       </div>
 
-      <div className={styles.panel}>
-        <div className={styles.swatches}>
-          {NEON_COLORS.map((color) => (
-            <button
-              key={color}
-              className={styles.swatch}
-              data-active={color === clockColor}
-              style={{ background: color, color }}
-              onClick={() => setClockColor(color)}
-              aria-label={`Clock colour ${color}`}
-            />
-          ))}
-          <input
-            type="color"
-            className={styles.picker}
-            value={clockColor}
-            onChange={(e) => setClockColor(e.target.value)}
-            title="Custom clock colour"
-          />
+      {settings.kaonashi && <Kaonashi ghost={ghost} rimColor={clockColor} />}
+
+      {panelOpen ? (
+        <div className={styles.panel}>
+          <div className={styles.row}>
+            <div className={styles.swatches}>
+              {NEON_COLORS.map((color) => (
+                <button
+                  key={color}
+                  className={styles.swatch}
+                  data-active={color === clockColor}
+                  style={{ background: color, color }}
+                  onClick={() => set("clockColor", color)}
+                  aria-label={`Clock colour ${color}`}
+                />
+              ))}
+            </div>
+            <label className={styles.control}>
+              Clock
+              <input
+                type="color"
+                className={styles.picker}
+                value={clockColor}
+                onChange={(e) => set("clockColor", e.target.value)}
+              />
+            </label>
+            <label className={styles.control}>
+              BG
+              <input
+                type="color"
+                className={styles.picker}
+                value={settings.backgroundColor}
+                onChange={(e) => set("backgroundColor", e.target.value)}
+              />
+            </label>
+            <Slider label="Neon" value={glow} min={0} max={20} step={1} onChange={(v) => set("glow", v)} />
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.segmented}>
+              <button data-active={settings.layout === "grid"} onClick={() => set("layout", "grid")}>
+                Grid
+              </button>
+              <button data-active={settings.layout === "random"} onClick={() => set("layout", "random")}>
+                Random
+              </button>
+            </div>
+            {settings.layout === "random" && (
+              <button className={styles.button} onClick={() => setShuffle(shuffle + 1)}>
+                Shuffle
+              </button>
+            )}
+            <Slider label="Size" value={settings.size} min={40} max={300} step={5} onChange={(v) => set("size", v)} />
+            <Slider label="Speed" value={settings.speed} min={0} max={10} step={0.5} onChange={(v) => set("speed", v)} />
+            <Slider label="Line" value={settings.line} min={0.5} max={6} step={0.5} onChange={(v) => set("line", v)} />
+            <button className={styles.button} onClick={() => set("numerals", !settings.numerals)}>
+              {settings.numerals ? "◔ Wedges" : "123 Numerals"}
+            </button>
+            <button className={styles.button} onClick={() => set("kaonashi", !settings.kaonashi)}>
+              {settings.kaonashi ? "Hide No-Face" : "Show No-Face"}
+            </button>
+            <button className={styles.button} onClick={() => setSettings(DEFAULTS)}>
+              Reset
+            </button>
+            <button className={styles.button} onClick={() => setPanelOpen(false)} aria-label="Hide panel">
+              ✕
+            </button>
+          </div>
         </div>
-
-        <label className={styles.control}>
-          BG
-          <input
-            type="color"
-            className={styles.picker}
-            value={backgroundColor}
-            onChange={(e) => setBackgroundColor(e.target.value)}
-          />
-        </label>
-
-        <label className={styles.control}>
-          Neon
-          <input
-            type="range"
-            min="0"
-            max="20"
-            value={glow}
-            onChange={(e) => setGlow(Number(e.target.value))}
-          />
-        </label>
-
-        <button className={styles.toggle} onClick={() => setNumerals(!numerals)}>
-          {numerals ? "◔ Wedges" : "123 Numerals"}
+      ) : (
+        <button className={styles.openButton} onClick={() => setPanelOpen(true)}>
+          ⚙ Panel
         </button>
-      </div>
+      )}
     </main>
   );
 }
 
+// Grid: rows and columns, each clock one step behind its neighbour (a diagonal ripple).
+// Random: scattered positions, sizes and delays.
+function makeSpots(layout: Settings["layout"], size: number, width: number, height: number): Spot[] {
+  const cols = Math.max(1, Math.round(width / size));
+  const rows = Math.max(1, Math.round(height / size));
+  const cellWidth = width / cols;
+  const cellHeight = height / rows;
+
+  const spots: Spot[] = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      if (layout === "grid") {
+        spots.push({
+          x: (col + 0.5) * cellWidth,
+          y: (row + 0.5) * cellHeight,
+          size: Math.min(cellWidth, cellHeight) * 0.9,
+          offset: row + col,
+        });
+      } else {
+        spots.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: size * (0.4 + Math.random() * 1.2),
+          offset: Math.random() * STEPS,
+        });
+      }
+    }
+  }
+  return spots;
+}
+
+type ClockProps = { phase: number; line: number };
+
 // phase 0–9: the wedge grows smoothly to a full circle. phase 9–10: void (nothing drawn).
-function WedgeClock({ phase }: { phase: number }) {
-  if (phase >= 9) return <div />;
+function WedgeClock({ phase, line }: ClockProps) {
+  if (phase >= 9) return null;
 
   const angle = (phase / 9) * 2 * Math.PI;
   const x = 50 + 40 * Math.sin(angle);
@@ -137,16 +236,16 @@ function WedgeClock({ phase }: { phase: number }) {
 
   return (
     <svg className={styles.clock} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" className={styles.face} />
+      <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />
       <path d={`M 50 50 L 50 10 A 40 40 0 ${largeArc} 1 ${x} ${y} Z`} className={styles.wedge} />
-      <line x1="50" y1="50" x2={x} y2={y} className={styles.hand} />
+      <line x1="50" y1="50" x2={x} y2={y} className={styles.hand} strokeWidth={line * 2} />
     </svg>
   );
 }
 
 // phase 0–9: shows the digit 1–9, with a dot running once round the rim per digit. phase 9–10: void.
-function NumeralClock({ phase }: { phase: number }) {
-  if (phase >= 9) return <div />;
+function NumeralClock({ phase, line }: ClockProps) {
+  if (phase >= 9) return null;
 
   const digit = Math.floor(phase) + 1;
   const angle = (phase % 1) * 2 * Math.PI;
@@ -155,11 +254,37 @@ function NumeralClock({ phase }: { phase: number }) {
 
   return (
     <svg className={styles.clock} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" className={styles.face} />
+      <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />
       <text x="50" y="52" className={styles.digit}>
         {digit}
       </text>
-      <circle cx={x} cy={y} r="4" className={styles.wedge} />
+      <circle cx={x} cy={y} r={2 + line * 1.5} className={styles.wedge} />
     </svg>
+  );
+}
+
+type SliderProps = {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) => void;
+};
+
+function Slider({ label, value, min, max, step, onChange }: SliderProps) {
+  return (
+    <label className={styles.control}>
+      {label}
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <span className={styles.value}>{value}</span>
+    </label>
   );
 }
