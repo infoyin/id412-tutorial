@@ -17,10 +17,28 @@
 
 /* pointer-events: none makes the videos ignore clicks and hovers. */
 .cell {
-  width: 100%;
-  height: 100%;
-  border: none;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
   pointer-events: none;
+}
+
+/* Exactly the size of the 16:9 picture; anything outside it is cut off. */
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+/* 120px taller at top and bottom than the picture: the title bar and YouTube logo sit there. */
+.player {
+  position: absolute;
+  left: 0;
+  top: -120px;
+  width: 100%;
+  height: calc(100% + 240px);
+  border: none;
 }
 
 /* The one click that unlocks sound, covering the whole screen. */

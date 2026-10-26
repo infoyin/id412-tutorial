@@ -8,9 +8,10 @@ A 3×3 square grid of the same YouTube video, centred on the screen. Each cell s
 - Parameters: VIDEO_ID, START (41 s), GRID (3), MIN_DELAY–MAX_DELAY (0.1–6 s), START_JITTER (4 s)
 
 ## How it works
-- One embed URL: `youtube.com/embed/<id>?start=41&autoplay=1&loop=1&playlist=<id>&controls=0&disablekb=1`; `loop` needs `playlist` set to the same id.
+- One embed URL: `youtube.com/embed/<id>?start=41&autoplay=1&loop=1&playlist=<id>&controls=0&disablekb=1&iv_load_policy=3&rel=0`; `loop` needs `playlist` set to the same id.
 - Browsers only play sound after a user click, so a full-screen "click to start" button sets `started`; the cells are created after that, unmuted.
 - `pointer-events: none` on every cell makes the videos unclickable.
+- No title or logo: each iframe sits in a 16:9 `.frame` with `overflow: hidden` and is 240px taller than it, so YouTube's title bar and logo fall in the cropped strips above and below the picture.
 - After the click each cell picks a random delay (MIN_DELAY–MAX_DELAY) and start (START minus up to START_JITTER); a `setTimeout` per cell swaps its black placeholder for the iframe when the delay is up.
 - The grid is a square, `min(100vw, 100vh)` on each side, centred; GRID columns × GRID rows, one `<iframe>` per cell.
 

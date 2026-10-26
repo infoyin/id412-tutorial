@@ -42,20 +42,23 @@ export default function Video() {
   return (
     <main className={styles.container}>
       <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${GRID}, 1fr)` }}>
-        {cells.map((cell, i) =>
-          shown[i] ? (
-            <iframe
-              key={i}
-              className={styles.cell}
-              // loop needs playlist set to the same video.
-              src={`https://www.youtube.com/embed/${VIDEO_ID}?start=${cell.start}&autoplay=1&loop=1&playlist=${VIDEO_ID}&controls=0&disablekb=1`}
-              title={`Video ${i + 1}`}
-              allow="autoplay; encrypted-media"
-            />
-          ) : (
-            <div key={i} className={styles.cell} />
-          ),
-        )}
+        {cells.map((cell, i) => (
+          <div key={i} className={styles.cell}>
+            {shown[i] && (
+              // The frame is exactly the video picture; the taller iframe inside puts
+              // YouTube's title and logo outside it, where they are cropped away.
+              <div className={styles.frame}>
+                <iframe
+                  className={styles.player}
+                  // loop needs playlist set to the same video.
+                  src={`https://www.youtube.com/embed/${VIDEO_ID}?start=${cell.start}&autoplay=1&loop=1&playlist=${VIDEO_ID}&controls=0&disablekb=1&iv_load_policy=3&rel=0&playsinline=1`}
+                  title={`Video ${i + 1}`}
+                  allow="autoplay; encrypted-media"
+                />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       {!started && (
