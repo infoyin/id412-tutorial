@@ -1,9 +1,18 @@
 .container {
   position: fixed;
   inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+}
+
+/* A square as big as the screen allows. */
+.grid {
   display: grid;
   grid-auto-rows: 1fr;
-  background: black;
+  width: min(100vw, 100vh);
+  height: min(100vw, 100vh);
 }
 
 .cell {
