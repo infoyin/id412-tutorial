@@ -1,18 +1,18 @@
 .container {
   position: fixed;
   inset: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .grid {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   display: grid;
   padding: 8px;
   gap: 8px;
 }
 
 .clock {
+  display: block;
   width: 100%;
   height: 100%;
 }
@@ -34,19 +34,102 @@
   stroke-linecap: round;
 }
 
-.panel {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  background: rgba(30, 30, 30, 0.9);
-  color: white;
+.digit {
+  fill: var(--clock);
   font-family: ui-monospace, Menlo, monospace;
-  font-size: 14px;
+  font-size: 44px;
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
-.panel label {
+/* Floating glass panel at the bottom centre. */
+.panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  width: fit-content;
+  margin: 0 auto;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 20px;
+  border: 1px solid var(--clock);
+  border-radius: 28px;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 16px var(--clock);
+  color: white;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+}
+
+.swatches {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.swatch[data-active="true"] {
+  border-color: white;
+  box-shadow: 0 0 14px currentColor, 0 0 4px currentColor;
+}
+
+.picker {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.picker::-webkit-color-swatch {
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control input[type="range"] {
+  width: 90px;
+  accent-color: var(--clock);
+}
+
+.toggle {
+  padding: 6px 14px;
+  border: 1px solid var(--clock);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--clock);
+  font: inherit;
+  cursor: pointer;
+  text-shadow: 0 0 6px var(--clock);
+}
+
+.toggle:hover {
+  background: var(--clock);
+  color: black;
 }
