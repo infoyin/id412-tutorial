@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import Kaonashi, { type Ghost } from "./Kaonashi";
-import { distortDigit, noiseLines, wobblyCircle } from "./captcha";
+import { distortDigit, noise, noiseLines, wobblyCircle } from "./captcha";
 
 // A page full of abstract clocks. Each one sweeps smoothly from 1 to 9, then a void step,
 // then starts again. A floating panel adjusts colours, glow, layout and timing.
 // Kaonashi (No-Face) follows the mouse and swallows the clocks near it.
 // Captcha mode turns borders and digits into warped, scratched captcha shapes.
+// Images mode replaces each clock with a random time picture, a new one after every void.
 
 // ---- Edit these to change how the page starts. Every one also has a control in the panel. ----
 const DEFAULTS = {
@@ -18,12 +19,18 @@ const DEFAULTS = {
   size: 110, // px, roughly the size of one clock
   speed: 2.5, // counts per second
   line: 1.5, // outline thickness
-  numerals: false, // false = wedges, true = digits
+  face: "wedges" as "wedges" | "numerals" | "images", // what each clock shows
   layout: "grid" as "grid" | "random",
   kaonashi: true, // No-Face on/off
   captcha: false, // false = clean circles, true = warped captcha shapes
   warp: 8, // px of captcha warp, 0 = none
 };
+// Pictures for Images mode, in public/experiments/w1/time-interval/. Drop in your own SVG or PNG
+// (white or any colour on transparent; it is painted in the clock colour) and add its name here.
+const IMAGES = [
+  "hourglass", "alarm-clock", "stopwatch", "calendar-26", "calendar-01",
+  "sundial", "moon", "pocket-watch", "metronome", "digital-12-00",
+].map((name) => `/experiments/w1/time-interval/${name}.svg`);
 const NEON_COLORS = ["#ff2bd6", "#00f0ff", "#39ff14", "#ffe600", "#ff6b00", "#9d4dff", "#ffffff"];
 const STEPS = 10; // 1–9 and one void
 const PANEL_SPACE = 130; // px kept free at the bottom while the panel is open
@@ -90,7 +97,7 @@ export default function TimeInterval() {
   // Captcha warp: the SVG filter below bends the whole clock layer like captcha text.
   const warp = settings.captcha && settings.warp > 0 ? "url(#captcha-warp)" : "";
   const filter = `${warp} ${neon}`.trim() || "none";
-  const Clock = settings.numerals ? NumeralClock : WedgeClock;
+  const Clock = { wedges: WedgeClock, numerals: NumeralClock, images: ImageClock }[settings.face];
 
   return (
     <main
@@ -124,6 +131,7 @@ export default function TimeInterval() {
             >
               <Clock
                 phase={(((time - spot.offset) % STEPS) + STEPS) % STEPS}
+                cycle={Math.floor((time - spot.offset) / STEPS)}
                 line={settings.line}
                 captcha={settings.captcha}
                 seed={i + 1}
@@ -188,9 +196,17 @@ export default function TimeInterval() {
             <Slider label="Size" value={settings.size} min={40} max={300} step={5} onChange={(v) => set("size", v)} />
             <Slider label="Speed" value={settings.speed} min={0} max={10} step={0.5} onChange={(v) => set("speed", v)} />
             <Slider label="Line" value={settings.line} min={0.5} max={6} step={0.5} onChange={(v) => set("line", v)} />
-            <button className={styles.button} onClick={() => set("numerals", !settings.numerals)}>
-              {settings.numerals ? "◔ Wedges" : "123 Numerals"}
-            </button>
+            <div className={styles.segmented}>
+              <button data-active={settings.face === "wedges"} onClick={() => set("face", "wedges")}>
+                ◔ Wedges
+              </button>
+              <button data-active={settings.face === "numerals"} onClick={() => set("face", "numerals")}>
+                123
+              </button>
+              <button data-active={settings.face === "images"} onClick={() => set("face", "images")}>
+                ⌛ Images
+              </button>
+            </div>
             <button
               className={styles.button}
               data-active={settings.captcha}
@@ -252,10 +268,11 @@ function makeSpots(layout: Settings["layout"], size: number, width: number, heig
   return spots;
 }
 
-type ClockProps = { phase: number; line: number; captcha: boolean; seed: number };
+// phase: 0–10 within the count. cycle: how many full counts so far. seed: which clock (fixed).
+type ClockProps = { phase: number; cycle: number; line: number; captcha: boolean; seed: number };
 
 // The clock's border: a clean circle, or in captcha mode a wobbly double outline with scratches.
-function Face({ line, captcha, seed }: Omit<ClockProps, "phase">) {
+function Face({ line, captcha, seed }: Pick<ClockProps, "line" | "captcha" | "seed">) {
   if (!captcha) return <circle cx="50" cy="50" r="40" className={styles.face} strokeWidth={line} />;
 
   return (
@@ -308,6 +325,27 @@ function NumeralClock({ phase, line, captcha, seed }: ClockProps) {
       )}
       <circle cx={x} cy={y} r={2 + line * 1.5} className={styles.wedge} />
     </svg>
+  );
+}
+
+// phase 0–9: a random time picture, growing in on 1 and shrinking away on 9. phase 9–10: void.
+// Each new cycle picks a new picture and a new tilt.
+function ImageClock({ phase, cycle, seed }: ClockProps) {
+  if (phase >= 9) return null;
+
+  const image = IMAGES[Math.floor(noise(seed, cycle) * IMAGES.length)];
+  const tilt = (noise(seed, cycle + 0.5) - 0.5) * 40; // ±20°
+  const grow = Math.min(1, phase, 9 - phase); // 0 → 1 during the first step, 1 → 0 during the last
+
+  return (
+    <div
+      className={styles.image}
+      style={{
+        maskImage: `url(${image})`,
+        transform: `rotate(${tilt}deg) scale(${0.5 + grow * 0.5})`,
+        opacity: grow,
+      }}
+    />
   );
 }
 
