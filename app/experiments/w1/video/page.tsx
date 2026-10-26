@@ -1,28 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 // A 5×5 grid of the same YouTube video, filling the whole screen.
+// Each cell waits a random delay and starts at a slightly different second, so they are never in sync.
 const VIDEO_ID = "1SwA46-lSWk";
 const START = 530; // seconds into the video (the &t=530s in the link)
 const GRID = 5; // 5 × 5 cells
+const MAX_DELAY = 12; // s, the longest a cell waits before it starts
+const START_JITTER = 4; // s, each cell starts up to this much earlier than START
 
-// autoplay only works when muted; loop needs playlist set to the same video.
-const src = `https://www.youtube.com/embed/${VIDEO_ID}?start=${START}&autoplay=1&mute=1&loop=1&playlist=${VIDEO_ID}&controls=0`;
+type Cell = { delay: number; start: number };
 
 export default function Video() {
-  const cells = Array.from({ length: GRID * GRID }, (_, i) => i);
+  const [cells, setCells] = useState<Cell[]>([]);
+  const [shown, setShown] = useState<boolean[]>([]); // which cells have started
+
+  // Pick a random delay and start second per cell (in an effect, so server and browser agree).
+  useEffect(() => {
+    const picked = Array.from({ length: GRID * GRID }, () => ({
+      delay: Math.random() * MAX_DELAY,
+      start: START - Math.floor(Math.random() * START_JITTER),
+    }));
+    setCells(picked);
+    setShown(picked.map(() => false));
+
+    // Each cell loads its video only when its own delay is up.
+    const timers = picked.map((cell, i) =>
+      setTimeout(() => {
+        setShown((previous) => previous.map((value, j) => (j === i ? true : value)));
+      }, cell.delay * 1000),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   return (
     <main className={styles.container} style={{ gridTemplateColumns: `repeat(${GRID}, 1fr)` }}>
-      {cells.map((i) => (
-        <iframe
-          key={i}
-          className={styles.cell}
-          src={src}
-          title={`Video ${i + 1}`}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
-      ))}
+      {cells.map((cell, i) =>
+        shown[i] ? (
+          <iframe
+            key={i}
+            className={styles.cell}
+            // autoplay only works when muted; loop needs playlist set to the same video.
+            src={`https://www.youtube.com/embed/${VIDEO_ID}?start=${cell.start}&autoplay=1&mute=1&loop=1&playlist=${VIDEO_ID}&controls=0`}
+            title={`Video ${i + 1}`}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <div key={i} className={styles.cell} />
+        ),
+      )}
     </main>
   );
 }
