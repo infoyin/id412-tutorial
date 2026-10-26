@@ -1,14 +1,30 @@
 .container {
   position: fixed;
   inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  padding: 8px;
+  gap: 8px;
   background: black;
 }
 
-.counter {
-  font-family: ui-monospace, Menlo, monospace;
-  font-size: 15vw;
-  color: white;
+.clock {
+  width: 100%;
+  height: 100%;
+}
+
+.face {
+  fill: none;
+  stroke: white;
+  stroke-width: 1.5;
+}
+
+.wedge {
+  fill: white;
+  opacity: 0.85;
+}
+
+.hand {
+  stroke: white;
+  stroke-width: 3;
+  stroke-linecap: round;
 }
