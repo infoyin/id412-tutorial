@@ -16,7 +16,8 @@ const ROWS = 9; // background rows
 
 const random = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
-const PLACEHOLDER: Dish = { name: "?", ko: "", emoji: "🍽️", where: "", tags: [] };
+const PHOTOS = "/experiments/w1/coolshit/";
+const PLACEHOLDER: Dish = { name: "?", ko: "", photo: "", where: "", tags: [] };
 
 // Dishes that fit what was typed: all words if possible, else any word, else everything.
 function match(mood: string) {
@@ -78,10 +79,7 @@ export default function WhatToEat() {
               style={{ animationDuration: `${80 + r * 9}s`, animationDirection: r % 2 ? "reverse" : "normal" }}
             >
               {[...row, ...row].map((d, i) => (
-                <div key={i} className={styles.tile} style={{ background: `hsl(${(i * 37 + r * 20) % 360} 70% 88%)` }}>
-                  <span className={styles.tileEmoji}>{d.emoji}</span>
-                  <span className={styles.tileName}>{d.name}</span>
-                </div>
+                <img key={i} className={styles.tile} src={PHOTOS + d.photo} alt="" />
               ))}
             </div>
           );
@@ -103,7 +101,7 @@ export default function WhatToEat() {
           >
             {reel.map((d, i) => (
               <div key={i} className={styles.card}>
-                {d.emoji}
+                {d.photo ? <img src={PHOTOS + d.photo} alt={d.name} /> : "?"}
               </div>
             ))}
           </div>

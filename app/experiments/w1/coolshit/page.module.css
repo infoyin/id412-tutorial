@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #fbf3ea;
+  background: #f2f2f2;
   font-family: system-ui, -apple-system, sans-serif;
   color: #1d1a17;
   display: grid;
@@ -33,26 +33,14 @@
   to { transform: translateX(-50%); }
 }
 
+/* Photos are plain and monotone: no card behind them. */
 .tile {
   flex: none;
   width: 120px;
   height: 120px;
   border-radius: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.tileEmoji {
-  font-size: 52px;
-  line-height: 1;
-}
-
-.tileName {
-  font-size: 11px;
-  opacity: 0.6;
+  object-fit: cover;
+  filter: grayscale(1);
 }
 
 /* ---- Liquid-glass panel ---- */
@@ -127,11 +115,17 @@
   width: 96px;
   height: 96px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.45);
+  overflow: hidden;
   display: grid;
   place-items: center;
-  font-size: 56px;
-  line-height: 1;
+  font-size: 40px;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
 }
 
 .result {
