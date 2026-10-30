@@ -1284,16 +1284,22 @@
   color: #161616;
 }
 
-/* The title, now and then in English: each version fades in. Latin caps get a little more
-   letter-spacing than the characters, so both sit at about the same width. */
-.titleName {
+/* The title shows its English while pointed at. Same letter-spacing as INFO / INDEX. */
+.titleZh,
+.titleEn {
   display: inline-block;
-  letter-spacing: 0.04em;
-  animation: titleIn 0.6s ease both;
+  animation: titleIn 0.35s ease both;
 }
 
-.titleEnglish {
-  letter-spacing: 0.06em;
+.titleEn,
+.tabTitle .tabLabel:hover .titleZh,
+.tabTitle .tabLabel:focus-visible .titleZh {
+  display: none;
+}
+
+.tabTitle .tabLabel:hover .titleEn,
+.tabTitle .tabLabel:focus-visible .titleEn {
+  display: inline-block;
 }
 
 @keyframes titleIn {
