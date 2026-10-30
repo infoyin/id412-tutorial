@@ -1487,3 +1487,35 @@
 .wrapAtDot span {
   white-space: nowrap;
 }
+
+/* Top-right clock, left of the icons: Taipei, then Seoul, fading between them. */
+.clock {
+  position: absolute;
+  top: 18px;
+  right: 152px; /* clear of the three icons */
+  height: 36px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums; /* the seconds don't make the line jump */
+  white-space: nowrap;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.clock span {
+  animation: appear 0.6s ease both;
+}
+
+.clock b {
+  margin-right: 6px;
+}
+
+@media (max-width: 760px) {
+  .clock {
+    display: none;
+  }
+}

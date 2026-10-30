@@ -78,6 +78,7 @@ export class World {
   obstacle: Circle = { x: 0, y: 0, r: 0 };
   keepOut = { w: 0, h: 0 }; // the menu row in the top-left corner
   keepOutCorner = { w: 0, h: 0 }; // the size bar in the bottom-right corner
+  keepOutTopRight = { w: 0, h: 0 }; // the clock and icons in the top-right corner
   // Grid layout (the ⊞ button): pairs side by side in a Swiss grid instead of floating.
   grid = false;
   private gridSince = 0;
@@ -592,6 +593,20 @@ export class World {
           if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
         } else {
           b.y += oy;
+          if (b.vy < 0) b.vy *= -bounce;
+          if (Math.sin(b.drift) < 0) b.drift = -b.drift;
+        }
+      }
+      // Same for the clock and icons at the top right.
+      const tx = b.x + b.w / 2 + 8 - (this.width - this.keepOutTopRight.w);
+      const ty = this.keepOutTopRight.h + b.h / 2 + 8 - b.y;
+      if (free && tx > 0 && ty > 0) {
+        if (tx < ty) {
+          b.x -= tx;
+          if (b.vx > 0) b.vx *= -bounce;
+          if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift;
+        } else {
+          b.y += ty;
           if (b.vy < 0) b.vy *= -bounce;
           if (Math.sin(b.drift) < 0) b.drift = -b.drift;
         }

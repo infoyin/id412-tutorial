@@ -3,6 +3,7 @@ import type { Entry } from "./words";
 import { useState } from "react";
 import { FONT_STYLES } from "./fonts";
 import { SIZE } from "./settings";
+import { Clock } from "./Clock";
 import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
 
@@ -187,7 +188,9 @@ export function Overlay(p: Props) {
         </button>
       </div>
 
-      <div className={styles.toggles}>
+      <Clock />
+
+      <div className={styles.toggles} data-toggles>
         {/* Poster: a 3:4 snapshot of the field (camera). */}
         <button
           onClick={p.onSnap}

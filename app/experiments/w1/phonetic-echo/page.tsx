@@ -253,6 +253,11 @@ export default function PhoneticEcho() {
       world.keepOut = { w: menu?.right ?? 0, h: menu?.bottom ?? 0 };
       const bar = document.querySelector("[data-size-bar]")?.getBoundingClientRect();
       world.keepOutCorner = bar ? { w: innerWidth - bar.left, h: innerHeight - bar.top } : { w: 0, h: 0 };
+      // Top right: from the clock's left edge (or the icons, if the clock is hidden) to the corner.
+      const clock = document.querySelector("[data-clock]")?.getBoundingClientRect();
+      const icons = document.querySelector("[data-toggles]")?.getBoundingClientRect();
+      const left = Math.min(clock?.width ? clock.left : Infinity, icons?.left ?? Infinity);
+      world.keepOutTopRight = Number.isFinite(left) ? { w: innerWidth - left, h: Math.max(clock?.bottom ?? 0, icons?.bottom ?? 0) } : { w: 0, h: 0 };
       const closed = wheel.geometry(innerWidth, innerHeight, 0);
       world.left = closed.x + closed.r + 32;
       const g = wheel.geometry(innerWidth, innerHeight, 1);
@@ -262,6 +267,7 @@ export default function PhoneticEcho() {
     world.spawn(rotation.next(pairCount(innerWidth, innerHeight, scale)), "home");
     ensureFonts();
     window.addEventListener("resize", resize);
+    setTimeout(resize, 300); // once the clock has rendered, measure the corner it takes
 
     // Pointer: route to the wheel or to a block.
     const pointer: Pointer = { x: -999, y: -999, vx: 0, vy: 0, inside: false };
