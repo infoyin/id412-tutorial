@@ -10,6 +10,8 @@ import { FOIL, foil, grain, mix, theme } from "./theme";
 export const FONT = '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
 // Tâi-lô needs a font with the combining mark in a̍; many CJK fonts draw a box instead.
 export const LATIN = '"Helvetica Neue", Arial, sans-serif';
+// Mixed lines (Hangul, Han and Tâi-lô together): Latin first so a̍ draws, then the CJK fonts.
+const LABEL = `"Helvetica Neue", Arial, ${FONT}`;
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 let hatch: CanvasPattern | null = null;
@@ -171,6 +173,34 @@ export function fillFace(ctx: CanvasRenderingContext2D, b: Block, solid: number,
   ctx.globalAlpha = a;
 }
 
+let hatchLines: CanvasPattern | null = null;
+
+// Cracked false friends: hatched paper in light mode. In dark mode the foil stays (so the dark
+// text still reads) with see-through dark hatching over it.
+function fillCracked(ctx: CanvasRenderingContext2D, b: Block, time: number, rect?: boolean) {
+  if (!theme.dark) {
+    ctx.fillStyle = hatchPattern(ctx)!;
+    if (rect) ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+    else ctx.fill();
+    return;
+  }
+  fillFace(ctx, b, 0, time, rect);
+  if (!hatchLines) {
+    const tile = document.createElement("canvas");
+    tile.width = tile.height = 8;
+    const g = tile.getContext("2d")!;
+    g.strokeStyle = "rgba(0, 0, 0, 0.32)";
+    g.beginPath();
+    g.moveTo(0, 8);
+    g.lineTo(8, 0);
+    g.stroke();
+    hatchLines = ctx.createPattern(tile, "repeat");
+  }
+  ctx.fillStyle = hatchLines!;
+  if (rect) ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+  else ctx.fill();
+}
+
 // Corners of a block on screen (its rectangle, turned).
 function corners(b: Block): [number, number][] {
   const c = Math.cos(b.angle);
@@ -314,10 +344,8 @@ export function drawField(
         solid,
         faceKey: [theme.dark, fontSize, Math.round(solid * 10), Math.round(resonance * 5), cracked, weight, b.w | 0].join("|"),
         paint: (c) => {
-          if (cracked) {
-            c.fillStyle = hatchPattern(c)!;
-            c.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
-          } else fillFace(c, b, solid, 0, true);
+          if (cracked) fillCracked(c, b, 0, true);
+          else fillFace(c, b, solid, 0, true);
           drawText(c, b, fontSize, 1, resonance, solid, unit);
         },
       });
@@ -356,11 +384,10 @@ export function drawField(
 
     // The plate: white → solid black as the pair solidifies; hatched and dashed once cracked.
     plate(ctx, b, unit);
-    if (cracked) {
-      ctx.fillStyle = hatchPattern(ctx)!;
-      ctx.fill();
-    } else fillFace(ctx, b, solid, time);
-    ctx.strokeStyle = theme.dark ? "rgba(255, 255, 255, 0.4)" : theme.ink;
+    if (cracked) fillCracked(ctx, b, time);
+    else fillFace(ctx, b, solid, time);
+    // On foil, a cracked block's dashed edge and crack are drawn in dark ink so they show.
+    ctx.strokeStyle = theme.dark ? (cracked ? FOIL.ink : "rgba(255, 255, 255, 0.4)") : theme.ink;
     ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6 + pulse;
     if (cracked) ctx.setLineDash([4, 3]);
     ctx.stroke();
@@ -396,10 +423,10 @@ export function drawField(
       `臺 ${e.hanja} ${e.taiwanese.tailo} — ${ff?.twEnglish ?? short(e.taiwanese.definition)}`,
       `한 ${e.korean.hangul} ${e.korean.romanization} — ${short(e.korean.english, 24)}`,
     ];
-    ctx.font = `400 ${small}px ${FONT}`;
+    ctx.font = `400 ${small}px ${LABEL}`;
     const notes = ff ? [...wrap(ctx, ff.why.ko, maxWidth - 24), ...wrap(ctx, ff.why.zh, maxWidth - 24)] : [];
     const notesWidth = Math.max(0, ...notes.map((l) => ctx.measureText(l).width));
-    ctx.font = `700 ${size}px ${FONT}`;
+    ctx.font = `700 ${size}px ${LABEL}`;
     const lines = [...heads.map((text) => ({ text, bold: true })), ...notes.map((text) => ({ text, bold: false }))];
     const w = Math.min(maxWidth, Math.max(notesWidth, ...heads.map((l) => ctx.measureText(l).width)) + 24);
     const h = heads.length * size * 1.5 + notes.length * small * 1.5 + (notes.length ? 8 : 0) + 16;
@@ -417,7 +444,7 @@ export function drawField(
     let ly = y + 10;
     lines.forEach((l, i) => {
       if (!l.bold && lines[i - 1]?.bold) ly += 8; // a little space before the explanation
-      ctx.font = l.bold ? `700 ${size}px ${FONT}` : `400 ${small}px ${FONT}`;
+      ctx.font = l.bold ? `700 ${size}px ${LABEL}` : `400 ${small}px ${LABEL}`;
       ctx.fillText(l.text, x + 12, ly);
       ly += (l.bold ? size : small) * 1.5;
     });
