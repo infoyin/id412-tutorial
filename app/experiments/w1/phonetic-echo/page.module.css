@@ -1228,12 +1228,19 @@
   grid-row: 1 / 5;
 }
 
-/* The compass: 3D blocks on/off. Above the size bar; the needle turns when on. */
+/* The compass: 3D blocks on/off. Thin lines; the needle swings round when on. */
 .sizeBar .compass {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   margin-bottom: 8px;
-  padding: 3px;
+  padding: 2px;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.sizeBar .compass:hover,
+.compassOn {
+  opacity: 1 !important;
 }
 
 .compass svg {
@@ -1241,19 +1248,24 @@
   height: 100%;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.4;
-  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.compassOn svg {
-  transform: rotate(45deg);
+.needle {
+  transform-origin: 16px 16px;
+  transition: transform 0.9s cubic-bezier(0.34, 1.4, 0.4, 1); /* a little overshoot, like a real needle */
 }
 
-.compassOn svg circle {
-  fill: var(--ink);
+.needleNorth {
+  fill: currentColor;
 }
 
-.compassOn svg path {
-  stroke: var(--paper);
-  fill: var(--paper);
+.compassOn .needle {
+  transform: rotate(225deg);
+}
+
+.compassOn svg > circle {
+  stroke-width: 1.6;
 }

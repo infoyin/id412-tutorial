@@ -104,10 +104,16 @@ export function Overlay(p: Props) {
           aria-label="3D · 입체 · 立體"
           title="3D · 입체 · 立體"
         >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 4.5l2.6 7.5H9.4z" fill="currentColor" stroke="none" />
-            <path d="M12 19.5l-2.6-7.5h5.2z" />
+          <svg viewBox="0 0 32 32" aria-hidden>
+            <circle cx="16" cy="16" r="14.5" />
+            {[0, 90, 180, 270].map((a) => (
+              <path key={a} d="M16 3.2v2.4" transform={`rotate(${a} 16 16)`} />
+            ))}
+            <g className={styles.needle}>
+              <path d="M16 7.5 18.4 16 16 17.6 13.6 16Z" className={styles.needleNorth} />
+              <path d="M16 24.5 13.6 16 16 14.4 18.4 16Z" />
+              <circle cx="16" cy="16" r="1.1" className={styles.needleNorth} />
+            </g>
           </svg>
         </button>
         <button onClick={() => p.onScale(p.scale + 0.1)} aria-label="bigger · 크게 · 放大" disabled={p.scale >= SIZE.max}>

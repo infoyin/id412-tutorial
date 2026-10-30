@@ -1,6 +1,7 @@
 import type { Playing } from "./audio";
 import type { Block, World } from "./physics";
 import { TUNING } from "./settings";
+import { drawCube } from "./cube";
 import { mix, theme } from "./theme";
 
 // Drawing the field: paper background, a few editorial rules, tension lines between partners,
@@ -110,6 +111,114 @@ function plate(ctx: CanvasRenderingContext2D, b: Block, unit: number, grow = 0) 
   ctx.closePath();
 }
 
+// The words on a block, centred on (0, 0): text black on white, white on black; heavier as it
+// resonates and solidifies. Used on the flat blocks and painted onto the 3D cubes.
+function drawText(ctx: CanvasRenderingContext2D, b: Block, fontSize: number, alpha: number, resonance: number, solid: number, unit: number) {
+  const pair = b.pair;
+  // Text: black on white, white on black; heavier as it resonates and solidifies.
+  const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
+  ctx.fillStyle = solid > 0.5 ? theme.paper : theme.ink;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `${weight} ${fontSize}px ${FONT}`;
+  // Taiwanese: characters with 注音, Tâi-lô underneath.
+  // Korean: Hangul, then the shared characters (they surface as the pair resonates),
+  // then the Revised Romanization.
+  // On Korean blocks the lines open up as the characters appear, so before that the
+  // romanization sits as close as the Tâi-lô does.
+  const korean = b.lang === "ko";
+  const show = korean ? Math.max(resonance, solid) : 0;
+  const mainY = -fontSize * (0.2 + 0.16 * show);
+  if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, mainY);
+  else ctx.fillText(b.text, 0, mainY);
+  if (show > 0.01) {
+    ctx.font = `500 ${Math.round(fontSize * 0.3)}px ${FONT}`;
+    ctx.globalAlpha = alpha * show;
+    ctx.fillText(pair.entry.hanja, 0, fontSize * 0.28);
+  }
+  ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
+  ctx.globalAlpha = alpha * 0.75;
+  ctx.fillText(b.sub, 0, fontSize * (0.62 + 0.14 * show));
+  ctx.globalAlpha = alpha;
+
+  // Language tag in the corner.
+  ctx.font = `400 ${Math.round(fontSize * 0.26)}px ${FONT}`;
+  ctx.textAlign = "left";
+  ctx.globalAlpha = alpha * 0.5;
+  // Inside the plate, clear of a cut top-left corner.
+  ctx.fillText(b.lang === "tw" ? "臺" : "한", -b.w / 2 + unit * (b.cut === 0 ? 1.1 : 0.55), -b.h / 2 + unit * 0.7);
+}
+
+// Corners of a block on screen (its rectangle, turned).
+function corners(b: Block): [number, number][] {
+  const c = Math.cos(b.angle);
+  const s = Math.sin(b.angle);
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => {
+    const lx = (x * b.w) / 2;
+    const ly = (y * b.h) / 2;
+    return [b.x + lx * c - ly * s, b.y + lx * s + ly * c];
+  });
+}
+
+// Convex hull (monotone chain).
+function hull(points: [number, number][]) {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o: number[], a: number[], b: number[]) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower: [number, number][] = [];
+  for (const q of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop();
+    lower.push(q);
+  }
+  const upper: [number, number][] = [];
+  for (const q of p.reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+    upper.push(q);
+  }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+
+// The bridge: the hull of both blocks, shrunk toward the line between them while far apart
+// (beam 0 = a thin line) and opening to the full shape as they meet (beam 1).
+function drawBridge(ctx: CanvasRenderingContext2D, tw: Block, ko: Block, beam: number, fade: number, time: number, reduced: boolean) {
+  const k = 0.12 + 0.88 * beam ** 1.5;
+  const squeeze = (b: Block) => corners(b).map(([x, y]) => [b.x + (x - b.x) * k, b.y + (y - b.y) * k] as [number, number]);
+  const shape = hull([...squeeze(tw), ...squeeze(ko)]);
+  ctx.save();
+  ctx.beginPath();
+  shape.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  ctx.closePath();
+  ctx.globalAlpha = fade * (0.35 + 0.65 * beam);
+  ctx.fillStyle = theme.shadow;
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = theme.ink;
+  ctx.globalAlpha = fade * beam;
+  ctx.stroke();
+  // Stripes across the bridge, flowing from both ends toward the middle.
+  ctx.clip();
+  const dx = ko.x - tw.x;
+  const dy = ko.y - tw.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const reach = Math.max(tw.w, tw.h, ko.w, ko.h);
+  ctx.strokeStyle = theme.ink;
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 6; i++) {
+    const f = reduced ? i / 6 : (time * 0.6 + i / 6) % 1;
+    for (const t of [f * 0.5, 1 - f * 0.5]) {
+      const x = tw.x + dx * t;
+      const y = tw.y + dy * t;
+      ctx.globalAlpha = fade * beam * 0.35 * (1 - f);
+      ctx.beginPath();
+      ctx.moveTo(x - nx * reach, y - ny * reach);
+      ctx.lineTo(x + nx * reach, y + ny * reach);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 export function drawField(
   ctx: CanvasRenderingContext2D,
   world: World,
@@ -148,45 +257,10 @@ export function drawField(
     }
     ctx.setLineDash([]);
 
-    // A beam of light between partners, growing as they close in: a soft glowing band,
-    // a thin bright core, and streaks running from both ends toward the middle.
+    // A bridge between partners: the outline around both blocks, pulled thin at first and
+    // filling out to a solid band as they close in, with stripes flowing toward the middle.
     const beam = clamp01((closeness - 0.2) / (TUNING.connectAt - 0.2));
-    if (beam > 0) {
-      const dx = ko.x - tw.x;
-      const dy = ko.y - tw.y;
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.shadowColor = theme.ink;
-      ctx.shadowBlur = 24 * beam;
-      ctx.strokeStyle = theme.ink;
-      ctx.globalAlpha = fade * beam * 0.55;
-      ctx.lineWidth = 3 + beam * 16 * (reduced ? 1 : 0.85 + 0.15 * Math.sin(time * 12));
-      ctx.beginPath();
-      ctx.moveTo(tw.x, tw.y);
-      ctx.lineTo(ko.x, ko.y);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = theme.paper;
-      ctx.globalAlpha = fade * beam;
-      ctx.lineWidth = 1 + beam * 2;
-      ctx.stroke();
-      // Streaks: short bright dashes moving inward from each block.
-      const count = 3 + Math.round(beam * 4);
-      for (let k = 0; k < count; k++) {
-        const f = reduced ? k / count : (time * (0.5 + beam) + k / count) % 1;
-        for (const [sx, sy, dir] of [[tw.x, tw.y, 1], [ko.x, ko.y, -1]] as const) {
-          const a0 = (f * 0.5) * dir;
-          const a1 = Math.min(f * 0.5 + 0.04, 0.5) * dir;
-          ctx.globalAlpha = fade * beam * (1 - f);
-          ctx.lineWidth = 2 + beam * 2;
-          ctx.beginPath();
-          ctx.moveTo(sx + dx * a0, sy + dy * a0);
-          ctx.lineTo(sx + dx * a1, sy + dy * a1);
-          ctx.stroke();
-        }
-      }
-      ctx.restore();
-    }
+    if (beam > 0) drawBridge(ctx, tw, ko, beam, fade, time, reduced);
   }
 
   const unit = fontSize * 0.5;
@@ -205,28 +279,28 @@ export function drawField(
     ctx.globalAlpha = alpha;
     ctx.translate(b.x + (Math.random() - 0.5) * shake, b.y + (Math.random() - 0.5) * shake);
 
-    // 3D: the block becomes a thick slab. Its sides show on the side away from the camera point,
-    // longer the further away it is (a simple perspective), and nearer blocks look a bit bigger.
-    let near = 1;
+    // 3D: a sliced cube (cube.ts) that turns toward the cursor; the word is painted on its front.
     if (depth.amount > 0.01) {
       const span = Math.max(width, height);
-      const ox = ((b.x - depth.x) / span) * fontSize * 1.6 * depth.amount;
-      const oy = ((b.y - depth.y) / span) * fontSize * 1.6 * depth.amount;
-      const layers = 7;
-      for (let k = layers; k >= 1; k--) {
-        ctx.save();
-        ctx.translate((ox * k) / layers, (oy * k) / layers);
-        ctx.rotate(b.angle);
-        plate(ctx, b, unit);
-        ctx.fillStyle = mix(0.12 + 0.5 * (k / layers) * (1 - solid) + solid * 0.9);
-        ctx.fill();
-        ctx.strokeStyle = theme.ink;
-        ctx.lineWidth = k === layers ? 1 : 0.4;
-        ctx.stroke();
-        ctx.restore();
-      }
-      near = 1 + 0.07 * depth.amount * (1 - Math.min(Math.hypot(b.x - depth.x, b.y - depth.y) / span, 1));
+      const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
+      ctx.rotate(b.angle * (1 - depth.amount * 0.7));
+      drawCube(ctx, b, {
+        amount: depth.amount,
+        yaw: (((depth.x - b.x) / span) * 1.1 + Math.sin(time * 0.3 + b.phase) * 0.25) * depth.amount,
+        pitch: (((b.y - depth.y) / span) * 1.2 + Math.cos(time * 0.25 + b.phase) * 0.15) * depth.amount,
+        time,
+        solid,
+        faceKey: [theme.dark, fontSize, Math.round(solid * 10), Math.round(resonance * 5), cracked, weight, b.w | 0].join("|"),
+        paint: (c) => {
+          c.fillStyle = cracked ? hatchPattern(c)! : mix(solid);
+          c.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+          drawText(c, b, fontSize, 1, resonance, solid, unit);
+        },
+      });
+      ctx.restore();
+      continue;
     }
+    const near = 1;
 
     ctx.rotate(b.angle);
     ctx.scale(near, near);
@@ -275,38 +349,7 @@ export function drawField(
       ctx.stroke();
     }
 
-    // Text: black on white, white on black; heavier as it resonates and solidifies.
-    const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
-    ctx.fillStyle = solid > 0.5 ? theme.paper : theme.ink;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `${weight} ${fontSize}px ${FONT}`;
-    // Taiwanese: characters with 注音, Tâi-lô underneath.
-    // Korean: Hangul, then the shared characters (they surface as the pair resonates),
-    // then the Revised Romanization.
-    // On Korean blocks the lines open up as the characters appear, so before that the
-    // romanization sits as close as the Tâi-lô does.
-    const korean = b.lang === "ko";
-    const show = korean ? Math.max(resonance, solid) : 0;
-    const mainY = -fontSize * (0.2 + 0.16 * show);
-    if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, mainY);
-    else ctx.fillText(b.text, 0, mainY);
-    if (show > 0.01) {
-      ctx.font = `500 ${Math.round(fontSize * 0.3)}px ${FONT}`;
-      ctx.globalAlpha = alpha * show;
-      ctx.fillText(pair.entry.hanja, 0, fontSize * 0.28);
-    }
-    ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
-    ctx.globalAlpha = alpha * 0.75;
-    ctx.fillText(b.sub, 0, fontSize * (0.62 + 0.14 * show));
-    ctx.globalAlpha = alpha;
-
-    // Language tag in the corner.
-    ctx.font = `400 ${Math.round(fontSize * 0.26)}px ${FONT}`;
-    ctx.textAlign = "left";
-    ctx.globalAlpha = alpha * 0.5;
-    // Inside the plate, clear of a cut top-left corner.
-    ctx.fillText(b.lang === "tw" ? "臺" : "한", -b.w / 2 + unit * (b.cut === 0 ? 1.1 : 0.55), -b.h / 2 + unit * 0.7);
+    drawText(ctx, b, fontSize, alpha, resonance, solid, unit);
     ctx.restore();
   }
 
