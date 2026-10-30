@@ -106,7 +106,7 @@ export function Overlay(p: Props) {
       {p.open && e && (
         <section
           key={e.id}
-          className={`${styles.note} ${p.place.wide ? "" : styles.noteBelow}`}
+          className={`${styles.note} ${p.place.wide ? styles.noteCentered : styles.noteBelow}`}
           style={p.place.wide ? { left: p.place.left, top: p.place.top } : { top: p.place.top }}
         >
           <p className={styles.status}>

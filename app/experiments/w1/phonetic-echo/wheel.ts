@@ -62,7 +62,7 @@ export class Wheel {
     if (wide) {
       const left = (w - (rWide * 2 + GAP + NOTE_WIDTH)) / 2;
       target = { x: left + rWide, y: h / 2, r: rWide };
-      note = { left: left + rWide * 2 + GAP, top: Math.max(h / 2 - rWide, 72) };
+      note = { left: left + rWide * 2 + GAP, top: h / 2 }; // the note centres itself on this line
     } else {
       const r = Math.min(h * 0.26, w * 0.42, 260);
       target = { x: w / 2, y: r + 64, r };

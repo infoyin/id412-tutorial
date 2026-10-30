@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { speakLetter } from "./audio";
-import { HANGUL, TONES, ZHUYIN, type Letter } from "./letters";
+import { HANGUL, TONES, ZHUYIN, type Letter, type Tone } from "./letters";
 import { ENTRIES } from "./words";
 import styles from "./page.module.css";
 
@@ -89,6 +89,31 @@ function Letters({ letters, language, playing, onPlay }: { letters: Letter[]; la
   );
 }
 
+// The five tones, one card each: mark, name, example, how the pitch moves. Click to hear.
+function Tones({ playing, onPlay }: { playing: string; onPlay: (l: Letter) => void }) {
+  return (
+    <div className={styles.tones}>
+      {TONES.map((t: Tone) => (
+        <button
+          key={t.letter}
+          className={playing === t.letter ? styles.letterOn : ""}
+          onClick={() => {
+            onPlay(t);
+            speakLetter(t.speak, "zh");
+          }}
+          aria-label={`${t.name} ${t.label}`}
+        >
+          <b>{t.letter}</b>
+          <span>{t.name}</span>
+          <span>{t.label}</span>
+          <small lang="zh-Hant">{t.zh}</small>
+          <small lang="ko">{t.ko}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Info() {
   const finals = countFinals();
   const [playing, setPlaying] = useState(""); // last letter clicked, shown inverted
@@ -163,8 +188,10 @@ export function Info() {
         <div className={styles.infoCol}>
           <section>
             <h3>● 注音符號 · 주음부호</h3>
-            <p lang="zh-Hant">1913 年讀音統一會議定，1918 年公布為「注音字母」，1930 年改稱注音符號。符號取自古漢字（ㄅ←勹、ㄇ←冂），共 37 個。方塊上的注音是華語讀音；臺語拼音以 2006 年公布的臺羅為主。</p>
-            <p lang="ko">1913년 독음통일회에서 정하고 1918년 ‘주음자모’로 공포, 1930년 주음부호로 이름을 바꿨습니다. 옛 한자에서 따온 37개 기호(ㄅ←勹). 블록의 주음은 표준 중국어 읽기입니다.</p>
+            <p lang="zh-Hant">英文叫 Bopomofo，取自前四個符號 ㄅㄆㄇㄈ 的讀音。1913 年讀音統一會議定，1918 年公布為「注音字母」，1930 年改稱注音符號。符號取自古漢字（ㄅ←勹、ㄇ←冂），共 37 個。</p>
+            <p lang="zh-Hant">一個字最多由「聲母＋介音＋韻母」三個符號組成，再加上聲調，直排時寫在字的右側，例如 學 ㄒㄩㄝˊ。方塊上的注音是華語讀音；臺語拼音以 2006 年公布的臺羅為主。</p>
+            <p lang="ko">영어로는 보포모포(Bopomofo), 첫 네 기호 ㄅㄆㄇㄈ의 소리에서 온 이름입니다. 1913년 정하고 1918년 ‘주음자모’로 공포, 1930년 주음부호로 이름을 바꿨습니다. 옛 한자에서 따온 37개 기호(ㄅ←勹).</p>
+            <p lang="ko">한 글자는 ‘성모+개음+운모’ 최대 세 기호와 성조로 적고, 글자 오른쪽에 세로로 씁니다(學 ㄒㄩㄝˊ). 블록의 주음은 표준 중국어 읽기입니다.</p>
           </section>
 
           <section>
@@ -190,8 +217,10 @@ export function Info() {
       <div className={styles.infoCharts}>
         <div>
           <h3>● 注音符號 37 · 주음부호</h3>
-          <Letters letters={[...ZHUYIN, ...TONES]} language="zh" playing={playing} onPlay={play} />
+          <Letters letters={ZHUYIN} language="zh" playing={playing} onPlay={play} />
           <p className={styles.cite}>點擊發音 · 누르면 들려요 · 以例字發音 (ㄅ → 玻) · 語音合成</p>
+          <h3 className={styles.tonesTitle}>● 聲調 · 성조 — 同一個 ma，五種音高</h3>
+          <Tones playing={playing} onPlay={play} />
         </div>
         <div>
           <h3>● 한글 40자 · 韓文四十音</h3>

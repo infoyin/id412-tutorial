@@ -265,6 +265,11 @@
   cursor: default;
 }
 
+/* Beside the open wheel: centred on the wheel's middle (top = wheel centre). */
+.noteCentered {
+  translate: 0 -50%;
+}
+
 @keyframes appear {
   from { opacity: 0; transform: translateY(6px); }
 }
@@ -413,8 +418,9 @@
   animation: unfold 0.55s cubic-bezier(0.65, 0, 0.25, 1) both;
 }
 
+/* Leave about as much white on the right as there is on the left (one title tab). */
 .tabInfo .tabBody {
-  width: calc(100vw - var(--title-w)); /* to the right edge */
+  width: max(640px, calc(100vw - 2 * var(--title-w)));
 }
 
 .tabIndex .tabBody {
@@ -977,4 +983,50 @@
   .letters button {
     padding: 3px 1px 2px;
   }
+}
+
+/* The five tones: one card each. */
+.tonesTitle {
+  margin-top: 10px !important;
+}
+
+.tones {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin: 6px 0 4px;
+}
+
+.tones button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 7px 7px;
+  border: 1px solid currentColor;
+  background: none;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tones b {
+  font-size: 20px;
+  line-height: 1;
+  height: 20px;
+}
+
+.tones span {
+  font-size: 11px;
+}
+
+.tones small {
+  font-size: 9.5px;
+  opacity: 0.7;
+}
+
+.tones button:hover,
+.tones .letterOn {
+  background: var(--paper);
+  color: var(--ink);
 }
