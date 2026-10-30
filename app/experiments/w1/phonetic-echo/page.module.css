@@ -414,7 +414,7 @@
 }
 
 .tabInfo .tabBody {
-  width: min(1000px, calc(100vw - var(--title-w) - 24px));
+  width: calc(100vw - var(--title-w)); /* to the right edge */
 }
 
 .tabIndex .tabBody {
@@ -454,19 +454,19 @@
 
 .info {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 40px;
   min-height: 100%;
 }
 
 .infoText {
-  columns: 3 180px;
-  column-gap: 22px;
+  columns: 3 200px;
+  column-gap: 34px;
 }
 
 .info section {
   break-inside: avoid;
-  padding: 7px 0 7px;
+  padding: 9px 0 10px;
   border-top: 1px solid currentColor;
 }
 
@@ -475,7 +475,7 @@
 }
 
 .info .lead p {
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .info h3 {
@@ -487,9 +487,10 @@
 }
 
 .info p {
-  margin: 0 0 5px;
-  font-size: 11px;
-  line-height: 1.45;
+  margin: 0 0 7px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
   color: inherit;
 }
 
@@ -831,8 +832,9 @@
   cursor: pointer;
 }
 
+/* As wide as the three tabs together: its right edge lines up with INDEX. */
 .tabTitle .tabBody {
-  width: min(460px, 100vw);
+  width: min(calc(var(--title-w) + 2 * var(--tab-w)), 100vw);
   height: auto;
   max-height: calc(100vh - var(--tab-h));
   box-shadow: inset 0 0 0 1.5px var(--ink);
@@ -856,7 +858,7 @@
 
 .about dl {
   display: grid;
-  grid-template-columns: 82px 1fr;
+  grid-template-columns: 96px 1fr;
   gap: 4px 12px;
   margin: 16px 0 0;
   padding-top: 12px;
@@ -873,6 +875,7 @@
 .about dd {
   grid-column: 2;
   margin: 0;
+  white-space: nowrap; /* each credit stays on one line */
 }
 
 /* ---- 注音 beside characters (HTML) ---- */
@@ -938,5 +941,27 @@
 @media (prefers-reduced-motion: reduce) {
   .indexPane .detail {
     animation: none;
+  }
+}
+
+/* Smaller screens: INFO goes back to the compact spacing so it still fits without scrolling. */
+@media (max-width: 1360px), (max-height: 760px) {
+  .info {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 26px;
+  }
+  .infoText {
+    column-gap: 24px;
+  }
+  .info section {
+    padding: 7px 0;
+  }
+  .info p {
+    margin: 0 0 5px;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .info .lead p {
+    font-size: 12px;
   }
 }

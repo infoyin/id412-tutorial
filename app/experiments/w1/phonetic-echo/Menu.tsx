@@ -21,10 +21,11 @@ function About() {
       <p lang="ko">대만어와 한국어에는 같은 한자로 쓰는 말이 수백 개 있고, 천 년을 건너 지금도 서로의 소리를 닮아 있습니다. 여기서 그 말들은 끌고, 튕기고, 들을 수 있는 블록이 됩니다.</p>
       <dl>
         <dt>Project</dt>
-        <dd>Mini project for ID412 Interactive Space</dd>
+        <dd>Mini Project for ID412 Interactive Space</dd>
         <dt>Created by</dt>
-        <dd>Yin Jie Chen</dd>
+        <dd>Yin Jie Chen · 진윤제 · 陳胤傑</dd>
         <dd>Research Intern, KAIST 시각도구연구실 · Visual Instruments Lab</dd>
+        <dd>Exchange Student from Taiwan Tech</dd>
         <dt>Data</dt>
         <dd>教育部《臺灣台語常用詞辭典》《重編國語辭典修訂本》 · 국립국어원《한국어기초사전》 · Lingua Libre</dd>
       </dl>
