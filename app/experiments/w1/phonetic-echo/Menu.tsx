@@ -48,14 +48,13 @@ function About() {
           </a>
         </dd>
         <dd>Exchange Student [from] NTUST · Taiwan Tech</dd>
-        <dt>Research</dt>
+        <dt>Source</dt>
         <dd>
           <a href="https://www.sinica.edu.tw/cp/695" target="_blank" rel="noreferrer">陳彥伶〈語言親緣關係常見的幾個迷思〉中央研究院</a>
         </dd>
         <dd>
           <a href="https://tdr.lib.ntu.edu.tw/handle/123456789/52032" target="_blank" rel="noreferrer">申祐先《韓國漢字音歷史層次研究》臺大 2015</a>
         </dd>
-        <dt>Data</dt>
         <dd>教育部《臺灣台語常用詞辭典》《重編國語辭典修訂本》 · 국립국어원《한국어기초사전》 · Lingua Libre</dd>
       </dl>
     </div>
