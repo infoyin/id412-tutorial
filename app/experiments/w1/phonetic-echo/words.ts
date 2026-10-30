@@ -1,3 +1,4 @@
+import falseFriends from "./false-friends.json";
 import koreanAudio from "./korean-audio.json";
 import vocabulary from "./vocabulary.json";
 
@@ -12,22 +13,35 @@ import vocabulary from "./vocabulary.json";
 // Status values: "dictionary_matched" | "candidate" | "editor_reviewed". Nothing is
 // editor_reviewed yet: that is set by hand, by a person, after checking a pair.
 //
+// false-friends.json: same characters, different meanings (新聞 news / 신문 newspaper), chosen by
+// the AI assistant from both dictionaries' definitions, not human-reviewed. In the field they
+// attract like partners, then crack apart instead of connecting.
+//
 // Korean audio: Lingua Libre recordings (korean-audio.json, CC0 / CC BY-SA) where they exist,
 // otherwise the browser's ko-KR speech synthesis (see audio.ts).
 
-export type Status = "dictionary_matched" | "candidate" | "editor_reviewed";
+export type Status = "dictionary_matched" | "candidate" | "editor_reviewed" | "false_friend";
 
 export type Entry = {
   id: string;
   hanja: string;
   category: string;
   status: Status;
-  taiwanese: { written: string; tailo: string; audio: string; url: string };
+  taiwanese: {
+    written: string;
+    tailo: string;
+    audio: string;
+    url: string;
+    definition: string; // MOE, verbatim ("" for 臺華共同詞: same as Mandarin)
+    example: { han: string; tailo: string; zh: string } | null; // MOE 例句
+  };
   korean: {
     hangul: string;
     pronunciation: string; // krdict standard pronunciation, "ː" = long vowel
     definition: string; // krdict, verbatim
     english: string; // krdict's English equivalent
+    chinese: string; // krdict's Chinese equivalent (simplified)
+    example: string; // krdict example
     url: string;
     audio: { file: string; license: string; author: string; source: string } | null;
   };
@@ -65,35 +79,53 @@ const NOTES: Record<string, Entry["note"]> = {
 
 const audioById = new Map(koreanAudio.map((a) => [a.krdictId, a]));
 
-export const ENTRIES: Entry[] = vocabulary.pairs.map((p) => ({
+type Raw = (typeof vocabulary.pairs)[number];
+
+const toEntry = (p: Raw): Entry => ({
   id: p.id,
   hanja: p.hanja,
   category: p.category,
   status: p.status as Status,
-  taiwanese: { written: p.taiwanese.written, tailo: p.taiwanese.tailo, audio: p.taiwanese.audio, url: p.taiwanese.url },
+  taiwanese: {
+    written: p.taiwanese.written,
+    tailo: p.taiwanese.tailo,
+    audio: p.taiwanese.audio,
+    url: p.taiwanese.url,
+    definition: p.taiwanese.definition,
+    example: p.taiwanese.example,
+  },
   korean: {
     hangul: p.korean.hangul,
     pronunciation: p.korean.pronunciation,
     definition: p.korean.definition,
     english: p.korean.english,
+    chinese: p.korean.chinese,
+    example: p.korean.example,
     url: p.korean.url,
     audio: audioById.get(p.korean.sourceId) ?? null,
   },
   note: NOTES[p.hanja] ?? null,
-}));
+});
 
+export const ENTRIES: Entry[] = vocabulary.pairs.map(toEntry);
+export const FALSE_FRIENDS: Entry[] = (falseFriends.pairs as Raw[]).map(toEntry);
 export const COUNTS = vocabulary.counts;
 
 // Picks the next set of pairs to show: avoids what was shown recently, mixes categories.
 export class Rotation {
   private recent: string[] = [];
+  private recentTraps: string[] = [];
   private memory: number;
 
   constructor(memory = Math.floor(ENTRIES.length * 0.6)) {
     this.memory = memory;
   }
 
+  // `count` pairs, one or two of them false friends.
   next(count: number): Entry[] {
+    const tricks = FALSE_FRIENDS.filter((e) => !this.recentTraps.includes(e.id)).sort(() => Math.random() - 0.5);
+    const traps = (tricks.length ? tricks : [...FALSE_FRIENDS].sort(() => Math.random() - 0.5)).slice(0, count >= 8 ? 2 : 1);
+    count -= traps.length;
     const fresh = ENTRIES.filter((e) => !this.recent.includes(e.id));
     const pool = fresh.length >= count ? fresh : ENTRIES;
     // Group by category, shuffle each, then take one per category in turn.
@@ -108,6 +140,7 @@ export class Rotation {
       for (const g of order) if (g.length && picked.length < count) picked.push(g.shift()!);
     }
     this.recent = [...this.recent, ...picked.map((e) => e.id)].slice(-this.memory);
-    return picked;
+    this.recentTraps = [...this.recentTraps, ...traps.map((e) => e.id)].slice(-12);
+    return [...picked, ...traps].sort(() => Math.random() - 0.5);
   }
 }

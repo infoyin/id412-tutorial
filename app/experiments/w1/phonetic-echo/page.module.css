@@ -316,3 +316,300 @@
     text-align: left;
   }
 }
+
+/* ---- INFO / INDEX tabs: rectangles that grow down into tall blocks ---- */
+
+.menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  font-weight: 700; /* Chinese, Korean and Latin all in the same bold */
+}
+
+.tab {
+  width: 200px;
+  height: 80px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.5s cubic-bezier(0.65, 0, 0.25, 1), height 0.6s cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.tabInfo {
+  background: #111;
+  color: #fbfbf9;
+}
+
+.tabIndex {
+  background: #d6d6d2;
+  color: #111;
+}
+
+.tabOpen {
+  width: min(440px, 100vw);
+  height: 100vh;
+}
+
+.tabLabel {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  line-height: 1.1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tabLabel span:first-child {
+  font-size: 22px;
+  letter-spacing: 0.02em;
+}
+
+.tabLabel:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+.tabBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px 40px;
+  animation: appear 0.6s ease 0.35s both;
+}
+
+/* INFO content */
+
+.info section {
+  padding: 14px 0 18px;
+  border-top: 1px solid currentColor;
+}
+
+.info h3 {
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.info p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.chartTitle {
+  margin-top: 16px !important;
+}
+
+.cite {
+  font-size: 10px !important;
+  opacity: 0.6;
+}
+
+.sources a {
+  color: inherit;
+}
+
+.bar100 {
+  display: flex;
+  height: 22px;
+  border: 1px solid currentColor;
+}
+
+.bar100 i {
+  display: block;
+  height: 100%;
+  border-right: 1px solid currentColor;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 4px;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+}
+
+.legend i {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  margin-right: 2px;
+  border: 1px solid currentColor;
+  vertical-align: -1px;
+}
+
+/* Monotone fills (on the black INFO block: white is "solid") */
+.fillBlack { background: #fbfbf9; }
+.fillHatch { background: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 5px); }
+.fillDots { background: radial-gradient(currentColor 0.8px, transparent 1px) 0 0 / 5px 5px; }
+.fillWhite { background: transparent; }
+
+.finals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finalRow {
+  display: grid;
+  grid-template-columns: 36px 1fr 104px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+/* INDEX content: rows like a printed list */
+
+.index {
+  margin: 0 -14px;
+  padding: 0;
+  list-style: none;
+}
+
+.indexHead {
+  padding: 18px 14px 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 52px 1fr 20px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-top: 1px solid #a9a9a4;
+  background: none;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: #c8c8c3;
+}
+
+/* .index raises specificity above ".root button { color: inherit }" */
+.index .rowOn,
+.index .rowOn:hover {
+  background: #111;
+  color: #fbfbf9;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.rowWord {
+  letter-spacing: 0.04em;
+}
+
+.detail {
+  padding: 14px;
+  background: #fbfbf9;
+  border-top: 1px solid #111;
+}
+
+.detailWords {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 12px;
+}
+
+.detailWords button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border: none;
+  background: none;
+  font-weight: 700 !important;
+  text-align: left;
+  cursor: pointer;
+}
+
+.detailWords small {
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.detailWords strong {
+  font-size: 22px;
+}
+
+.detailWords em {
+  font-style: normal;
+  font-size: 12px;
+}
+
+.detailWords button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.detailWords .wordOn strong,
+.detailWords button:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.trap {
+  margin: 0 0 10px;
+  padding: 6px 8px;
+  border: 1px dashed #111;
+  font-size: 12px;
+}
+
+.detail dl {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.detail dt {
+  margin-top: 8px;
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.detail dd {
+  margin: 0;
+}
+
+.detailLinks {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0 0;
+  font-size: 11px;
+}
+
+.detailLinks a {
+  color: inherit;
+}
+
+@media (max-width: 760px) {
+  .tab {
+    width: 50vw;
+  }
+  .tabOpen {
+    width: 100vw;
+  }
+}

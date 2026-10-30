@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getPlaying, koreanVoiceStatus, onPlaying, playOne, playPair, setMuted, stop, type Lang, type Playing } from "./audio";
 import { drawField, FONT, LATIN } from "./draw";
+import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
 import { pairCount, TUNING } from "./settings";
@@ -89,6 +90,11 @@ export default function PhoneticEcho() {
       playPair(pair.entry);
       setSelectedId(pair.entry.id);
       setAnnounce(`${pair.entry.taiwanese.written} · ${pair.entry.korean.hangul}`);
+    };
+    // A false friend cracks: hear both (they sound alike), and say what happened.
+    world.onCrack = (pair) => {
+      playPair(pair.entry);
+      setAnnounce(`偽友 · 가짜 친구 · false friend: ${pair.entry.taiwanese.written} ≠ ${pair.entry.korean.hangul}`);
     };
     onPlaying(setPlayingState);
     const checkVoice = () => setKoreanVoice(koreanVoiceStatus());
@@ -232,6 +238,7 @@ export default function PhoneticEcho() {
   return (
     <main className={styles.root}>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden />
+      <Menu playing={playing} muted={muted} onPlay={(e: Entry, lang: Lang) => playOne(e, lang)} />
       <Overlay
         started={started}
         open={open}

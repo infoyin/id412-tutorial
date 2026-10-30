@@ -7,6 +7,8 @@ import type { Entry } from "./words";
 // A fling gives every block an impulse; the old set flies out and fades while a new set
 // flies in from the edges and settles.
 // Partners pass three stages: approach → resonance → docked and filling black.
+// False friends (same characters, different meanings) go through approach and resonance too,
+// then crack apart instead of docking, and no longer attract each other.
 
 export type Block = {
   pair: Pair;
@@ -44,6 +46,8 @@ export type Pair = {
   docked: boolean;
   side: number; // Korean block docks on this side of the Taiwanese one
   leaving: boolean;
+  falseFriend: boolean;
+  cracked: number; // seconds since a false friend cracked apart; -1 = not (yet)
 };
 
 export type Pointer = { x: number; y: number; vx: number; vy: number; inside: boolean };
@@ -72,6 +76,7 @@ export class World {
   private time = 0;
   measure: (b: Block) => void = () => {};
   onConnect: (pair: Pair) => void = () => {};
+  onCrack: (pair: Pair) => void = () => {};
   onChange: (entries: Entry[]) => void = () => {};
 
   constructor(width: number, height: number) {
@@ -110,7 +115,8 @@ export class World {
   spawn(entries: Entry[], from: "home" | "edges") {
     const fresh: Block[] = [];
     for (const entry of entries) {
-      const pair = { entry, closeness: 0, solidity: 0, docked: false, side: 1, leaving: false } as Pair;
+      const falseFriend = entry.status === "false_friend";
+      const pair = { entry, closeness: 0, solidity: 0, docked: false, side: 1, leaving: false, falseFriend, cracked: -1 } as Pair;
       pair.tw = this.make(pair, "tw");
       pair.ko = this.make(pair, "ko");
       this.pairs.push(pair);
@@ -198,6 +204,24 @@ export class World {
     }
     this.pending = { at: this.time + TUNING.transitionSeconds * 0.3, entries: next };
     this.onChange([]);
+  }
+
+  // Throw the two blocks of a false friend apart, spinning.
+  private crack(pair: Pair) {
+    const { tw, ko } = pair;
+    pair.cracked = 0;
+    if (this.held === tw || this.held === ko) this.held = null;
+    if (this.guided === pair) this.guided = null;
+    const d = Math.hypot(ko.x - tw.x, ko.y - tw.y) || 1;
+    const nx = (ko.x - tw.x) / d;
+    const ny = (ko.y - tw.y) / d;
+    tw.vx -= nx * 700;
+    tw.vy -= ny * 700;
+    ko.vx += nx * 700;
+    ko.vy += ny * 700;
+    tw.spin -= 4 * SETTINGS.angularMomentum;
+    ko.spin += 4 * SETTINGS.angularMomentum;
+    this.onCrack(pair);
   }
 
   // Topmost block under a point, in the block's own rotated frame.
@@ -305,7 +329,14 @@ export class World {
       pair.closeness = close;
       const active = this.held === tw || this.held === ko || this.guided === pair;
 
-      if (pair.docked) {
+      if (pair.cracked >= 0) {
+        // Cracked false friends keep a little distance from each other.
+        pair.cracked += dt;
+        const d = Math.hypot(ko.x - tw.x, ko.y - tw.y) || 1;
+        const push = close * 220;
+        force(tw, ((tw.x - ko.x) / d) * push, ((tw.y - ko.y) / d) * push);
+        force(ko, ((ko.x - tw.x) / d) * push, ((ko.y - tw.y) / d) * push);
+      } else if (pair.docked) {
         // Docked: the Korean block holds its place beside the Taiwanese one, same tilt.
         const tx = tw.x + pair.side * ((tw.w + ko.w) / 2 + 6);
         const kx = (tx - ko.x) * 70 - (ko.vx - tw.vx) * 12;
@@ -321,6 +352,11 @@ export class World {
         if (this.held !== tw) force(tw, ((ko.x - tw.x) / d) * pull, ((ko.y - tw.y) / d) * pull);
         if (this.held !== ko) force(ko, ((tw.x - ko.x) / d) * pull, ((tw.y - ko.y) / d) * pull);
         pair.solidity = Math.max(0, pair.solidity - rate * 0.5);
+        // False friends: at the moment of connecting, they crack apart.
+        if (pair.falseFriend && active && close >= TUNING.connectAt) {
+          this.crack(pair);
+          continue;
+        }
         // Only a hand (or the keyboard) makes the final connection; gravity alone can't.
         if (active && close >= TUNING.connectAt) {
           pair.docked = true;

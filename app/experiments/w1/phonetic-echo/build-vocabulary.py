@@ -48,6 +48,12 @@ HAN = re.compile(r"^[㐀-䶿一-鿿豈-﫿]+$")
 # Korean variant glyph → the form the Taiwanese dictionary uses. Same character, different glyph.
 VARIANTS = {"敎": "教", "硏": "研", "靑": "青", "眞": "真", "爲": "為", "淸": "清", "晩": "晚", "呑": "吞", "卽": "即", "旣": "既", "槪": "概", "緖": "緒", "鷄": "雞", "姸": "妍"}
 
+# False friends: same characters, clearly different meanings in the two dictionaries' own
+# definitions (新聞 = news vs 신문 = newspaper). Chosen by the AI assistant (2026-10-31) by reading
+# both definitions; not human-reviewed. Written to false-friends.json.
+FALSE_FRIENDS = ["新聞", "工夫", "點心", "料理", "安寧", "便宜", "人事", "試驗", "操心", "千萬", "階段",
+                 "新婦", "焦燥", "豆乳", "經理", "汽車", "人間", "質問", "交代", "斟酌", "種種", "境界"]
+
 # Pairs whose two definitions the AI assistant compared entry by entry (2026-10-30).
 ASSISTANT_COMPARED = {"時間", "感謝", "結婚", "學生", "文化"}
 
@@ -92,10 +98,13 @@ def ods_sheets(path, wanted):
 
 
 def taiwanese(path):
-    sheets = ods_sheets(path, {"詞目", "義項"})
+    sheets = ods_sheets(path, {"詞目", "義項", "例句"})
     senses = collections.defaultdict(list)
     for s in sheets["義項"]:
         senses[s["詞目id"].split(".")[0]].append(s.get("解說", ""))
+    examples = {}
+    for x in sheets["例句"]:
+        examples.setdefault(x["詞目id"].split(".")[0], {"han": x.get("漢字", ""), "tailo": x.get("羅馬字", ""), "zh": x.get("華語", "")})
     words = {}
     for e in sheets["詞目"]:
         kind = e.get("詞目類型")
@@ -111,6 +120,7 @@ def taiwanese(path):
             "category": e.get("分類", ""),
             "audioFile": e.get("羅馬字音檔檔名", ""),
             "definition": next((d for d in senses[sid] if d.strip()), ""),
+            "example": examples.get(sid),
             "url": f"https://sutian.moe.edu.tw/zh-hant/su/{sid}/",
         }
     return words
@@ -138,6 +148,9 @@ def korean(folder):
             forms = [feats(w) for w in as_list(e.get("WordForm")) if feats(w).get("type") == "발음"]
             first = as_list(e.get("Sense"))[0] if e.get("Sense") else {}
             equivalents = {feats(q).get("language"): feats(q).get("lemma", "") for q in as_list(first.get("Equivalent"))}
+            samples = [feats(x) for x in as_list(first.get("SenseExample"))]
+            # A full sentence if there is one, else a phrase.
+            sample = next((x for x in samples if x.get("type") == "문장"), samples[0] if samples else {})
             entries.append({
                 "id": e["val"],
                 "hangul": feats(as_list(e["Lemma"])[0])["writtenForm"],
@@ -151,6 +164,7 @@ def korean(folder):
                 "definition": feats(first).get("definition", "").strip(),
                 "english": equivalents.get("영어", ""),
                 "chinese": equivalents.get("중국어", ""),
+                "example": sample.get("example", "").strip(),
                 "url": f"https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo={e['val']}",
             })
     return entries
@@ -219,6 +233,7 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
                 "written": hanja,
                 "tailo": t["tailo"],
                 "definition": t["definition"],
+                "example": t["example"],
                 "audioFile": t["audioFile"],
                 "sourceId": t["id"],
                 "url": t["url"],
@@ -228,6 +243,8 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
                 "pronunciation": k["pronunciation"],
                 "definition": k["definition"],
                 "english": k["english"],
+                "chinese": k["chinese"],
+                "example": k["example"],
                 "level": k["level"],
                 "pos": k["pos"],
                 "semantic": k["semantic"],
@@ -240,15 +257,17 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
               if p["status"] == "dictionary_matched" and p["korean"]["level"] in ("초급", "중급")
               and p["taiwanese"]["audioFile"] and p["korean"]["pronunciation"]]
     rest = [p for p in pairs if p not in usable]
+    by_hanja = {p["hanja"]: p for p in pairs}
+    false_friends = [{**by_hanja[h], "status": "false_friend"} for h in FALSE_FRIENDS if h in by_hanja]
 
-    for p in usable:
+    for p in usable + false_friends:
         name = p["taiwanese"]["audioFile"]  # e.g. 6050(1)
         p["taiwanese"]["audio"] = "/experiments/w1/phonetic-echo/audio/tw/" + name.replace("(", "-").rstrip(")") + ".mp3"
     if mp3_zip:
         out = os.path.join(HERE, "../../../../public/experiments/w1/phonetic-echo/audio/tw")
         os.makedirs(out, exist_ok=True)
         archive = zipfile.ZipFile(mp3_zip)
-        for p in usable:
+        for p in usable + false_friends:
             name = p["taiwanese"]["audioFile"]
             folder = str(int(name.split("(")[0]) // 1000)
             data = archive.read(f"{folder}/{name}.mp3")
@@ -265,6 +284,9 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
     # Compact: the page loads this file.
     json.dump({**meta, "pairs": usable}, open(os.path.join(HERE, "vocabulary.json"), "w"), ensure_ascii=False, separators=(",", ":"))
     json.dump({**meta, "pairs": rest}, open(os.path.join(HERE, "vocabulary-candidates.json"), "w"), ensure_ascii=False, indent=1)
+    json.dump({"note": "Chosen by the AI assistant from both dictionaries' definitions; not human-reviewed.", "pairs": false_friends},
+              open(os.path.join(HERE, "false-friends.json"), "w"), ensure_ascii=False, separators=(",", ":"))
+    print("false friends:", len(false_friends), "missing:", [h for h in FALSE_FRIENDS if h not in by_hanja])
     print(json.dumps(meta["counts"]), "| categories:", dict(collections.Counter(p["category"] for p in usable)))
 
 

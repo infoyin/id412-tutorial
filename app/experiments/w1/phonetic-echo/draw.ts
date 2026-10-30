@@ -12,6 +12,29 @@ export const LATIN = '"Helvetica Neue", Arial, sans-serif';
 const PAPER = "#fbfbf9";
 const INK = "#111";
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+let hatch: CanvasPattern | null = null;
+
+// Diagonal hatching for cracked false friends, made once.
+function hatchPattern(ctx: CanvasRenderingContext2D) {
+  if (hatch) return hatch;
+  const tile = document.createElement("canvas");
+  tile.width = tile.height = 8;
+  const g = tile.getContext("2d")!;
+  g.fillStyle = PAPER;
+  g.fillRect(0, 0, 8, 8);
+  g.strokeStyle = "#8a8a86";
+  g.lineWidth = 1;
+  g.beginPath();
+  g.moveTo(0, 8);
+  g.lineTo(8, 0);
+  g.stroke();
+  hatch = ctx.createPattern(tile, "repeat");
+  return hatch;
+}
+
+// First clause of a definition: "報社、廣播電臺…" → "報社".
+const short = (text: string, max = 12) => (text.split(/[。，、；;,]/)[0] ?? "").slice(0, max);
+
 const resonanceOf = (close: number) => clamp01((close - TUNING.resonateFrom) / (TUNING.connectAt - TUNING.resonateFrom));
 
 // Irregular plate: a rectangle with jittered corners and maybe one cut corner.
@@ -69,7 +92,7 @@ export function drawField(
   // Tension lines between partners (under the blocks, whose fill hides the inside part).
   for (const pair of world.pairs) {
     const { tw, ko, closeness } = pair;
-    if (closeness < 0.02 || pair.docked || pair.leaving) continue;
+    if (closeness < 0.02 || pair.docked || pair.leaving || pair.cracked >= 0) continue;
     const resonance = resonanceOf(closeness);
     ctx.strokeStyle = resonance > 0 ? INK : "#9a9a95";
     ctx.lineWidth = 0.75;
@@ -91,7 +114,8 @@ export function drawField(
   const unit = fontSize * 0.5;
   for (const b of world.blocks) {
     const pair = b.pair;
-    const resonance = pair.docked ? 1 : pair.leaving ? 0 : resonanceOf(pair.closeness);
+    const cracked = pair.cracked >= 0;
+    const resonance = pair.docked ? 1 : pair.leaving || cracked ? 0 : resonanceOf(pair.closeness);
     const solid = pair.solidity;
     const shake = reduced || pair.docked ? 0 : resonance * 1.6;
     // While this word is being pronounced, it breathes.
@@ -127,14 +151,25 @@ export function drawField(
       ctx.restore();
     }
 
-    // The plate: white → solid black as the pair solidifies.
+    // The plate: white → solid black as the pair solidifies; hatched and dashed once cracked.
     const g = Math.round(251 - 234 * solid);
     plate(ctx, b, unit);
-    ctx.fillStyle = `rgb(${g}, ${g}, ${g})`;
+    ctx.fillStyle = cracked ? hatchPattern(ctx)! : `rgb(${g}, ${g}, ${g})`;
     ctx.fill();
     ctx.strokeStyle = INK;
     ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6 + pulse;
+    if (cracked) ctx.setLineDash([4, 3]);
     ctx.stroke();
+    ctx.setLineDash([]);
+    if (cracked) {
+      // A zigzag crack from top to bottom.
+      const x0 = b.jitter[0] * b.w * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(x0, -b.h / 2);
+      for (let k = 1; k <= 5; k++) ctx.lineTo(x0 + (k % 2 ? 1 : -1) * unit * 0.35, -b.h / 2 + (b.h * k) / 5);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
     // Text: black on white, white on black; heavier as it resonates and solidifies.
     const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
@@ -164,6 +199,34 @@ export function drawField(
     ctx.globalAlpha = alpha * 0.5;
     ctx.fillText(b.lang === "tw" ? "台" : "한", -b.w / 2 + 8, -b.h / 2 + 10);
     ctx.restore();
+  }
+
+  // Label for a freshly cracked false friend: the two meanings, for a few seconds.
+  for (const pair of world.pairs) {
+    const t = pair.cracked;
+    if (t < 0 || t > 7 || pair.leaving) continue;
+    const e = pair.entry;
+    const lines = [
+      "偽友 · 가짜 친구 · false friend",
+      `台 ${e.hanja} — ${short(e.taiwanese.definition) || `同華語「${e.hanja}」`}`,
+      `한 ${e.korean.hangul} — ${short(e.korean.chinese, 8)} · ${short(e.korean.english, 18)}`,
+    ];
+    const size = Math.max(12, Math.round(fontSize * 0.5));
+    ctx.font = `700 ${size}px ${FONT}`;
+    const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 24;
+    const h = lines.length * size * 1.5 + 16;
+    const x = Math.min(Math.max((pair.tw.x + pair.ko.x) / 2 - w / 2, 12), width - w - 12);
+    const y = Math.min(Math.max(Math.min(pair.tw.y, pair.ko.y) - h - 40, 12), height - h - 12);
+    ctx.globalAlpha = fade * Math.min(1, t / 0.3, (7 - t) / 1.2);
+    ctx.fillStyle = PAPER;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = INK;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    lines.forEach((l, i) => ctx.fillText(l, x + 12, y + 10 + i * size * 1.5));
   }
   ctx.globalAlpha = 1;
 }
