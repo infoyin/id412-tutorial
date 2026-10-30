@@ -17,10 +17,25 @@ type Tab = "about" | "info" | "index";
 function About() {
   return (
     <div className={styles.about}>
-      <p className={styles.aboutLead}>臺韓對話 · 대한 대화 — Same Letters, Two Voices</p>
-      <p lang="zh-Hant">臺語和韓語有數百個詞以相同的漢字書寫，跨越千年仍彼此呼應。在這裡，它們是可以拖曳、甩動、聆聽的方塊。名字本身也是一對：臺韓對話，臺語唸 Tâi-Hân Tuì-uē，韓語唸 대한 대화。偶爾「對」會變成「佳」——佳話，一個近乎押韻的偽友。</p>
-      <p lang="ko">대만어와 한국어에는 같은 한자로 쓰는 말이 수백 개 있고, 천 년을 건너 지금도 서로의 소리를 닮아 있습니다. 여기서 그 말들은 끌고, 튕기고, 들을 수 있는 블록이 됩니다. 이름도 한 쌍입니다: 臺韓對話는 대만어로 Tâi-Hân Tuì-uē, 한국어로 대한 대화. 가끔 ‘對’가 ‘佳(가화)’로 바뀝니다.</p>
-      <p lang="en">The name is itself a pair: 臺韓對話, “a Taiwan–Korea dialogue”, read Tâi-Hân Tuì-uē in Taiwanese and Dae-han Dae-hwa in Korean. Now and then 對 (dialogue) slips into 佳 (a fine story) and cracks back.</p>
+      <p className={styles.aboutLead}>臺韓對話 · 대한 대화 · Taiwan–Korea Dialogue</p>
+      <p lang="zh-Hant">
+        臺灣台語與韓語分屬不同語系，卻因歷史上的漢字文化交流，在許多詞彙中留下共通的漢字來源與部分相近的聲音。
+      </p>
+      <p lang="zh-Hant">
+        在《臺韓對話》中，詞語化為可以拖曳、甩動、連結與聆聽的幾何物件。當兩種語言相遇，原本分離的輪廓逐漸連結、凝聚成形。對話，也可能成為一段佳話。
+      </p>
+      <p lang="ko">
+        대만 민난어(臺灣台語)와 한국어는 서로 다른 어족에 속하지만, 한자 문화권의 역사적 교류를 통해 일부 단어에서 공통된 한자와 비슷한 소리를 발견할 수 있습니다.
+      </p>
+      <p lang="ko">
+        이 작품에서 단어들은 잡고, 흔들고, 연결하고, 들을 수 있는 기하학적 오브제가 됩니다. 두 언어가 만나면 흩어져 있던 윤곽이 연결되고 하나의 형태로 응집됩니다. 서로 다른 소리가 만나 하나의 이야기가 됩니다.
+      </p>
+      <p lang="en">
+        Taiwanese Hokkien and Korean belong to different language families, yet centuries of linguistic and cultural exchange have left traces of shared Chinese-character origins and phonetic similarities.
+      </p>
+      <p lang="en">
+        In Taiwan–Korea Dialogue, words become geometric objects to grab, shake, connect, and hear. As two languages meet, separate outlines converge into solid forms. A dialogue becomes a story worth sharing.
+      </p>
       <dl>
         <dt>Project</dt>
         <dd>Mini Project [ID412] Interactive Space</dd>
@@ -33,6 +48,13 @@ function About() {
           </a>
         </dd>
         <dd>Exchange Student [from] NTUST · Taiwan Tech</dd>
+        <dt>Research</dt>
+        <dd>
+          <a href="https://www.sinica.edu.tw/cp/695" target="_blank" rel="noreferrer">陳彥伶〈語言親緣關係常見的幾個迷思〉中央研究院</a>
+        </dd>
+        <dd>
+          <a href="https://tdr.lib.ntu.edu.tw/handle/123456789/52032" target="_blank" rel="noreferrer">申祐先《韓國漢字音歷史層次研究》臺大 2015</a>
+        </dd>
         <dt>Data</dt>
         <dd>教育部《臺灣台語常用詞辭典》《重編國語辭典修訂本》 · 국립국어원《한국어기초사전》 · Lingua Libre</dd>
       </dl>

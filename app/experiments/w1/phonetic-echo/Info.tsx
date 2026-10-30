@@ -168,9 +168,9 @@ export function Info() {
 
             <section>
               <h3>● 韓語 · 한국어 · Korean</h3>
-              <p lang="zh-Hant">與漢語不同語系，但從文言文借入大量漢字詞，約佔《標準國語大辭典》詞條的 58.5%。</p>
-              <p lang="ko">계통은 다르지만 한문에서 한자어를 받아들여, 《표준국어대사전》 표제어의 약 58.5%가 한자어입니다.</p>
-              <p lang="en">Not related to Chinese, but it borrowed widely from Classical Chinese: about 58.5% of the headwords in the Standard Korean Language Dictionary are Sino-Korean.</p>
+              <p lang="zh-Hant">與濟州語同屬韓語系，和漢語不同源，但從漢字文化圈借入大量漢字詞，約佔《標準國語大辭典》詞條的 58.5%。</p>
+              <p lang="ko">제주어와 함께 한국어족에 속하며 중국어와 계통이 다르지만, 한자 문화권에서 많은 한자어를 받아들여 《표준국어대사전》 표제어의 약 58.5%가 한자어입니다.</p>
+              <p lang="en">With Jejueo it forms the Koreanic family, unrelated to Chinese, yet it borrowed so widely that about 58.5% of the headwords in the Standard Korean Language Dictionary are Sino-Korean.</p>
               <Bar parts={[{ label: "漢字語", value: 58.5 }, { label: "固有語", value: 25.5 }, { label: "混種語", value: 10.6 }, { label: "外來語", value: 5.4 }]} />
               <p className={styles.cite}>% · 국립국어원 분석 (세계일보 2011)</p>
             </section>
@@ -180,9 +180,9 @@ export function Info() {
           <div className={styles.infoCol}>
             <section>
               <h3>● 為何相像 · 왜 비슷할까 · Why They Sound Alike?</h3>
-              <p lang="zh-Hant">多數學者認為，韓國漢字音和臺語文讀音都可追溯到中古漢語（約隋唐）。兩邊都保留了韻尾，-t 在韓語則規律地變成 ㄹ；華語已失去 -p、-t、-k。</p>
-              <p lang="ko">한국 한자음과 대만어 文讀은 모두 중세 중국어(대략 수·당)로 거슬러 올라간다고 보는 견해가 많습니다. 둘 다 받침을 지켰고, -t는 한국어에서 ㄹ이 됩니다.</p>
-              <p lang="en">Many scholars trace both Sino-Korean readings and Taiwanese literary readings to Middle Chinese (roughly Sui–Tang). Both kept the syllable endings; Korean regularly turned -t into ㄹ (l), while Mandarin lost -p, -t, -k.</p>
+              <p lang="zh-Hant">兩者沒有親緣關係，相似來自漢字詞的借用。臺語保留中古漢語的入聲韻尾 -p、-t、-k，韓語音節也允許這類韻尾，所以「結婚」kiat-hun 與 결혼 聽來相近；華語已失去入聲（陳彥伶）。韓國漢字音以中古漢語為主，也混有更早與更晚的層次（申祐先 2015）。</p>
+              <p lang="ko">두 언어는 친족 관계가 아니며, 닮은 말은 한자어 차용에서 왔습니다. 대만어는 중세 중국어의 입성 받침 -p, -t, -k를 지켰고 한국어도 이런 받침을 허용해 結婚 kiat-hun과 결혼이 비슷하게 들립니다. 한국 한자음은 중세 중국어가 중심이지만 더 이른 층과 늦은 층도 섞여 있습니다.</p>
+              <p lang="en">They are not related; the likeness comes from borrowed Sino words. Taiwanese keeps the Middle Chinese stop endings -p, -t, -k and Korean syllables allow such endings too, so 結婚 kiat-hun and 결혼 sound close, while Mandarin lost them. Sino-Korean readings rest mainly on Middle Chinese, with older and later layers mixed in.</p>
               <p className={styles.chartTitle}>臺語韻尾 → 받침 · Taiwanese Endings → Korean Finals · {ENTRIES.length}쌍</p>
               <div className={styles.finals}>
                 {finals.map(({ t, total, counts }) => (
@@ -237,6 +237,10 @@ export function Info() {
                 <a href="https://www.koreatimes.co.kr/southkorea/20140514/korean-13th-most-widely-spoken-language" target="_blank" rel="noreferrer">Korea Times</a> ·{" "}
                 <a href="https://www.thenewslens.com/article/157030" target="_blank" rel="noreferrer">The News Lens</a> ·{" "}
                 <a href="https://www.segye.com/newsView/20110630005004" target="_blank" rel="noreferrer">세계일보</a>
+              </p>
+              <p>
+                <a href="https://www.sinica.edu.tw/cp/695" target="_blank" rel="noreferrer">陳彥伶〈語言親緣關係常見的幾個迷思：兼論語言與方言〉中央研究院</a> ·{" "}
+                <a href="https://tdr.lib.ntu.edu.tw/handle/123456789/52032" target="_blank" rel="noreferrer">申祐先《韓國漢字音歷史層次研究》臺大博士論文 2015</a>
               </p>
             </section>
           </div>
