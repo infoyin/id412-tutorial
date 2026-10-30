@@ -25,7 +25,7 @@ export const TUNING = {
   flingSpeed: 1500, // px/s of pointer speed on the wheel that counts as a fling
   flingCooldown: 2.5, // seconds before another fling can renew the words
   transitionSeconds: 1.6, // old words fly out and fade, new ones enter, over about this long
-  autoplayAfter: 30, // seconds without input before the piece starts playing itself
+  autoplayAfter: 15, // seconds without input before the piece starts playing itself
   autoplayStep: 4.5, // seconds between its moves
   maxDpr: 2,
 };

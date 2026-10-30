@@ -482,7 +482,7 @@ export default function PhoneticEcho() {
       // Autoplay.
       if (!auto.on && now - lastInput > TUNING.autoplayAfter * 1000 && !listen.on && !wheel.isOpen && !document.querySelector("[data-menu] [class*=tabBody]")) {
         auto.on = true;
-        auto.at = now;
+        auto.at = now - TUNING.autoplayStep * 1000; // the first move straight away
         setAutoplay(true);
       }
       if (auto.on && now - auto.at > TUNING.autoplayStep * 1000) {
