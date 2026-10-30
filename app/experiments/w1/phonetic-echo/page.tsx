@@ -7,6 +7,7 @@ import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
 import { pairCount, TUNING } from "./settings";
+import { setDark } from "./theme";
 import { Wheel } from "./wheel";
 import { Rotation, type Entry } from "./words";
 import styles from "./page.module.css";
@@ -32,6 +33,7 @@ export default function PhoneticEcho() {
   const [open, setOpen] = useState(false);
   const [place, setPlace] = useState({ left: 0, top: 0, wide: true });
   const [muted, setMutedState] = useState(false);
+  const [dark, setDarkState] = useState(false);
   const [started, setStarted] = useState(false);
   const [announce, setAnnounce] = useState("");
   const [playing, setPlayingState] = useState<Playing>(null);
@@ -57,6 +59,22 @@ export default function PhoneticEcho() {
     wheel.select(wheel.selected + delta);
     setSelectedId(shownRef.current[wheel.selected]?.id ?? null);
   };
+
+  // Light / dark, remembered per browser (a convenience; it may not be available).
+  const applyDark = (value: boolean) => {
+    setDark(value);
+    setDarkState(value);
+    try {
+      localStorage.setItem("phonetic-echo-dark", value ? "1" : "0");
+    } catch {}
+  };
+  useEffect(() => {
+    let saved = false;
+    try {
+      saved = localStorage.getItem("phonetic-echo-dark") === "1";
+    } catch {}
+    if (saved) applyDark(true);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -236,7 +254,7 @@ export default function PhoneticEcho() {
   const entry = shown.find((e) => e.id === selectedId) ?? shown[0] ?? null;
 
   return (
-    <main className={styles.root}>
+    <main className={`${styles.root} ${dark ? styles.dark : ""}`}>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden />
       <Menu playing={playing} muted={muted} onPlay={(e: Entry, lang: Lang) => playOne(e, lang)} />
       <Overlay
@@ -245,11 +263,13 @@ export default function PhoneticEcho() {
         entry={entry}
         place={place}
         muted={muted}
+        dark={dark}
         playing={playing}
         koreanVoice={koreanVoice}
         announce={announce}
         pairs={shown}
         onToggleSound={toggleSound}
+        onToggleDark={() => applyDark(!dark)}
         onPlay={(e: Entry, lang: Lang) => playOne(e, lang)}
         onStep={step}
         onOpen={() => openWheel(true)}

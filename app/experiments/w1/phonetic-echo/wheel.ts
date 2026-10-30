@@ -1,4 +1,5 @@
 import { SETTINGS, TUNING } from "./settings";
+import { theme } from "./theme";
 import type { Entry } from "./words";
 
 // The paper wheel on the left edge, a little more than half hidden.
@@ -19,8 +20,6 @@ export type WheelAction =
 
 export const NOTE_WIDTH = 400; // the annotation beside the open wheel
 const GAP = 56;
-const INK = "#111";
-const PAPER = "#fbfbf9";
 const smooth = (current: number, target: number, rate: number, dt: number) => current + (target - current) * (1 - Math.exp(-rate * dt));
 const ease = (t: number) => t * t * (3 - 2 * t);
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -182,8 +181,8 @@ export class Wheel {
     ctx.translate(x, y);
 
     // Disk, rings.
-    ctx.fillStyle = PAPER;
-    ctx.strokeStyle = INK;
+    ctx.fillStyle = theme.paper;
+    ctx.strokeStyle = theme.ink;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -211,7 +210,7 @@ export class Wheel {
     if (e > 0.01 && entries.length) {
       ctx.globalAlpha = e;
       const sel = this.selected * step + this.angle;
-      ctx.fillStyle = INK;
+      ctx.fillStyle = theme.ink;
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.9, sel - step / 2, sel + step / 2);
       ctx.arc(0, 0, r * 0.22, sel + step / 2, sel - step / 2, true);
@@ -236,7 +235,7 @@ export class Wheel {
       const a = i * step + this.angle;
       const flip = Math.cos(a) < 0;
       const selected = e > 0.5 && i === this.selected;
-      ctx.fillStyle = selected ? PAPER : INK;
+      ctx.fillStyle = selected ? theme.paper : theme.ink;
       for (const [text, radius, scale] of [
         [entry.taiwanese.written, 0.76, 1],
         [e > 0.5 ? entry.korean.hangul : "", 0.42, 0.9],
@@ -250,16 +249,21 @@ export class Wheel {
         ctx.fillText(text, 0, 0);
         ctx.restore();
       }
+      // False friends get a hollow mark, matched pairs a filled one.
       ctx.beginPath();
       ctx.arc(Math.cos(a) * r * 0.86, Math.sin(a) * r * 0.86, 2.5, 0, Math.PI * 2);
-      ctx.fill();
+      if (entry.status === "false_friend") {
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else ctx.fill();
     });
 
     // Gravity gauge: a thick arc on the visible side that grows with the pull.
     if (e < 0.99 && Math.abs(this.pull) > 0.01) {
       ctx.globalAlpha = 1 - e;
       ctx.lineWidth = 4;
-      ctx.strokeStyle = INK;
+      ctx.strokeStyle = theme.ink;
       ctx.beginPath();
       const from = -Math.PI / 2 + 0.12; // top of the wheel; down-pull grows clockwise
       ctx.arc(0, 0, r * 1.03, from, from + this.pull * Math.PI * 0.9, this.pull < 0);
@@ -268,7 +272,7 @@ export class Wheel {
     }
 
     // Hub text and the pointer notch at 3 o'clock.
-    ctx.fillStyle = INK;
+    ctx.fillStyle = theme.ink;
     ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.05, 10))));
     if (e > 0.5) {
       // Three short lines so they fit inside the hub.

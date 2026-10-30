@@ -2,8 +2,10 @@ import { SETTINGS, TUNING } from "./settings";
 import type { Entry } from "./words";
 
 // The word field: outlined blocks with position, velocity, angle and spin.
-// Forces: a soft spring to a wandering home spot, gravity from the wheel (each block feels it
-// with its own lag), drag (settlingDamping), partner attraction, box collisions, walls, the wheel.
+// By default the field is weightless: each block drifts in its own slowly turning direction,
+// bounces off edges and the wheel (its drift direction reflects), and turns gently. Gravity from
+// the wheel (each block feels it with its own lag), drag (settlingDamping), partner attraction,
+// box collisions.
 // A fling gives every block an impulse; the old set flies out and fades while a new set
 // flies in from the edges and settles.
 // Partners pass three stages: approach → resonance → docked and filling black.
@@ -29,6 +31,7 @@ export type Block = {
   homeX: number;
   homeY: number;
   phase: number;
+  drift: number; // direction it floats in when weightless (radians)
   lag: number; // how quickly this block feels a change in gravity
   feel: number; // gravity this block currently feels
   hover: number;
@@ -104,6 +107,7 @@ export class World {
       cut: r() < 0.6 ? Math.floor(r() * 4) : -1,
       homeX: 0, homeY: 0,
       phase: r() * Math.PI * 2,
+      drift: r() * Math.PI * 2,
       lag: 1.5 + r() * 2.5,
       feel: 0, hover: 0, age: 0,
       entering: false,
@@ -281,7 +285,6 @@ export class World {
     this.magnetic = SETTINGS.magneticStrength * (1 + Math.min(this.energy / 1200, 1.5));
     this.damping = smooth(this.damping, SETTINGS.settlingDamping, 1.6 / TUNING.transitionSeconds, dt);
     const drift = TUNING.driftSpeed * (reduced ? 0.3 : 1);
-    const anchor = 1.2 * (1 - Math.min(Math.abs(this.pull) * 1.6, 1)) ** 2; // home spring gives way to gravity
 
     const ax = new Map<Block, number>();
     const ay = new Map<Block, number>();
@@ -301,13 +304,14 @@ export class World {
       } else if (b === this.held) {
         force(b, (pointer.x - this.grabX - b.x) * 140 - b.vx * 18, (pointer.y - this.grabY - b.y) * 140 - b.vy * 18);
         hover = 1;
+      } else if (b.entering) {
+        // Flying in: guided to its spot until it is on screen.
+        force(b, (b.homeX - b.x) * 3 - b.vx * this.damping, (b.homeY - b.y) * 3 + b.feel - b.vy * this.damping);
+        if (b.age > 0.3 && this.inside(b)) b.entering = false;
       } else {
-        const t = this.time;
-        const hx = b.homeX + Math.sin(t * 0.05 + b.phase) * drift * 3;
-        const hy = b.homeY + Math.cos(t * 0.04 + b.phase * 1.3) * drift * 2;
-        const k = b.entering ? 3 : anchor; // a new block is guided home more firmly
-        force(b, (hx - b.x) * k - b.vx * this.damping, (hy - b.y) * k + b.feel - b.vy * this.damping);
-        if (b.entering && b.age > 0.3 && this.inside(b)) b.entering = false;
+        // Weightless: steer toward its own drift velocity; the direction slowly turns.
+        b.drift += Math.sin(this.time * 0.13 + b.phase) * 0.15 * dt;
+        force(b, (Math.cos(b.drift) * drift - b.vx) * this.damping, (Math.sin(b.drift) * drift - b.vy) * this.damping + b.feel);
         if (pointer.inside && !this.held) {
           const d = Math.hypot(pointer.x - b.x, pointer.y - b.y);
           hover = clamp01(1 - (d - Math.max(b.w, b.h) / 2) / 120);
@@ -348,7 +352,8 @@ export class World {
         if (active && this.energy > 1800) pair.docked = false; // a hard flick pulls them apart
       } else {
         const d = Math.hypot(ko.x - tw.x, ko.y - tw.y) || 1;
-        const pull = this.magnetic * close * close * (active ? 520 : 30);
+        // Partners only pull while a hand (or the keyboard) is bringing them together.
+        const pull = active ? this.magnetic * close * close * 520 : 0;
         if (this.held !== tw) force(tw, ((ko.x - tw.x) / d) * pull, ((ko.y - tw.y) / d) * pull);
         if (this.held !== ko) force(ko, ((tw.x - ko.x) / d) * pull, ((tw.y - ko.y) / d) * pull);
         pair.solidity = Math.max(0, pair.solidity - rate * 0.5);
@@ -378,7 +383,8 @@ export class World {
       b.vy += (ay.get(b) ?? 0) * dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
-      const target = b === this.held ? Math.max(-0.35, Math.min(0.35, b.vx * 0.0006)) : b.rest;
+      // Held: tilt with the motion. Floating: sway slowly around its resting tilt.
+      const target = b === this.held ? Math.max(-0.35, Math.min(0.35, b.vx * 0.0006)) : b.rest + Math.sin(this.time * 0.12 + b.phase) * 0.45;
       const spring = b.pair.leaving ? 0 : 5;
       b.spin += ((target - b.angle) * spring - b.spin * (0.4 + this.damping * 2) + b.vx * 0.0015) * dt;
       b.angle += b.spin * dt;
@@ -453,23 +459,28 @@ export class World {
       // New blocks pass through the edges while flying in; old ones bounce once, then may leave.
       const walls = !b.entering && (!b.pair.leaving || b.age < 0.6);
       if (walls) {
+        // Bounce, and turn the drift direction away from the wall (like light off a mirror).
         if (b.y + b.h / 2 > this.height - m) {
           b.y = this.height - m - b.h / 2;
           if (b.vy > 0) b.vy *= -bounce;
           b.vx *= 0.96;
+          if (Math.sin(b.drift) > 0) b.drift = -b.drift;
         }
         if (b.y - b.h / 2 < m) {
           b.y = m + b.h / 2;
           if (b.vy < 0) b.vy *= -bounce;
           b.vx *= 0.96;
+          if (Math.sin(b.drift) < 0) b.drift = -b.drift;
         }
         if (b.x + b.w / 2 > this.width - m) {
           b.x = this.width - m - b.w / 2;
           if (b.vx > 0) b.vx *= -bounce;
+          if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift;
         }
         if (b.x - b.w / 2 < m) {
           b.x = m + b.w / 2;
           if (b.vx < 0) b.vx *= -bounce;
+          if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
         }
       }
       // Keep out of the wheel.
@@ -481,6 +492,7 @@ export class World {
       if (d < min && b !== this.held && !b.pair.leaving) {
         b.x = o.x + (dx / d) * min;
         b.y = o.y + (dy / d) * min;
+        b.drift = Math.atan2(dy, dx) + (Math.random() - 0.5); // float away from the wheel
         const inward = (b.vx * dx + b.vy * dy) / d;
         if (inward < 0) {
           b.vx -= (dx / d) * inward * 1.3;

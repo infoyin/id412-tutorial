@@ -1,10 +1,24 @@
 .root {
+  --paper: #fbfbf9;
+  --ink: #111111;
+  --gray: #d6d6d2;
+  --gray-hover: #c8c8c3;
+  --line: #a9a9a4;
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #fbfbf9;
-  color: #111;
+  background: var(--paper);
+  color: var(--ink);
   font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+
+/* Dark mode: the same system, inverted. Matches theme.ts for the canvas. */
+.dark {
+  --paper: #121212;
+  --ink: #eeeeea;
+  --gray: #2c2c2a;
+  --gray-hover: #3a3a37;
+  --line: #4a4a46;
 }
 
 .canvas {
@@ -27,30 +41,8 @@
 
 /* ---- Title, instruction, sound ---- */
 
-.title {
-  position: absolute;
-  top: 28px;
-  right: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  pointer-events: none;
-}
 
-.bar {
-  width: 96px;
-  height: 6px;
-  margin-bottom: 8px;
-  background: #111;
-}
 
-.title span:last-child {
-  letter-spacing: 0.12em;
-  opacity: 0.55;
-}
 
 .intro {
   position: absolute;
@@ -80,23 +72,7 @@
   opacity: 0;
 }
 
-.sound {
-  position: absolute;
-  right: 28px;
-  bottom: 24px;
-  padding: 4px 0;
-  border: none;
-  background: none;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  opacity: 0.6;
-}
 
-.sound:hover,
-.sound:focus-visible {
-  opacity: 1;
-}
 
 .live {
   position: absolute;
@@ -104,6 +80,38 @@
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
+}
+
+/* Sound and light/dark: two icons, bottom right. */
+.toggles {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  display: flex;
+  gap: 6px;
+}
+
+.toggles button {
+  width: 36px;
+  height: 36px;
+  padding: 7px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.toggles button:hover {
+  opacity: 1;
+}
+
+.toggles svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 
 /* ---- Annotation beside the open wheel ---- */
@@ -129,7 +137,7 @@
 .hanja {
   margin: 0;
   padding-bottom: 12px;
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid var(--ink);
   font-size: 64px;
   font-weight: 700;
   line-height: 1;
@@ -140,7 +148,7 @@
   display: flex;
   gap: 40px;
   padding: 14px 0;
-  border-bottom: 0.5px solid #111;
+  border-bottom: 0.5px solid var(--ink);
 }
 
 /* Each word is its own play button. */
@@ -170,7 +178,7 @@
 }
 
 .word:focus-visible {
-  outline: 2px solid #111;
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
@@ -283,17 +291,17 @@
 
 .keys button {
   padding: 6px 12px;
-  border: 1px solid #111;
-  background: #fbfbf9;
+  border: 1px solid var(--ink);
+  background: var(--paper);
   font-size: 13px;
   cursor: pointer;
 }
 
 .keys button:focus-visible,
-.sound:focus-visible,
+.toggles button:focus-visible,
 .links button:focus-visible,
 .links a:focus-visible {
-  outline: 2px solid #111;
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -339,18 +347,39 @@
 }
 
 .tabInfo {
-  background: #111;
-  color: #fbfbf9;
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .tabIndex {
-  background: #d6d6d2;
-  color: #111;
+  background: var(--gray);
+  color: var(--ink);
 }
 
 .tabOpen {
   width: min(440px, 100vw);
   height: 100vh;
+}
+
+/* INDEX spreads out to the right. */
+.tabIndex.tabOpen {
+  width: min(1040px, calc(100vw - 400px)); /* the title and INFO tabs take 400px */
+}
+
+/* The title: same rectangle, paper colour, not clickable. */
+.tabTitle {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.tabTitle .tabLabel {
+  cursor: default;
+}
+
+.tabTitle .tabLabel span:first-child {
+  font-size: 17px;
+  letter-spacing: 0.06em;
 }
 
 .tabLabel {
@@ -453,7 +482,7 @@
 }
 
 /* Monotone fills (on the black INFO block: white is "solid") */
-.fillBlack { background: #fbfbf9; }
+.fillBlack { background: var(--paper); }
 .fillHatch { background: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 5px); }
 .fillDots { background: radial-gradient(currentColor 0.8px, transparent 1px) 0 0 / 5px 5px; }
 .fillWhite { background: transparent; }
@@ -474,42 +503,87 @@
 
 /* INDEX content: rows like a printed list */
 
+/* Word list in columns (one block per category) + a details pane on the right. */
+.indexLayout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.indexColumns {
+  columns: 220px;
+  column-gap: 14px;
+}
+
+.indexGroup {
+  break-inside: avoid;
+  margin-bottom: 16px;
+}
+
+.indexHead {
+  margin: 0;
+  padding: 10px 8px 6px;
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .index {
-  margin: 0 -14px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.indexHead {
-  padding: 18px 14px 6px;
+.indexPane {
+  position: sticky;
+  top: 0;
+}
+
+.indexHint {
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.detailNum {
+  margin: 0;
   font-size: 12px;
-  letter-spacing: 0.08em;
+}
+
+.detailHanja {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 44px;
+  line-height: 1.1;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 52px 1fr 20px;
+  grid-template-columns: 40px 1fr 14px;
   align-items: center;
   width: 100%;
-  padding: 10px 14px;
+  padding: 7px 8px;
   border: none;
-  border-top: 1px solid #a9a9a4;
+  border-top: 1px solid var(--line);
   background: none;
   font-weight: 700 !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   text-align: left;
   cursor: pointer;
 }
 
 .row:hover {
-  background: #c8c8c3;
+  background: var(--gray-hover);
 }
 
 /* .index raises specificity above ".root button { color: inherit }" */
 .index .rowOn,
 .index .rowOn:hover {
-  background: #111;
-  color: #fbfbf9;
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .num {
@@ -522,8 +596,9 @@
 
 .detail {
   padding: 14px;
-  background: #fbfbf9;
-  border-top: 1px solid #111;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
 }
 
 .detailWords {
@@ -574,7 +649,7 @@
 .trap {
   margin: 0 0 10px;
   padding: 6px 8px;
-  border: 1px dashed #111;
+  border: 1px dashed var(--ink);
   font-size: 12px;
 }
 
@@ -607,9 +682,25 @@
 
 @media (max-width: 760px) {
   .tab {
-    width: 50vw;
+    width: 33.4vw;
+  }
+  .tabIndex.tabOpen {
+    width: 100vw;
+  }
+  .indexLayout {
+    grid-template-columns: 1fr;
+  }
+  .indexPane {
+    order: -1;
+    position: static;
   }
   .tabOpen {
     width: 100vw;
   }
+}
+
+.trap p {
+  margin: 3px 0;
+  font-size: 12px;
+  line-height: 1.5;
 }

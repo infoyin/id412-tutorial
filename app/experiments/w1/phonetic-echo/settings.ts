@@ -17,7 +17,7 @@ export const SETTINGS = {
 
 // Smaller knobs.
 export const TUNING = {
-  driftSpeed: 12, // px/s of ambient wandering
+  driftSpeed: 34, // px/s of weightless floating
   connectionDistance: 0.3, // × shorter screen side: gap at which partners start to feel each other
   connectAt: 0.88, // closeness at which partners dock
   resonateFrom: 0.45, // closeness where approach turns into resonance

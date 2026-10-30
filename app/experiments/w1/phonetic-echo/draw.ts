@@ -1,6 +1,7 @@
 import type { Playing } from "./audio";
 import type { Block, World } from "./physics";
 import { TUNING } from "./settings";
+import { mix, theme } from "./theme";
 
 // Drawing the field: paper background, a few editorial rules, tension lines between partners,
 // and the outlined blocks. Black and white only; grays for in-between states.
@@ -9,20 +10,20 @@ export const FONT = '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingF
 // Tâi-lô needs a font with the combining mark in a̍; many CJK fonts draw a box instead.
 export const LATIN = '"Helvetica Neue", Arial, sans-serif';
 
-const PAPER = "#fbfbf9";
-const INK = "#111";
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 let hatch: CanvasPattern | null = null;
+let hatchDark = false;
 
 // Diagonal hatching for cracked false friends, made once.
 function hatchPattern(ctx: CanvasRenderingContext2D) {
-  if (hatch) return hatch;
+  if (hatch && hatchDark === theme.dark) return hatch;
+  hatchDark = theme.dark;
   const tile = document.createElement("canvas");
   tile.width = tile.height = 8;
   const g = tile.getContext("2d")!;
-  g.fillStyle = PAPER;
+  g.fillStyle = theme.paper;
   g.fillRect(0, 0, 8, 8);
-  g.strokeStyle = "#8a8a86";
+  g.strokeStyle = theme.mid;
   g.lineWidth = 1;
   g.beginPath();
   g.moveTo(0, 8);
@@ -74,11 +75,11 @@ export function drawField(
   reduced: boolean,
 ) {
   const { width, height } = world;
-  ctx.fillStyle = PAPER;
+  ctx.fillStyle = theme.paper;
   ctx.fillRect(0, 0, width, height);
 
   // Editorial rules.
-  ctx.strokeStyle = INK;
+  ctx.strokeStyle = theme.ink;
   ctx.lineWidth = 0.75;
   ctx.beginPath();
   ctx.moveTo(width - 28, 120);
@@ -94,7 +95,7 @@ export function drawField(
     const { tw, ko, closeness } = pair;
     if (closeness < 0.02 || pair.docked || pair.leaving || pair.cracked >= 0) continue;
     const resonance = resonanceOf(closeness);
-    ctx.strokeStyle = resonance > 0 ? INK : "#9a9a95";
+    ctx.strokeStyle = resonance > 0 ? theme.ink : theme.mid;
     ctx.lineWidth = 0.75;
     ctx.setLineDash(resonance > 0 ? [] : [3, 5]);
     ctx.globalAlpha = fade * Math.min(1, closeness / TUNING.resonateFrom);
@@ -134,7 +135,7 @@ export function drawField(
       ctx.save();
       ctx.translate(5, 8);
       plate(ctx, b, unit);
-      ctx.fillStyle = "#d8d8d4";
+      ctx.fillStyle = theme.shadow;
       ctx.fill();
       ctx.restore();
     }
@@ -145,18 +146,19 @@ export function drawField(
       ctx.save();
       ctx.rotate(0.03 * echo);
       plate(ctx, b, unit, 3 + echo * 4);
-      ctx.strokeStyle = `rgba(17, 17, 17, ${echo * 0.6})`;
+      ctx.strokeStyle = theme.ink;
+      ctx.globalAlpha = alpha * echo * 0.6;
       ctx.lineWidth = 0.75;
       ctx.stroke();
       ctx.restore();
+      ctx.globalAlpha = alpha;
     }
 
     // The plate: white → solid black as the pair solidifies; hatched and dashed once cracked.
-    const g = Math.round(251 - 234 * solid);
     plate(ctx, b, unit);
-    ctx.fillStyle = cracked ? hatchPattern(ctx)! : `rgb(${g}, ${g}, ${g})`;
+    ctx.fillStyle = cracked ? hatchPattern(ctx)! : mix(solid);
     ctx.fill();
-    ctx.strokeStyle = INK;
+    ctx.strokeStyle = theme.ink;
     ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6 + pulse;
     if (cracked) ctx.setLineDash([4, 3]);
     ctx.stroke();
@@ -173,7 +175,7 @@ export function drawField(
 
     // Text: black on white, white on black; heavier as it resonates and solidifies.
     const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
-    ctx.fillStyle = solid > 0.5 ? PAPER : INK;
+    ctx.fillStyle = solid > 0.5 ? theme.paper : theme.ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = `${weight} ${fontSize}px ${FONT}`;
@@ -201,10 +203,12 @@ export function drawField(
     ctx.restore();
   }
 
-  // Label for a freshly cracked false friend: the two meanings, for a few seconds.
+  // Why a false friend failed: the two meanings. Shown for 12 s after cracking, and again
+  // whenever the cursor rests on either block.
   for (const pair of world.pairs) {
     const t = pair.cracked;
-    if (t < 0 || t > 7 || pair.leaving) continue;
+    const hovered = Math.max(pair.tw.hover, pair.ko.hover);
+    if (t < 0 || pair.leaving || (t > 12 && hovered < 0.3)) continue;
     const e = pair.entry;
     const lines = [
       "偽友 · 가짜 친구 · false friend",
@@ -216,14 +220,14 @@ export function drawField(
     const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 24;
     const h = lines.length * size * 1.5 + 16;
     const x = Math.min(Math.max((pair.tw.x + pair.ko.x) / 2 - w / 2, 12), width - w - 12);
-    const y = Math.min(Math.max(Math.min(pair.tw.y, pair.ko.y) - h - 40, 12), height - h - 12);
-    ctx.globalAlpha = fade * Math.min(1, t / 0.3, (7 - t) / 1.2);
-    ctx.fillStyle = PAPER;
+    const y = Math.min(Math.max(Math.min(pair.tw.y, pair.ko.y) - h - 40, 96), height - h - 12); // below the tabs
+    ctx.globalAlpha = fade * Math.max(Math.min(1, t / 0.3, (12 - t) / 1.2), Math.min(1, (hovered - 0.3) * 3));
+    ctx.fillStyle = theme.paper;
     ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = INK;
+    ctx.strokeStyle = theme.ink;
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = INK;
+    ctx.fillStyle = theme.ink;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     lines.forEach((l, i) => ctx.fillText(l, x + 12, y + 10 + i * size * 1.5));

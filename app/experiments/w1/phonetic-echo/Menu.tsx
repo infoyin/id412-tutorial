@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import type { Lang, Playing } from "./audio";
 import { IndexList } from "./IndexList";
 import { Info } from "./Info";
-import { ENTRIES, type Entry } from "./words";
+import type { Entry } from "./words";
 import styles from "./page.module.css";
 
-// Two rectangular tabs at the top: INFO (black) and INDEX (gray). Clicking one grows it down
-// into a tall block of the same colour, with its content inside. One open at a time;
-// click the tab again or press Esc to fold it back.
+// The row of rectangles at the top left: the title (paper), INFO (ink) and INDEX (gray).
+// Clicking INFO or INDEX grows it down into a tall block of the same colour; INDEX also widens
+// to the right so the word list can spread out in columns. One open at a time; click the tab
+// again or press Esc to fold it back.
 
 type Tab = "info" | "index";
 
@@ -37,9 +38,15 @@ export function Menu(props: Props) {
   );
 
   return (
-    <nav className={styles.menu} aria-label="INFO / INDEX">
+    <nav className={styles.menu} aria-label="PHONETIC ECHO · INFO · INDEX">
+      <div className={`${styles.tab} ${styles.tabTitle}`}>
+        <div className={styles.tabLabel}>
+          <span>PHONETIC ECHO</span>
+          <span>臺語 ↔ 한국어</span>
+        </div>
+      </div>
       {tab("info", "INFO", "說明 · 정보", <Info />)}
-      {tab("index", "INDEX", `索引 · 색인 ${ENTRIES.length}`, <IndexList {...props} />)}
+      {tab("index", "INDEX", "索引 · 색인", <IndexList {...props} />)}
     </nav>
   );
 }

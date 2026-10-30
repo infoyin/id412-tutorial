@@ -13,11 +13,13 @@ type Props = {
   entry: Entry | null;
   place: { left: number; top: number; wide: boolean };
   muted: boolean;
+  dark: boolean;
   playing: Playing;
   koreanVoice: boolean | null; // null = not known yet
   announce: string;
   pairs: Entry[];
   onToggleSound: () => void;
+  onToggleDark: () => void;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -36,6 +38,40 @@ function Speaker({ active }: { active: boolean }) {
   );
 }
 
+// Sound on/off and light/dark as small icons, bottom right.
+function SoundIcon({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor" stroke="none" />
+      {on ? (
+        <>
+          <path d="M15.5 9c1.2 1.2 1.2 4.8 0 6" />
+          <path d="M18.5 6.5c2.6 2.6 2.6 8.4 0 11" />
+        </>
+      ) : (
+        <path d="M16 9l6 6M22 9l-6 6" />
+      )}
+    </svg>
+  );
+}
+
+function ThemeIcon({ dark }: { dark: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      {dark ? (
+        <>
+          <circle cx="12" cy="12" r="4.5" fill="currentColor" stroke="none" />
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+            <path key={a} d="M12 2.5v2.5" transform={`rotate(${a} 12 12)`} />
+          ))}
+        </>
+      ) : (
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor" stroke="none" />
+      )}
+    </svg>
+  );
+}
+
 export function Overlay(p: Props) {
   const e = p.entry;
   const isPlaying = (lang: Lang) => !!e && p.playing?.id === e.id && p.playing.lang === lang;
@@ -47,21 +83,20 @@ export function Overlay(p: Props) {
 
   return (
     <>
-      <header className={styles.title}>
-        <i className={styles.bar} />
-        <span>PHONETIC ECHO</span>
-        <span>臺灣台語 ↔ 한국어</span>
-      </header>
-
       <p className={`${styles.intro} ${p.started ? styles.faded : ""}`}>
         <span lang="ko">단어를 끌어 짝을 찾고, 왼쪽 바퀴를 당기거나 세게 튕기거나 눌러 보세요.</span>
         <span lang="zh-Hant">拖動詞語尋找配對；拉動、用力甩或點擊左邊的輪盤。</span>
         <span lang="en">Drag words to their pairs; pull, fling or click the wheel.</span>
       </p>
 
-      <button className={styles.sound} onClick={p.onToggleSound} aria-pressed={!p.muted}>
-        {p.muted ? "○ sound off · 소리 끔 · 靜音" : "● sound on · 소리 켬 · 聲音"}
-      </button>
+      <div className={styles.toggles}>
+        <button onClick={p.onToggleDark} aria-label={p.dark ? "light mode · 淺色 · 라이트 모드" : "dark mode · 深色 · 다크 모드"} title={p.dark ? "淺色 · 라이트" : "深色 · 다크"}>
+          <ThemeIcon dark={p.dark} />
+        </button>
+        <button onClick={p.onToggleSound} aria-pressed={!p.muted} aria-label={p.muted ? "sound off · 靜音 · 소리 끔" : "sound on · 聲音 · 소리 켬"} title={p.muted ? "靜音 · 소리 끔" : "聲音 · 소리 켬"}>
+          <SoundIcon on={!p.muted} />
+        </button>
+      </div>
 
       <p className={styles.live} aria-live="polite">
         {p.announce}
@@ -74,7 +109,7 @@ export function Overlay(p: Props) {
           style={p.place.wide ? { left: p.place.left, top: p.place.top } : { top: p.place.top }}
         >
           <p className={styles.status}>
-            ● 辭典對應 · 사전 대응 · dictionary matched — {e.category}
+            {e.status === "false_friend" ? "≠ 偽友 · 가짜 친구 · false friend" : `● 辭典對應 · 사전 대응 · dictionary matched — ${e.category}`}
           </p>
           <p className={styles.hanja} lang="zh-Hant">
             {e.hanja}
@@ -100,10 +135,26 @@ export function Overlay(p: Props) {
           </div>
           {p.muted && <p className={styles.small}>○ sound off · 소리 끔 · 靜音</p>}
 
-          <p className={styles.meaning}>{e.korean.english}</p>
-          <p className={styles.small} lang="ko">
-            「{e.korean.definition}」 — 한국어기초사전
-          </p>
+          {e.status === "false_friend" ? (
+            <div className={styles.trap}>
+              <p>同樣的漢字，不同的意思 · 같은 한자, 다른 뜻</p>
+              <p lang="zh-Hant">台 {e.hanja}：{e.taiwanese.definition || `與華語「${e.hanja}」同義`}</p>
+              <p lang="ko">
+                한 {e.korean.hangul}：{e.korean.definition} ({e.korean.english})
+              </p>
+              <p>韓語辭典的中文翻譯 · 사전의 중국어 번역：「{e.korean.chinese}」</p>
+            </div>
+          ) : (
+            <>
+              <p className={styles.meaning}>{e.korean.english}</p>
+              <p className={styles.small} lang="zh-Hant">
+                台語：{e.taiwanese.definition || `臺華共同詞，與華語「${e.hanja}」同義`} — 教育部辭典
+              </p>
+              <p className={styles.small} lang="ko">
+                「{e.korean.definition}」 — 한국어기초사전
+              </p>
+            </>
+          )}
           {e.note && (
             <>
               <p className={styles.soundNote} lang="ko">
