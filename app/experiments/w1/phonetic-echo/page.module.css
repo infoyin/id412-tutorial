@@ -452,26 +452,29 @@
   padding-bottom: 12px;
 }
 
-.info {
+/* Three text columns; a rule only between sections inside a column, never on top of one. */
+.infoCols {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 40px;
-  min-height: 100%;
-}
-
-.infoText {
-  columns: 3 200px;
-  column-gap: 34px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
 }
 
 .info section {
-  break-inside: avoid;
   padding: 9px 0 10px;
+}
+
+.infoCol section + section {
   border-top: 1px solid currentColor;
 }
 
-.info .lead {
-  border-top: none;
+/* The letter charts, side by side under the text. */
+.infoCharts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 36px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid currentColor;
 }
 
 .info .lead p {
@@ -568,9 +571,8 @@
   font-size: 10.5px;
 }
 
-/* The letter strip */
-.infoStrip h3 {
-  margin: 6px 0 3px;
+.infoCharts h3 {
+  margin: 0 0 6px;
 }
 
 /* INDEX content: rows like a printed list */
@@ -787,9 +789,9 @@
 
 .letters {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 3px;
-  margin: 3px 0 5px;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 4px;
+  margin: 4px 0 8px;
 }
 
 .letters button {
@@ -797,7 +799,7 @@
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  padding: 3px 1px 2px;
+  padding: 5px 1px 4px;
   border: 1px solid currentColor;
   background: none;
   font-weight: 700;
@@ -805,12 +807,12 @@
 }
 
 .letters b {
-  font-size: 15px;
+  font-size: 19px;
   line-height: 1.1;
 }
 
 .letters small {
-  font-size: 8.5px;
+  font-size: 9.5px;
   opacity: 0.7;
   white-space: nowrap;
 }
@@ -834,6 +836,7 @@
 
 /* As wide as the three tabs together: its right edge lines up with INDEX. */
 .tabTitle .tabBody {
+  padding: 22px 24px 24px; /* even top and bottom */
   width: min(calc(var(--title-w) + 2 * var(--tab-w)), 100vw);
   height: auto;
   max-height: calc(100vh - var(--tab-h));
@@ -841,7 +844,7 @@
 }
 
 .about {
-  padding: 10px 4px 8px;
+  padding: 0;
 }
 
 .about p {
@@ -860,8 +863,8 @@
   display: grid;
   grid-template-columns: 96px 1fr;
   gap: 4px 12px;
-  margin: 16px 0 0;
-  padding-top: 12px;
+  margin: 22px 0 0;
+  padding-top: 18px;
   border-top: 1.5px solid currentColor;
   font-size: 12px;
   line-height: 1.5;
@@ -946,12 +949,8 @@
 
 /* Smaller screens: INFO goes back to the compact spacing so it still fits without scrolling. */
 @media (max-width: 1360px), (max-height: 760px) {
-  .info {
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 26px;
-  }
-  .infoText {
-    column-gap: 24px;
+  .infoCols {
+    gap: 24px;
   }
   .info section {
     padding: 7px 0;
@@ -963,5 +962,19 @@
   }
   .info .lead p {
     font-size: 12px;
+  }
+  .infoCharts {
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+  .letters {
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 3px;
+  }
+  .letters b {
+    font-size: 16px;
+  }
+  .letters button {
+    padding: 3px 1px 2px;
   }
 }
