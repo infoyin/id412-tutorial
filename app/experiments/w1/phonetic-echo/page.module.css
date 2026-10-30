@@ -1523,3 +1523,46 @@
     display: none;
   }
 }
+
+/* Listen mode: a band under the menu row, centred on the field. */
+.listenBanner {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 7px 14px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: appear 0.4s ease both;
+}
+
+.listenBanner b {
+  margin-right: 10px;
+  padding: 2px 6px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Autoplay: a quiet label at the bottom. */
+.autoLabel {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.55;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: autoBlink 2.4s ease-in-out infinite;
+}
+
+@keyframes autoBlink {
+  50% { opacity: 0.25; }
+}

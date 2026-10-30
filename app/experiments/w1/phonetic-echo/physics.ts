@@ -36,6 +36,7 @@ export type Block = {
   lag: number; // how quickly this block feels a change in gravity
   feel: number; // gravity this block currently feels
   hover: number;
+  flash: number; // 0…1, a brief ring (listen mode: right answer, or a hint)
   age: number; // seconds since it entered or started leaving
   entering: boolean; // still flying in from off screen
   alpha: number;
@@ -118,7 +119,7 @@ export class World {
       phase: r() * Math.PI * 2,
       drift: r() * Math.PI * 2,
       lag: 1.5 + r() * 2.5,
-      feel: 0, hover: 0, age: 0,
+      feel: 0, hover: 0, flash: 0, age: 0,
       entering: false,
       alpha: 1,
     };
@@ -406,6 +407,7 @@ export class World {
         }
       }
       b.hover = smooth(b.hover, hover, 6, dt);
+      b.flash = Math.max(0, b.flash - dt * 0.8);
     }
 
     // Partners: approach, resonance, docking, solidity.

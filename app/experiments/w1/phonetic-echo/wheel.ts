@@ -33,6 +33,9 @@ export class Wheel {
   selected = 0;
   count = 1;
   hovered = false; // pointer over the wheel: it grows a little
+  listening = false; // listen mode: an ear in the hub (set by the page)
+  listenPulse = 0; // 0…1 while a word is being played, for the sound rings
+  private longFired = false;
   private hover = 0;
   private pullTarget = 0;
   private dragging = false;
@@ -138,10 +141,22 @@ export class Wheel {
     return { speed: Math.hypot(b.x - a.x, b.y - a.y) / dt, dir: Math.sign(b.y - a.y) || 1 };
   }
 
+  // A long press (held still for 0.65 s, wheel closed): true once, then the release is ignored.
+  longPress() {
+    if (!this.dragging || this.longFired || this.isOpen || this.moved > 6 || performance.now() - this.start.t < 650) return false;
+    this.longFired = true;
+    this.pullTarget = 0;
+    return true;
+  }
+
   up(x: number, y: number, w: number, h: number): WheelAction {
     if (!this.dragging) return null;
     this.dragging = false;
     this.pullTarget = 0;
+    if (this.longFired) {
+      this.longFired = false;
+      return null;
+    }
     const isClick = this.moved < 6 && performance.now() - this.start.t < 500;
     if (isClick) {
       if (!this.isOpen) return { type: "open" };
@@ -329,11 +344,40 @@ export class Wheel {
       ctx.fillText("×", 0, -r * 0.045);
       ctx.font = font.replace("400", "700").replace("SIZE", String(Math.round(Math.max(r * 0.05, 11))));
       ctx.fillText("Back", 0, r * 0.065);
+    } else if (this.listening) {
+      // Listen mode: an ear in the hub, with rings while the word plays.
+      const s = (r * 0.2) / 24;
+      ctx.save();
+      ctx.translate(-12 * s, -13 * s);
+      ctx.scale(s, s);
+      ctx.strokeStyle = inkIn;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = "round";
+      ctx.stroke(new Path2D("M9 9.5a4 4 0 0 1 8 0c0 2.4-1.7 3.2-2.6 4.6-.7 1.1-.7 2.6-2 3.4a2.3 2.3 0 0 1-3.4-1.6M11.6 9.5a1.4 1.4 0 0 1 2.8 0c0 .9-.7 1.3-1.2 1.9"));
+      ctx.restore();
+      for (let k = 0; k < 2; k++) {
+        const a = this.listenPulse * (0.5 + k * 0.5);
+        if (a <= 0.01) continue;
+        ctx.globalAlpha = a;
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = inkIn;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * (0.25 + k * 0.05), -0.6, 0.6);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      ctx.textAlign = "left";
+      ctx.font = font.replace("400", "700").replace("SIZE", String(Math.round(Math.max(r * 0.05, 11))));
+      ctx.fillText("聽 · 듣기 · Listen", -r * 0.1, -r * 0.34);
+      ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.04, 10))));
+      ctx.fillText("點轉盤重播 · 다시 듣기", -r * 0.1, r * 0.3);
+      ctx.fillText("長按離開 · 길게 눌러 나가기", -r * 0.1, r * 0.36);
     } else {
       ctx.textAlign = "left";
       ctx.fillText("↓ 重力 · 중력", -r * 0.1, -r * 0.34);
       ctx.fillText("⇣⇣ 換詞 · 새 단어", -r * 0.1, -r * 0.27);
       ctx.fillText("○ 對照 · 비교", -r * 0.1, r * 0.3);
+      ctx.fillText("◎ 長按 聽 · 길게 듣기", -r * 0.1, r * 0.37);
     }
     ctx.fillStyle = theme.ink;
     ctx.beginPath();

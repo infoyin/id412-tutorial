@@ -413,6 +413,20 @@ export function drawField(
       ctx.globalAlpha = alpha;
     }
 
+    // Listen mode: a double ring around the right block (or a hint).
+    if (b.flash > 0) {
+      ctx.save();
+      ctx.globalAlpha = alpha * Math.min(1, b.flash * 1.5);
+      ctx.strokeStyle = theme.ink;
+      ctx.lineWidth = 2;
+      plate(ctx, b, unit, 6 + (1 - b.flash) * 10);
+      ctx.stroke();
+      plate(ctx, b, unit, 12 + (1 - b.flash) * 16);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // The plate: white → solid black as the pair solidifies; hatched and dashed once cracked.
     plate(ctx, b, unit);
     if (cracked) fillCracked(ctx, b, time);

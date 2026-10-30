@@ -29,7 +29,7 @@ import { Particles } from "./particles";
 import { makePoster } from "./poster";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
-import { World, type Pointer } from "./physics";
+import { World, type Block, type Pointer } from "./physics";
 import { pairCount, SIZE, TUNING } from "./settings";
 import { setDark } from "./theme";
 import { Wheel } from "./wheel";
@@ -51,6 +51,8 @@ export default function PhoneticEcho() {
   const styleRef = useRef<(id: string) => void>(() => {});
   const [fontStyle, setFontStyle] = useState(FONT_STYLES[0].id);
   const [grid, setGrid] = useState(false);
+  const [listening, setListening] = useState(false); // listen mode (long-press the wheel)
+  const [autoplay, setAutoplay] = useState(false); // playing itself after a while without input
   const snapRef = useRef<() => string | null>(() => null);
   const [poster, setPoster] = useState<string | null>(null); // the last snapshot, as a PNG
   const [flash, setFlash] = useState(0);
@@ -70,8 +72,12 @@ export default function PhoneticEcho() {
     setGrid(on);
   };
   // Keyboard: F cycles the typeface, G toggles the grid (not while typing in a field).
-  const keysRef = useRef({ chooseFont, toggleGrid, fontStyle, takePoster });
-  keysRef.current = { chooseFont, toggleGrid, fontStyle, takePoster };
+  const toggle3D = () => {
+    threeDRef.current = !threeDRef.current;
+    setThreeD(threeDRef.current);
+  };
+  const keysRef = useRef({ chooseFont, toggleGrid, fontStyle, takePoster, toggle3D });
+  keysRef.current = { chooseFont, toggleGrid, fontStyle, takePoster, toggle3D };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea")) return;
@@ -304,6 +310,10 @@ export default function PhoneticEcho() {
         target = "wheel";
       } else if (wheel.isOpen) {
         openWheel(false); // clicking the empty field goes back
+      } else if (listen.on) {
+        // Listen mode: a click is an answer, not a grab.
+        const b = world.blockAt(e.clientX, e.clientY);
+        if (b) answer(b);
       } else if (world.grab(e.clientX, e.clientY)) {
         target = "block";
         press = { x: e.clientX, y: e.clientY, t: performance.now() };
@@ -314,7 +324,11 @@ export default function PhoneticEcho() {
     const onUp = (e: PointerEvent) => {
       if (target === "wheel") {
         const action = wheel.up(e.clientX, e.clientY, innerWidth, innerHeight);
-        if (action?.type === "open") openWheel(true);
+        // In listen mode a click on the wheel plays the word again.
+        if (action?.type === "open") {
+          if (listen.on) playTarget();
+          else openWheel(true);
+        }
         if (action?.type === "close") openWheel(false);
         if (action?.type === "select") {
           wheel.select(action.index);
@@ -338,6 +352,7 @@ export default function PhoneticEcho() {
       wheel.hovered = false;
     };
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && listen.on) setListen(false);
       if (!wheel.isOpen) return;
       if (e.key === "Escape") openWheel(false);
       if (e.key === "ArrowDown" || e.key === "ArrowRight") step(1);
@@ -349,6 +364,90 @@ export default function PhoneticEcho() {
     canvas.addEventListener("pointercancel", onUp);
     canvas.addEventListener("pointerleave", onLeave);
     window.addEventListener("keydown", onKey);
+
+    // ---- Listen mode: long-press the wheel. A word is played (Taiwanese or Korean); click the
+    // block you heard. Right: a ring, the portal sound, both readings, then the next word.
+    // Wrong: the block shakes and the word plays again; after two misses the answer glows.
+    const listen = { on: false, target: null as Block | null, misses: 0, timer: 0 };
+    const playTarget = () => listen.target && playOne(listen.target.pair.entry, listen.target.lang);
+    const nextRound = () => {
+      const pool = world.blocks.filter((b) => !b.pair.leaving && !b.entering && b !== listen.target);
+      listen.target = pool[Math.floor(Math.random() * pool.length)] ?? null;
+      listen.misses = 0;
+      playTarget();
+    };
+    const setListen = (on: boolean) => {
+      listen.on = on;
+      wheel.listening = on;
+      setListening(on);
+      clearTimeout(listen.timer);
+      if (on) {
+        world.release();
+        listen.target = null;
+        listen.timer = window.setTimeout(nextRound, 400);
+      } else {
+        listen.target = null;
+        stop();
+      }
+    };
+    const answer = (b: Block) => {
+      if (!listen.target) return;
+      if (b === listen.target) {
+        b.flash = 1;
+        particles.burst(b.x, b.y);
+        portal();
+        const entry = b.pair.entry;
+        listen.target = null;
+        listen.timer = window.setTimeout(() => {
+          playPair(entry);
+          listen.timer = window.setTimeout(() => listen.on && nextRound(), 3800);
+        }, 650);
+      } else {
+        b.spin += (Math.random() < 0.5 ? -1 : 1) * 7;
+        b.vx += (Math.random() - 0.5) * 300;
+        crackSound();
+        listen.misses++;
+        listen.timer = window.setTimeout(playTarget, 600);
+      }
+    };
+
+    // ---- Autoplay: after a while with no input the piece plays itself (for an exhibition
+    // screen): pairs connect, the wheel spins, the grid and 3D come and go, a fling now and then.
+    // Any input stops it and puts grid / 3D back as they were.
+    const auto = { on: false, at: 0, step: 0, grid: false, threeD: false };
+    const MOVES = ["pair", "turn", "pair", "grid", "pair", "grid", "3d", "pair", "fling", "3d"];
+    let lastInput = performance.now();
+    const stopAuto = () => {
+      if (!auto.on) return;
+      auto.on = false;
+      if (auto.grid) keysRef.current.toggleGrid();
+      if (auto.threeD) keysRef.current.toggle3D();
+      auto.grid = auto.threeD = false;
+      setAutoplay(false);
+    };
+    const onInput = () => {
+      lastInput = performance.now();
+      stopAuto();
+    };
+    const autoMove = () => {
+      const move = MOVES[auto.step++ % MOVES.length];
+      if (move === "pair") {
+        const open = world.current().filter((p) => !p.falseFriend && !p.docked && p.cracked < 0);
+        const pair = open[Math.floor(Math.random() * open.length)];
+        if (pair) world.bringTogether(pair);
+      }
+      if (move === "turn") wheel.omega += 7;
+      if (move === "grid") {
+        keysRef.current.toggleGrid();
+        auto.grid = !auto.grid;
+      }
+      if (move === "3d") {
+        keysRef.current.toggle3D();
+        auto.threeD = !auto.threeD;
+      }
+      if (move === "fling" && !world.grid) flingRef.current(0.8, 1);
+    };
+    for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.addEventListener(ev, onInput);
 
     let frame = 0;
     let last = performance.now();
@@ -363,6 +462,22 @@ export default function PhoneticEcho() {
       pointer.vx *= Math.exp(-dt * 6);
       pointer.vy *= Math.exp(-dt * 6);
       wheel.update(dt);
+      if (wheel.longPress()) setListen(!listen.on);
+      wheel.listenPulse += ((getPlaying() && listen.on ? 0.6 + 0.4 * Math.sin(now / 120) : 0) - wheel.listenPulse) * (1 - Math.exp(-dt * 10));
+      // The word being asked can leave the screen (a fling): ask another once things settle.
+      if (listen.on && listen.target?.pair.leaving) nextRound();
+      // After two misses the answer glows, gently pulsing, until it is found.
+      if (listen.on && listen.target && listen.misses >= 2) listen.target.flash = Math.max(listen.target.flash, 0.45 + 0.2 * Math.sin(now / 200));
+      // Autoplay.
+      if (!auto.on && now - lastInput > TUNING.autoplayAfter * 1000 && !listen.on && !wheel.isOpen && !document.querySelector("[data-menu] [class*=tabBody]")) {
+        auto.on = true;
+        auto.at = now;
+        setAutoplay(true);
+      }
+      if (auto.on && now - auto.at > TUNING.autoplayStep * 1000) {
+        auto.at = now;
+        autoMove();
+      }
       const g = wheel.geometry(innerWidth, innerHeight);
       world.pull = wheel.isOpen ? 0 : wheel.pull;
       world.obstacle = { x: g.x, y: g.y, r: g.r };
@@ -398,6 +513,8 @@ export default function PhoneticEcho() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", onKey);
+      for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.removeEventListener(ev, onInput);
+      clearTimeout(listen.timer);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointerup", onUp);
@@ -457,10 +574,9 @@ export default function PhoneticEcho() {
         grid={grid}
         onToggleGrid={toggleGrid}
         onSnap={takePoster}
-        onToggle3D={() => {
-          threeDRef.current = !threeDRef.current;
-          setThreeD(threeDRef.current);
-        }}
+        onToggle3D={toggle3D}
+        listening={listening}
+        autoplay={autoplay}
         onScale={(next: number) => {
           const v = Math.min(SIZE.max, Math.max(SIZE.min, Math.round(next / SIZE.step) * SIZE.step));
           setScaleState(v);

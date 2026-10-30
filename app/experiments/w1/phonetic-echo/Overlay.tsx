@@ -34,6 +34,8 @@ type Props = {
   grid: boolean;
   onToggleGrid: () => void;
   onSnap: () => void;
+  listening: boolean;
+  autoplay: boolean;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -189,6 +191,13 @@ export function Overlay(p: Props) {
       </div>
 
       <Clock />
+
+      {p.listening && (
+        <p className={styles.listenBanner} aria-live="polite">
+          <b>聽 · 듣기 · Listen</b> 點你聽到的詞 · 들은 단어를 누르세요 · Click the word you hear
+        </p>
+      )}
+      {p.autoplay && <p className={styles.autoLabel}>▶ 自動播放 · 자동 재생 · Autoplay — 移動滑鼠即可開始 · Move the mouse to play</p>}
 
       <div className={styles.toggles} data-toggles>
         {/* Poster: a 3:4 snapshot of the field (camera). */}
