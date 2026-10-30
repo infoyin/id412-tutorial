@@ -24,7 +24,12 @@ function About() {
         <dd>Mini Project · [ID412] Interactive Space</dd>
         <dt>Created by</dt>
         <dd>Yin Jie Chen · 진윤제 · 陳胤傑</dd>
-        <dd>Research Intern [at] KAIST Visual Instruments Lab</dd>
+        <dd>
+          Research Intern [at]{" "}
+          <a href="https://visual-instruments.kaist.ac.kr/" target="_blank" rel="noreferrer">
+            KAIST Visual Instruments Lab
+          </a>
+        </dd>
         <dd>Exchange Student [from] NTUST · Taiwan Tech</dd>
         <dt>Data</dt>
         <dd>教育部《臺灣台語常用詞辭典》《重編國語辭典修訂本》 · 국립국어원《한국어기초사전》 · Lingua Libre</dd>
