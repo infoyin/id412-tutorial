@@ -421,8 +421,11 @@
 }
 
 /* Leave about as much white on the right as there is on the left (one title tab). */
+/* INFO is only as tall as its content (scrolls if the screen is shorter). */
 .tabInfo .tabBody {
   width: max(640px, calc(100vw - 2 * var(--title-w)));
+  height: auto;
+  max-height: calc(100vh - var(--tab-h));
 }
 
 .tabIndex .tabBody {
@@ -591,7 +594,7 @@
 }
 
 /* Monotone fills (on the black INFO block: white is "solid") */
-.fillBlack { background: var(--paper); }
+.fillBlack { background: #8c8c88; } /* gray, so the bars don't read like the white headings */
 .fillHatch { background: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 5px); }
 .fillDots { background: radial-gradient(currentColor 0.8px, transparent 1px) 0 0 / 5px 5px; }
 .fillWhite { background: transparent; }

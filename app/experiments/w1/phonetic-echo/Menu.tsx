@@ -21,7 +21,7 @@ function About() {
       <p lang="ko">대만어와 한국어에는 같은 한자로 쓰는 말이 수백 개 있고, 천 년을 건너 지금도 서로의 소리를 닮아 있습니다. 여기서 그 말들은 끌고, 튕기고, 들을 수 있는 블록이 됩니다.</p>
       <dl>
         <dt>Project</dt>
-        <dd>Mini Project · [ID412] Interactive Space</dd>
+        <dd>Mini Project [ID412] Interactive Space</dd>
         <dt>Created by</dt>
         <dd>Yin Jie Chen · 진윤제 · 陳胤傑</dd>
         <dd>

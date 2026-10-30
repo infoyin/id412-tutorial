@@ -134,7 +134,7 @@ export function Info() {
           語言 · 언어 · Languages
         </button>
         <button role="tab" aria-selected={view === "letters"} onClick={() => setView("letters")}>
-          字母與聲調 · 글자와 성조 · Letters & tones
+          字母與聲調 · 글자와 성조 · Letters & Tones
         </button>
       </div>
 
