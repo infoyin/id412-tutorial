@@ -628,48 +628,127 @@
 
 /* INDEX content: rows like a printed list */
 
-/* Word list in columns (one block per category) + a details pane on the right. */
+/* INDEX: category tabs, then a category's rows in columns. */
 .indexLayout {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 18px;
-  align-items: start;
+  position: relative;
+}
+
+.indexTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 4px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.indexTabs button {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.indexTabs button small {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.indexTabs button[aria-selected="true"] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.indexTabs button:hover {
+  opacity: 0.8;
 }
 
 .indexColumns {
-  columns: 200px;
-  column-gap: 14px;
+  columns: 220px;
+  column-gap: 18px;
+  animation: appear 0.4s ease both;
 }
 
-.indexGroup {
+.indexColumns li {
   break-inside: avoid;
-  margin-bottom: 16px;
 }
 
-.indexHead {
-  margin: 0;
-  padding: 10px 8px 6px;
-  border: none;
-  border-bottom: 2px solid var(--ink);
-  font-size: 13px;
+/* Before a category is chosen: one tile each. */
+.indexTiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.indexTiles button {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 92px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ink);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.indexTiles b {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.indexTiles span {
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
-.index {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.indexTiles button:hover {
+  background: var(--ink);
+  color: var(--paper);
 }
 
-.indexPane {
-  position: sticky;
-  top: 0;
+/* A word: a translucent sheet over the list (like the comparison wheel), the details on it. */
+.indexSheet {
+  position: fixed;
+  top: var(--tab-h);
+  left: calc(var(--title-w) + var(--tab-w));
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 36px 24px;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--gray) 72%, transparent);
+  backdrop-filter: blur(3px);
+  animation: appear 0.3s ease both;
 }
 
-.indexHint {
-  margin: 10px 0;
-  font-size: 13px;
+.indexSheetCard {
+  position: relative;
+  width: min(460px, 100%);
+}
+
+.indexClose {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .detailNum {
@@ -822,12 +901,8 @@
     left: 0;
     width: 100vw !important;
   }
-  .indexLayout {
-    grid-template-columns: 1fr;
-  }
-  .indexPane {
-    order: -1;
-    position: static;
+  .indexSheet {
+    left: 0;
   }
 }
 
@@ -975,7 +1050,7 @@
 
 /* ---- INDEX details: a short entrance each time a word is chosen ---- */
 
-.indexPane .detail {
+.indexSheetCard .detail {
   animation: detailIn 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
@@ -993,7 +1068,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .indexPane .detail {
+  .indexSheetCard .detail {
     animation: none;
   }
 }

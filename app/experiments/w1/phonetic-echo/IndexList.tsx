@@ -4,9 +4,10 @@ import { ENTRIES, FALSE_FRIENDS, type Entry } from "./words";
 import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
 
-// INDEX: every pair as a numbered row (001. 時間 · 시간 →), grouped by category into blocks
-// that flow into columns. Click a row: its meanings, example sentences and the two
-// pronunciations appear in the pane on the right. False friends are the last block.
+// INDEX: categories first (tabs, like INFO, and tiles before one is chosen). Choosing one shows
+// its numbered rows (001. 時間 · 시간 →) in columns. Clicking a row lays a translucent sheet over
+// the list, like the comparison wheel, with the word's meanings, examples and two
+// pronunciations. Click outside it or × to go back to the list.
 
 const CATEGORIES: [string, string][] = [
   ["everyday", "日常 · 일상 · Everyday"],
@@ -23,8 +24,8 @@ const CATEGORIES: [string, string][] = [
 
 // Numbered once, in the order shown.
 const GROUPS = [
-  ...CATEGORIES.map(([key, name]) => ({ name, entries: ENTRIES.filter((e) => e.category === key).sort((a, b) => a.hanja.localeCompare(b.hanja)) })),
-  { name: "≠ 偽友 · 가짜 친구 · False friends", entries: FALSE_FRIENDS },
+  ...CATEGORIES.map(([key, name]) => ({ key, name, entries: ENTRIES.filter((e) => e.category === key).sort((a, b) => a.hanja.localeCompare(b.hanja)) })),
+  { key: "false friends", name: "≠ 偽友 · 가짜 친구 · False friends", entries: FALSE_FRIENDS },
 ];
 const NUMBER = new Map<string, number>();
 GROUPS.flatMap((g) => g.entries).forEach((e, i) => NUMBER.set(e.id, i + 1));
@@ -101,37 +102,64 @@ function Detail({ e, playing, muted, onPlay }: { e: Entry } & Props) {
 }
 
 export function IndexList(props: Props) {
+  const [group, setGroup] = useState<string | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
+  const current = GROUPS.find((g) => g.key === group);
 
   return (
     <div className={styles.indexLayout}>
-      <div className={styles.indexColumns}>
+      <div className={styles.indexTabs} role="tablist">
         {GROUPS.map((g) => (
-          <section key={g.name} className={styles.indexGroup}>
-            <h4 className={styles.indexHead}>{g.name}</h4>
-            <ul className={styles.index}>
-              {g.entries.map((e) => {
-                const on = selected?.id === e.id;
-                return (
-                  <li key={e.id}>
-                    <button className={`${styles.row} ${on ? styles.rowOn : ""}`} onClick={() => setSelected(on ? null : e)} aria-pressed={on}>
-                      <span className={styles.num}>{String(NUMBER.get(e.id)).padStart(3, "0")}.</span>
-                      <span className={styles.rowWord}>
-                        {e.hanja} {e.status === "false_friend" ? "≠" : "·"} {e.korean.hangul}
-                      </span>
-                      <span>→</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+          <button
+            key={g.key}
+            role="tab"
+            aria-selected={g.key === group}
+            onClick={() => {
+              setGroup(g.key);
+              setSelected(null);
+            }}
+          >
+            {g.name} <small>{g.entries.length}</small>
+          </button>
         ))}
       </div>
-      <aside className={styles.indexPane} aria-live="polite">
-        {/* key: a new word re-mounts the box, so its entrance animation plays again */}
-        {selected ? <Detail key={selected.id} e={selected} {...props} /> : <p className={styles.indexHint}>點一個詞 · 단어를 고르세요 · Choose a word →</p>}
-      </aside>
+
+      {current ? (
+        <ul key={current.key} className={`${styles.index} ${styles.indexColumns}`}>
+          {current.entries.map((e) => (
+            <li key={e.id}>
+              <button className={`${styles.row} ${selected?.id === e.id ? styles.rowOn : ""}`} onClick={() => setSelected(e)}>
+                <span className={styles.num}>{String(NUMBER.get(e.id)).padStart(3, "0")}.</span>
+                <span className={styles.rowWord}>
+                  {e.hanja} {e.status === "false_friend" ? "≠" : "·"} {e.korean.hangul}
+                </span>
+                <span>→</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className={styles.indexTiles}>
+          {GROUPS.map((g) => (
+            <button key={g.key} onClick={() => setGroup(g.key)}>
+              <b>{g.name}</b>
+              <span>{g.entries.length}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <div className={styles.indexSheet} onClick={() => setSelected(null)}>
+          {/* key: a new word re-mounts the box, so its entrance animation plays again */}
+          <div className={styles.indexSheetCard} onClick={(ev) => ev.stopPropagation()} aria-live="polite">
+            <button className={styles.indexClose} onClick={() => setSelected(null)} aria-label="close · 닫기 · 關閉">
+              ×
+            </button>
+            <Detail key={selected.id} e={selected} {...props} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
