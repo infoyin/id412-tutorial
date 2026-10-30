@@ -11,6 +11,7 @@ A black-and-white typographic field of Taiwanese and Korean words that share Chi
 - `physics.ts`: blocks with position, velocity, angle, spin. Weightless by default: each block drifts in its own slowly turning direction (`driftSpeed`), reflecting off edges and the wheel; wheel gravity, damping, box collisions, partner attraction only while dragging. Fling = impulse away from the wheel; old pairs fly out and fade, the next set flies in from the edges (`transitionSeconds`).
 - `wheel.ts`: drag = gravity, fling (speed over the last 100 ms, cooldown 2.5 s), click (< 6 px) = open. Open = wheel + annotation centred as one group.
 - `words.ts`: loads `vocabulary.json`; `Rotation` picks 6–10 pairs per set, mixing categories, avoiding recent ones.
+- Approaching partners are joined by a beam of light (glow band, bright core, streaks running inward); the hum, portal and crack sounds are synthesized live in `audio.ts` (original, not speech).
 - `audio.ts`: one voice at a time. Taiwanese = MOE recording. Korean = Lingua Libre recording if any, else browser `ko-KR` speech synthesis (never another language's voice). Mute stops both.
 - `draw.ts`, `Overlay.tsx`: drawing; title, instruction, sound toggle, annotation (click a word to hear it).
 - `Menu.tsx` (tabs), `Info.tsx` (history, sources, three diagrams; the ending chart -m→ㅁ, -t→ㄹ… is counted live from the 460 pairs), `IndexList.tsx` (482 rows: meanings, examples, both pronunciations).

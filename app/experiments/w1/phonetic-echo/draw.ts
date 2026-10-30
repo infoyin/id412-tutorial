@@ -110,6 +110,46 @@ export function drawField(
       ctx.stroke();
     }
     ctx.setLineDash([]);
+
+    // A beam of light between partners, growing as they close in: a soft glowing band,
+    // a thin bright core, and streaks running from both ends toward the middle.
+    const beam = clamp01((closeness - 0.2) / (TUNING.connectAt - 0.2));
+    if (beam > 0) {
+      const dx = ko.x - tw.x;
+      const dy = ko.y - tw.y;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.shadowColor = theme.ink;
+      ctx.shadowBlur = 24 * beam;
+      ctx.strokeStyle = theme.ink;
+      ctx.globalAlpha = fade * beam * 0.55;
+      ctx.lineWidth = 3 + beam * 16 * (reduced ? 1 : 0.85 + 0.15 * Math.sin(time * 12));
+      ctx.beginPath();
+      ctx.moveTo(tw.x, tw.y);
+      ctx.lineTo(ko.x, ko.y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = theme.paper;
+      ctx.globalAlpha = fade * beam;
+      ctx.lineWidth = 1 + beam * 2;
+      ctx.stroke();
+      // Streaks: short bright dashes moving inward from each block.
+      const count = 3 + Math.round(beam * 4);
+      for (let k = 0; k < count; k++) {
+        const f = reduced ? k / count : (time * (0.5 + beam) + k / count) % 1;
+        for (const [sx, sy, dir] of [[tw.x, tw.y, 1], [ko.x, ko.y, -1]] as const) {
+          const a0 = (f * 0.5) * dir;
+          const a1 = Math.min(f * 0.5 + 0.04, 0.5) * dir;
+          ctx.globalAlpha = fade * beam * (1 - f);
+          ctx.lineWidth = 2 + beam * 2;
+          ctx.beginPath();
+          ctx.moveTo(sx + dx * a0, sy + dy * a0);
+          ctx.lineTo(sx + dx * a1, sy + dy * a1);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
   }
 
   const unit = fontSize * 0.5;

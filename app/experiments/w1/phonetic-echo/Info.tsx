@@ -54,7 +54,9 @@ function Bar({ parts }: { parts: { label: string; value: number }[] }) {
       <ul className={styles.legend}>
         {parts.map((p, i) => (
           <li key={p.label}>
-            <i className={FILLS[i % FILLS.length]} /> {p.label} <b>{p.value}</b>
+            <i className={FILLS[i % FILLS.length]} />
+            <span>{p.label}</span>
+            <b>{p.value}</b>
           </li>
         ))}
       </ul>

@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getPlaying, koreanVoiceStatus, onPlaying, playOne, playPair, setMuted, stop, type Lang, type Playing } from "./audio";
+import {
+  closeEffects,
+  crackSound,
+  getPlaying,
+  koreanVoiceStatus,
+  onPlaying,
+  playOne,
+  playPair,
+  portal,
+  setHum,
+  setMuted,
+  stop,
+  unlockEffects,
+  type Lang,
+  type Playing,
+} from "./audio";
 import { drawField, FONT, LATIN } from "./draw";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
@@ -104,14 +119,17 @@ export default function PhoneticEcho() {
       wheel.setCount(entries.length);
       setShown(entries);
     };
+    // A pair connects: the portal sound, then the two pronunciations.
     world.onConnect = (pair) => {
-      playPair(pair.entry);
+      portal();
+      setTimeout(() => playPair(pair.entry), 700);
       setSelectedId(pair.entry.id);
       setAnnounce(`${pair.entry.taiwanese.written} · ${pair.entry.korean.hangul}`);
     };
     // A false friend cracks: hear both (they sound alike), and say what happened.
     world.onCrack = (pair) => {
-      playPair(pair.entry);
+      crackSound();
+      setTimeout(() => playPair(pair.entry), 450);
       setAnnounce(`偽友 · 가짜 친구 · false friend: ${pair.entry.taiwanese.written} ≠ ${pair.entry.korean.hangul}`);
     };
     onPlaying(setPlayingState);
@@ -132,7 +150,7 @@ export default function PhoneticEcho() {
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.044, 18), 34));
+      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.052, 20), 40));
       world.resize(innerWidth, innerHeight);
       // Floating words stay out of the menu row (title, INFO, INDEX).
       const menu = document.querySelector("[data-menu]")?.getBoundingClientRect();
@@ -170,6 +188,7 @@ export default function PhoneticEcho() {
     const onDown = (e: PointerEvent) => {
       onMove(e);
       setStarted(true);
+      unlockEffects(); // sound effects may start only after a gesture
       if (wheel.hit(e.clientX, e.clientY, innerWidth, innerHeight)) {
         wheel.down(e.clientX, e.clientY, innerWidth, innerHeight);
         target = "wheel";
@@ -224,6 +243,7 @@ export default function PhoneticEcho() {
       world.pull = wheel.isOpen ? 0 : wheel.pull;
       world.obstacle = { x: g.x, y: g.y, r: g.r };
       world.update(dt, pointer, reduced);
+      setHum(world.activeCloseness() ** 1.5);
       drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced);
       wheel.draw(ctx, innerWidth, innerHeight, shownRef.current, `400 SIZEpx ${FONT}`);
       // Turning the open wheel changes the annotation (state only changes when the sector does).
@@ -247,6 +267,7 @@ export default function PhoneticEcho() {
       if ("speechSynthesis" in window) speechSynthesis.removeEventListener("voiceschanged", checkVoice);
       onPlaying(() => {});
       stop();
+      closeEffects();
     };
     // openWheel and step only use refs and state setters, so setting up once is safe.
   }, []);

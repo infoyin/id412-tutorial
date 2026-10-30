@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Lang, Playing } from "./audio";
 import { IndexList } from "./IndexList";
 import { Info } from "./Info";
@@ -20,26 +20,41 @@ type Props = {
 
 export function Menu(props: Props) {
   const [open, setOpen] = useState<Tab | null>(null);
+  const [closing, setClosing] = useState<Tab | null>(null); // still on screen, folding away
+  const timer = useRef(0);
+
+  // Fold the open block back (the animation runs, then it is removed), optionally opening another.
+  const switchTo = (next: Tab | null) => {
+    if (open) {
+      setClosing(open);
+      clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setClosing(null), 450);
+    }
+    setOpen(next);
+  };
+  const close = () => open && switchTo(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
+    // Re-subscribed every render, so `close` always sees the current tab.
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  });
+  useEffect(() => () => clearTimeout(timer.current), []); // on unmount only
 
   const tab = (id: Tab, title: string, sub: string, content: React.ReactNode) => (
     <div className={`${styles.tab} ${id === "info" ? styles.tabInfo : styles.tabIndex}`}>
-      <button className={styles.tabLabel} onClick={() => setOpen(open === id ? null : id)} aria-expanded={open === id}>
+      <button className={styles.tabLabel} onClick={() => switchTo(open === id ? null : id)} aria-expanded={open === id}>
         <span>{title}</span>
         <span>{sub}</span>
       </button>
-      {open === id && <div className={styles.tabBody}>{content}</div>}
+      {(open === id || closing === id) && <div className={`${styles.tabBody} ${open === id ? "" : styles.tabBodyClosing}`}>{content}</div>}
     </div>
   );
 
   return (
     <nav className={styles.menu} aria-label="PHONETIC ECHO · INFO · INDEX" data-menu>
-      {open && <div className={styles.backdrop} onClick={() => setOpen(null)} />}
+      {open && <div className={styles.backdrop} onClick={close} />}
       <div className={`${styles.tab} ${styles.tabTitle}`}>
         <div className={styles.tabLabel}>
           <span>PHONETIC ECHO</span>

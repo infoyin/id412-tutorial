@@ -259,6 +259,16 @@ export class World {
     this.held = null;
   }
 
+  // How close the pair being brought together (dragged or guided) is, 0…1. Drives the hum.
+  activeCloseness() {
+    let best = 0;
+    for (const p of this.pairs) {
+      const active = this.held === p.tw || this.held === p.ko || this.guided === p;
+      if (active && !p.docked && p.cracked < 0 && !p.leaving) best = Math.max(best, p.closeness);
+    }
+    return best;
+  }
+
   // Keyboard fallback: the Korean block glides to its Taiwanese partner.
   bringTogether(pair: Pair) {
     if (!pair.docked && !pair.leaving) this.guided = pair;

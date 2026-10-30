@@ -306,6 +306,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tabBody,
+  .tabBodyClosing,
   .speakerOn path,
   .intro,
   .note {
@@ -424,6 +426,17 @@
   to { clip-path: inset(0 0 0 0); }
 }
 
+/* Closing: fold back into the tab's corner. */
+.tabBodyClosing {
+  animation: fold 0.45s cubic-bezier(0.65, 0, 0.25, 1) both;
+  pointer-events: none;
+}
+
+@keyframes fold {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: inset(0 100% 100% 0); }
+}
+
 /* Clicking anywhere outside the open block closes it. */
 .backdrop {
   position: fixed;
@@ -495,23 +508,33 @@
   border-right: 1px solid currentColor;
 }
 
+/* Two even columns: swatch + label on the left, the number aligned right. */
 .legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin: 8px 0 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 24px;
+  margin: 10px 0 6px;
   padding: 0;
   list-style: none;
   font-size: 11px;
 }
 
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
 .legend i {
-  display: inline-block;
+  flex: none;
   width: 14px;
   height: 10px;
-  margin-right: 2px;
   border: 1px solid currentColor;
-  vertical-align: -1px;
 }
 
 /* Monotone fills (on the black INFO block: white is "solid") */
