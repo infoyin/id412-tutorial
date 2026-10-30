@@ -1,4 +1,4 @@
-# Phonetic Echo
+# 臺韓對話 · 대한 대화 (Daehan Daehwa)
 
 A black-and-white typographic field of Taiwanese and Korean words that share Chinese characters (感謝 / 감사), as outlined paper blocks. Drag a word to its partner: they attract, resonate, dock, fill black and are pronounced (Taiwanese, then Korean). The paper wheel at the left edge drives the field: drag it for gravity, fling it to scatter everything and bring new words, click it for the comparison wheel, where each word can be replayed. One or two pairs in each set are false friends (新聞 news / 신문 newspaper): they resonate like partners, then crack apart, hatched, with both meanings shown (12 s, and again on hover; also in the comparison wheel). Title, INFO and INDEX tabs at the top left: a short history with diagrams, and the full numbered word list in category columns with a details pane. Bottom right: light/dark and sound icons (`theme.ts` holds the canvas colours, CSS variables the rest).
 

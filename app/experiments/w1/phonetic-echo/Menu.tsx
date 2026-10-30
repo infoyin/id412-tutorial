@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Lang, Playing } from "./audio";
 import { IndexList } from "./IndexList";
 import { Info } from "./Info";
+import { Title } from "./Title";
 import type { Entry } from "./words";
 import styles from "./page.module.css";
 
@@ -16,9 +17,10 @@ type Tab = "about" | "info" | "index";
 function About() {
   return (
     <div className={styles.about}>
-      <p className={styles.aboutLead}>A small typographic instrument for hearing the words Taiwanese and Korean share.</p>
-      <p lang="zh-Hant">臺語和韓語有數百個詞以相同的漢字書寫，跨越千年仍彼此呼應。在這裡，它們是可以拖曳、甩動、聆聽的方塊。</p>
-      <p lang="ko">대만어와 한국어에는 같은 한자로 쓰는 말이 수백 개 있고, 천 년을 건너 지금도 서로의 소리를 닮아 있습니다. 여기서 그 말들은 끌고, 튕기고, 들을 수 있는 블록이 됩니다.</p>
+      <p className={styles.aboutLead}>臺韓對話 · 대한 대화 — Same Letters, Two Voices</p>
+      <p lang="zh-Hant">臺語和韓語有數百個詞以相同的漢字書寫，跨越千年仍彼此呼應。在這裡，它們是可以拖曳、甩動、聆聽的方塊。名字本身也是一對：臺韓對話，臺語唸 Tâi-Hân Tuì-uē，韓語唸 대한 대화。偶爾「對」會變成「佳」——佳話，一個近乎押韻的偽友。</p>
+      <p lang="ko">대만어와 한국어에는 같은 한자로 쓰는 말이 수백 개 있고, 천 년을 건너 지금도 서로의 소리를 닮아 있습니다. 여기서 그 말들은 끌고, 튕기고, 들을 수 있는 블록이 됩니다. 이름도 한 쌍입니다: 臺韓對話는 대만어로 Tâi-Hân Tuì-uē, 한국어로 대한 대화. 가끔 ‘對’가 ‘佳(가화)’로 바뀝니다.</p>
+      <p lang="en">The name is itself a pair: 臺韓對話, “a Taiwan–Korea dialogue”, read Tâi-Hân Tuì-uē in Taiwanese and Dae-han Dae-hwa in Korean. Now and then 對 (dialogue) slips into 佳 (a fine story) and cracks back.</p>
       <dl>
         <dt>Project</dt>
         <dd>Mini Project [ID412] Interactive Space</dd>
@@ -79,12 +81,14 @@ export function Menu(props: Props) {
   );
 
   return (
-    <nav className={styles.menu} aria-label="PHONETIC ECHO · INFO · INDEX" data-menu>
+    <nav className={styles.menu} aria-label="臺韓對話 · INFO · INDEX" data-menu>
       {open && <div className={styles.backdrop} onClick={close} />}
       <div className={`${styles.tab} ${styles.tabTitle}`}>
         <button className={styles.tabLabel} onClick={() => switchTo(open === "about" ? null : "about")} aria-expanded={open === "about"}>
-          <span>PHONETIC ECHO</span>
-          <span>臺語 ↔ 한국어</span>
+          <span>
+            <Title />
+          </span>
+          <span>대한 대화</span>
         </button>
         {(open === "about" || closing === "about") && (
           <div className={`${styles.tabBody} ${open === "about" ? "" : styles.tabBodyClosing}`}>

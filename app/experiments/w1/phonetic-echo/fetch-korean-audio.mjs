@@ -12,7 +12,7 @@ import path from "path";
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const OUT = path.join(HERE, "../../../../public/experiments/w1/phonetic-echo/audio/ko");
-const UA = { "User-Agent": "ID412 student project (Phonetic Echo)" };
+const UA = { "User-Agent": "ID412 student project (Daehan Daehwa)" };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function api(params) {

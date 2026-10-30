@@ -250,7 +250,7 @@ export function Overlay(p: Props) {
       )}
 
       {/* Keyboard fallback: invisible until a key moves focus here. */}
-      <nav className={styles.keys} aria-label="Phonetic Echo">
+      <nav className={styles.keys} aria-label="臺韓對話 · 대한 대화">
         <button onClick={p.onOpen}>○ 對照 · 비교 · compare</button>
         <button onClick={p.onShuffle}>⇣ 換詞 · 새 단어 · new words</button>
         {p.pairs.map((pair, i) => (

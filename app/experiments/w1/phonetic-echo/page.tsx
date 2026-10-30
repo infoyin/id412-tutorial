@@ -33,7 +33,7 @@ import { Wheel } from "./wheel";
 import { Rotation, type Entry } from "./words";
 import styles from "./page.module.css";
 
-// PHONETIC ECHO — Taiwanese and Korean words that share Chinese characters, as outlined paper
+// 臺韓對話 · 대한 대화 (Tâi-Hân Tuì-uē · Dae-han Dae-hwa) — Taiwanese and Korean words that share Chinese characters, as outlined paper
 // blocks on a white field. Drag a word to its partner: they attract, resonate, dock, fill black
 // and are pronounced. The half-hidden wheel on the left: drag = gravity, fling = scatter the
 // field and bring new words, click = the comparison wheel, where each word can be replayed.
