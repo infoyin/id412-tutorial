@@ -7,7 +7,7 @@
 export const FONTS_CSS =
   "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Noto+Sans+KR:wght@100..900" +
   "&family=Noto+Serif+TC:wght@200..900&family=Noto+Serif+KR:wght@200..900&family=LXGW+WenKai+TC:wght@300;400;700" +
-  "&family=Gowun+Batang:wght@400;700&family=Chiron+Hei+HK:wght@200..900&family=Black+Han+Sans&family=Inter:wght@100..900" +
+  "&family=Gowun+Batang:wght@400;700&family=Chiron+Hei+HK:wght@200..900&family=Gothic+A1:wght@500;600;700;800;900&family=Inter:wght@100..900" +
   "&display=swap";
 
 // Tâi-lô and romanization: Inter, falling back per character (a̍) to Helvetica / Arial.
@@ -29,7 +29,7 @@ export const FONT_STYLES: FontStyle[] = [
   { id: "sans", name: "黑體 · 고딕 · Sans", tw: `"Noto Sans TC"`, ko: `"Noto Sans KR"`, light: 250, heavy: 900, variable: true },
   { id: "serif", name: "明體 · 명조 · Serif", tw: `"Noto Serif TC"`, ko: `"Noto Serif KR"`, light: 250, heavy: 900, variable: true },
   { id: "kai", name: "楷體 · 손글씨 · Script", tw: `"LXGW WenKai TC"`, ko: `"Gowun Batang"`, light: 400, heavy: 700, variable: false },
-  { id: "display", name: "粗體 · 디스플레이 · Display", tw: `"Chiron Hei HK"`, ko: `"Black Han Sans"`, light: 500, heavy: 900, variable: true, koWeight: 400 },
+  { id: "display", name: "粗體 · 디스플레이 · Display", tw: `"Chiron Hei HK"`, ko: `"Gothic A1"`, light: 500, heavy: 900, variable: true },
 ];
 
 // The weight for how far a block has come: k = 0 floating … 1 connected and solid.

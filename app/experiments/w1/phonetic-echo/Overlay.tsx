@@ -139,18 +139,6 @@ export function Overlay(p: Props) {
             </ul>
           )}
         </div>
-        {/* Grid: floating ↔ a Swiss grid, pairs side by side. */}
-        <button
-          className={`${styles.tool} ${p.grid ? styles.toolOn : ""}`}
-          onClick={p.onToggleGrid}
-          aria-pressed={p.grid}
-          aria-label="grid · 排版 · 격자 (G)"
-          title="排版 · 격자 · Grid (G)"
-        >
-          <svg viewBox="0 0 32 32" aria-hidden className={styles.gridIcon}>
-            {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={6 + c * 7.5} y={6 + r * 7.5} width="5" height="5" rx="0.6" />))}
-          </svg>
-        </button>
         <button
           className={`${styles.compass} ${p.threeD ? styles.compassOn : ""}`}
           onClick={p.onToggle3D}
@@ -168,6 +156,18 @@ export function Overlay(p: Props) {
               <path d="M16 24.5 13.6 16 16 14.4 18.4 16Z" />
               <circle cx="16" cy="16" r="1.1" className={styles.needleNorth} />
             </g>
+          </svg>
+        </button>
+        {/* Grid: floating ↔ a Swiss grid, pairs side by side. */}
+        <button
+          className={`${styles.tool} ${p.grid ? styles.toolOn : ""}`}
+          onClick={p.onToggleGrid}
+          aria-pressed={p.grid}
+          aria-label="grid · 排版 · 격자 (G)"
+          title="排版 · 격자 · Grid (G)"
+        >
+          <svg viewBox="0 0 32 32" aria-hidden className={styles.gridIcon}>
+            {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={6 + c * 7.5} y={6 + r * 7.5} width="5" height="5" rx="0.6" />))}
           </svg>
         </button>
         <button onClick={() => p.onScale(p.scale + 0.1)} aria-label="bigger · 크게 · 放大" disabled={p.scale >= SIZE.max}>
@@ -188,17 +188,16 @@ export function Overlay(p: Props) {
       </div>
 
       <div className={styles.toggles}>
-        {/* Poster: a 3:4 snapshot of the field. Glows a little in the grid, the best moment. */}
+        {/* Poster: a 3:4 snapshot of the field (camera). Pulses in the grid, the best moment. */}
         <button
           className={p.grid ? styles.snapReady : ""}
           onClick={p.onSnap}
           aria-label="poster · 海報 · 포스터 (P)"
           title="海報 · 포스터 · Poster (P)"
         >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <path d="M5 3h10l4 4v14H5z" />
-            <path d="M15 3v4h4" />
-            <path d="M8 13h8M8 16.5h5" />
+          <svg viewBox="0 0 24 24" aria-hidden className={styles.camera}>
+            <path d="M8.2 4.5h7.6l1.4 2.2H20a1.5 1.5 0 0 1 1.5 1.5v10.3a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5V8.2A1.5 1.5 0 0 1 4 6.7h2.8z" />
+            <circle cx="12" cy="13" r="3.6" className={styles.lens} />
           </svg>
         </button>
         <button onClick={p.onToggleDark} aria-label={p.dark ? "light mode · 淺色 · 라이트 모드" : "dark mode · 深色 · 다크 모드"} title={p.dark ? "淺色 · 라이트" : "深色 · 다크"}>

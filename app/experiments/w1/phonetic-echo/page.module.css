@@ -1232,8 +1232,8 @@
 .sizeBar .compass {
   width: 36px;
   height: 36px;
-  margin-bottom: 8px;
-  padding: 2px;
+  margin-bottom: 6px;
+  padding: 5px;
   opacity: 0.75;
   transition: opacity 0.2s;
 }
@@ -1321,17 +1321,19 @@
   opacity: 1;
 }
 
+/* Aa and the compass: a 26px circle, the same visual size as the grid icon's squares. */
 .aa {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
+  margin: auto;
   border: 1px solid currentColor;
   border-radius: 50%;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
+  font-family: "Noto Sans TC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .toolOn .aa {
@@ -1472,4 +1474,16 @@
 
 @keyframes posterIn {
   from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+}
+
+/* The poster button: a solid camera; the lens is cut out in the page colour. */
+.toggles svg.camera {
+  fill: currentColor;
+  stroke: none;
+}
+
+.toggles svg.camera .lens {
+  fill: var(--paper);
+  stroke: currentColor;
+  stroke-width: 1.4;
 }
