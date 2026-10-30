@@ -305,6 +305,7 @@ export function drawField(
   reduced: boolean,
   // 3D view: amount 0…1 (animated on/off), and the point the "camera" looks from (the cursor).
   depth: { amount: number; x: number; y: number } = { amount: 0, x: 0, y: 0 },
+  under?: (fade: number) => void, // drawn on the paper, beneath everything (the particles)
 ) {
   const { width, height } = world;
   fieldWidth = width;
@@ -312,6 +313,7 @@ export function drawField(
   ctx.fillRect(0, 0, width, height);
 
   const fade = 1 - dim * 0.94; // blocks step back in comparison mode
+  under?.(fade);
 
   // Tension lines between partners (under the blocks, whose fill hides the inside part).
   for (const pair of world.pairs) {

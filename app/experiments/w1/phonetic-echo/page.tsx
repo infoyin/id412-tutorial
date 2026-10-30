@@ -25,6 +25,7 @@ import {
 } from "./audio";
 import { blockFont, drawField, FONT, LATIN, setTypeface, typeface, zhuyinColumn } from "./draw";
 import { FONT_STYLES } from "./fonts";
+import { Particles } from "./particles";
 import { makePoster } from "./poster";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
@@ -203,8 +204,10 @@ export default function PhoneticEcho() {
     // A pair connects: the portal sound, then the two pronunciations.
     // Pairs connected this session, for the poster.
     const connected = new Map<string, Entry>();
+    const particles = new Particles();
     world.onConnect = (pair) => {
       connected.set(pair.entry.id, pair.entry);
+      particles.burst((pair.tw.x + pair.ko.x) / 2, (pair.tw.y + pair.ko.y) / 2);
       portal();
       setTimeout(() => playPair(pair.entry), 700);
       setSelectedId(pair.entry.id);
@@ -228,6 +231,7 @@ export default function PhoneticEcho() {
       lastFling = now;
       world.fling(strength, dir, rotation.next(pairCount(innerWidth, innerHeight, scale)));
       flingSound(strength);
+      particles.kick(world.obstacle.x, world.obstacle.y, strength);
     };
 
     // The size bar: bigger text and blocks; fewer pairs when bigger, more when smaller again.
@@ -248,6 +252,7 @@ export default function PhoneticEcho() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       fontSize = Math.round(baseFont() * scale);
       world.resize(innerWidth, innerHeight);
+      particles.fill(innerWidth, innerHeight);
       // Floating words stay out of the menu row (title, INFO, INDEX).
       const menu = document.querySelector("[data-menu]")?.getBoundingClientRect();
       world.keepOut = { w: menu?.right ?? 0, h: menu?.bottom ?? 0 };
@@ -375,7 +380,10 @@ export default function PhoneticEcho() {
       setDrag(target === "block" ? Math.min(Math.hypot(pointer.vx, pointer.vy) / 2000, 1) : 0);
       depthAmount += ((threeDRef.current ? 1 : 0) - depthAmount) * (1 - Math.exp(-dt * 5));
       const cam = pointer.inside ? pointer : { x: innerWidth / 2, y: innerHeight / 2 };
-      drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced, { amount: depthAmount, x: cam.x, y: cam.y });
+      particles.update(dt, now / 1000, world, pointer, reduced);
+      drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced, { amount: depthAmount, x: cam.x, y: cam.y }, (fade) =>
+        particles.draw(ctx, fade, FONT),
+      );
       wheel.draw(ctx, innerWidth, innerHeight, shownRef.current, `400 SIZEpx ${FONT}`);
       // Turning the open wheel changes the annotation (state only changes when the sector does).
       if (wheel.isOpen && wheel.selected !== shownSelected) {
