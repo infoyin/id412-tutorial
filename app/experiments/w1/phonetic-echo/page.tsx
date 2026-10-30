@@ -190,7 +190,7 @@ export default function PhoneticEcho() {
       const y0 = Math.max(0, Math.min(...live.map((b) => b.y - b.h / 2)) - m);
       const x1 = Math.min(innerWidth, Math.max(...live.map((b) => b.x + b.w / 2)) + m);
       const y1 = Math.min(innerHeight, Math.max(...live.map((b) => b.y + b.h / 2)) + m);
-      return makePoster(canvas, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, canvas.width / innerWidth, [...connected.values()]);
+      return makePoster(canvas, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, canvas.width / innerWidth, world.current().map((p) => p.entry), new Set(connected.keys()));
     };
 
     // The Aa menu: a new face for every block (they flip over to it).
