@@ -25,6 +25,7 @@ import {
 } from "./audio";
 import { blockFont, drawField, FONT, LATIN, setTypeface, typeface, zhuyinColumn } from "./draw";
 import { FONT_STYLES } from "./fonts";
+import { makePoster } from "./poster";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
@@ -49,6 +50,15 @@ export default function PhoneticEcho() {
   const styleRef = useRef<(id: string) => void>(() => {});
   const [fontStyle, setFontStyle] = useState(FONT_STYLES[0].id);
   const [grid, setGrid] = useState(false);
+  const snapRef = useRef<() => string | null>(() => null);
+  const [poster, setPoster] = useState<string | null>(null); // the last snapshot, as a PNG
+  const [flash, setFlash] = useState(0);
+  const takePoster = () => {
+    const url = snapRef.current();
+    if (!url) return;
+    setFlash((n) => n + 1);
+    setPoster(url);
+  };
   const chooseFont = (id: string) => {
     setFontStyle(id);
     styleRef.current(id);
@@ -59,8 +69,8 @@ export default function PhoneticEcho() {
     setGrid(on);
   };
   // Keyboard: F cycles the typeface, G toggles the grid (not while typing in a field).
-  const keysRef = useRef({ chooseFont, toggleGrid, fontStyle });
-  keysRef.current = { chooseFont, toggleGrid, fontStyle };
+  const keysRef = useRef({ chooseFont, toggleGrid, fontStyle, takePoster });
+  keysRef.current = { chooseFont, toggleGrid, fontStyle, takePoster };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea")) return;
@@ -70,6 +80,7 @@ export default function PhoneticEcho() {
         k.chooseFont(FONT_STYLES[(i + 1) % FONT_STYLES.length].id);
       }
       if (e.key === "g" || e.key === "G") k.toggleGrid();
+      if (e.key === "p" || e.key === "P") k.takePoster();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -170,6 +181,18 @@ export default function PhoneticEcho() {
       Promise.all(loads).then(() => world.blocks.forEach((b) => world.measure(b)));
     }
 
+    // The ⧉ button: crop the canvas to the blocks (plus a margin) and lay it out as a poster.
+    snapRef.current = () => {
+      const live = world.blocks.filter((b) => !b.pair.leaving);
+      if (!live.length) return null;
+      const m = 40;
+      const x0 = Math.max(0, Math.min(...live.map((b) => b.x - b.w / 2)) - m);
+      const y0 = Math.max(0, Math.min(...live.map((b) => b.y - b.h / 2)) - m);
+      const x1 = Math.min(innerWidth, Math.max(...live.map((b) => b.x + b.w / 2)) + m);
+      const y1 = Math.min(innerHeight, Math.max(...live.map((b) => b.y + b.h / 2)) + m);
+      return makePoster(canvas, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, canvas.width / innerWidth, [...connected.values()]);
+    };
+
     // The Aa menu: a new face for every block (they flip over to it).
     styleRef.current = (id) => {
       const next = FONT_STYLES.find((f) => f.id === id);
@@ -178,7 +201,10 @@ export default function PhoneticEcho() {
       ensureFonts();
     };
     // A pair connects: the portal sound, then the two pronunciations.
+    // Pairs connected this session, for the poster.
+    const connected = new Map<string, Entry>();
     world.onConnect = (pair) => {
+      connected.set(pair.entry.id, pair.entry);
       portal();
       setTimeout(() => playPair(pair.entry), 700);
       setSelectedId(pair.entry.id);
@@ -380,6 +406,21 @@ export default function PhoneticEcho() {
 
   return (
     <main className={`${styles.root} ${dark ? styles.dark : ""}`}>
+      {flash > 0 && <div key={flash} className={styles.shutter} />}
+      {poster && (
+        <div className={styles.posterCard}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a data URL just drawn */}
+          <img src={poster} alt="臺韓對話 poster" />
+          <p>
+            <a href={poster} download={`臺韓對話-${new Date().toLocaleDateString("sv")}.png`}>
+              ↓ 下載 · 저장 · Download
+            </a>
+            <button onClick={() => setPoster(null)} aria-label="close · 關閉 · 닫기">
+              ×
+            </button>
+          </p>
+        </div>
+      )}
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden />
       <Menu playing={playing} muted={muted} onPlay={(e: Entry, lang: Lang) => playOne(e, lang)} />
       <Overlay
@@ -401,6 +442,7 @@ export default function PhoneticEcho() {
         onFontStyle={chooseFont}
         grid={grid}
         onToggleGrid={toggleGrid}
+        onSnap={takePoster}
         onToggle3D={() => {
           threeDRef.current = !threeDRef.current;
           setThreeD(threeDRef.current);

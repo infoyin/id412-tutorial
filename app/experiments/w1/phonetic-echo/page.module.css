@@ -1403,3 +1403,73 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+/* ---- Poster snapshot ---- */
+
+.snapReady {
+  opacity: 1 !important;
+  animation: snapGlow 1.6s ease-in-out infinite;
+}
+
+@keyframes snapGlow {
+  50% { transform: scale(1.12); }
+}
+
+.shutter {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--paper);
+  pointer-events: none;
+  animation: shutter 0.45s ease-out both;
+}
+
+@keyframes shutter {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
+
+.posterCard {
+  position: absolute;
+  top: 64px;
+  right: 18px;
+  z-index: 5;
+  width: 210px;
+  padding: 8px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  animation: posterIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.posterCard img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--ink);
+}
+
+.posterCard p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 2px 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.posterCard a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.posterCard button {
+  border: none;
+  background: none;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes posterIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+}

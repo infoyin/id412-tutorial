@@ -32,6 +32,7 @@ type Props = {
   onFontStyle: (id: string) => void;
   grid: boolean;
   onToggleGrid: () => void;
+  onSnap: () => void;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -187,6 +188,19 @@ export function Overlay(p: Props) {
       </div>
 
       <div className={styles.toggles}>
+        {/* Poster: a 3:4 snapshot of the field. Glows a little in the grid, the best moment. */}
+        <button
+          className={p.grid ? styles.snapReady : ""}
+          onClick={p.onSnap}
+          aria-label="poster · 海報 · 포스터 (P)"
+          title="海報 · 포스터 · Poster (P)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M5 3h10l4 4v14H5z" />
+            <path d="M15 3v4h4" />
+            <path d="M8 13h8M8 16.5h5" />
+          </svg>
+        </button>
         <button onClick={p.onToggleDark} aria-label={p.dark ? "light mode · 淺色 · 라이트 모드" : "dark mode · 深色 · 다크 모드"} title={p.dark ? "淺色 · 라이트" : "深色 · 다크"}>
           <ThemeIcon dark={p.dark} />
         </button>
