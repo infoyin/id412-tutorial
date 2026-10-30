@@ -90,11 +90,13 @@ function Letters({ letters, language, playing, onPlay }: { letters: Letter[]; la
   );
 }
 
-// The five tones, one card each: mark, name, example, how the pitch moves. Click to hear.
+// The four tones, one card each: mark, name, example, how the pitch moves. Then the neutral
+// tone on its own, since it is not a fifth tone. Click any card to hear it.
 function Tones({ playing, onPlay }: { playing: string; onPlay: (l: Letter) => void }) {
+  const neutral = TONES[4];
   return (
     <div className={styles.tones}>
-      {TONES.map((t: Tone) => (
+      {TONES.slice(0, 4).map((t: Tone) => (
         <button
           key={t.letter}
           className={playing === t.letter ? styles.letterOn : ""}
@@ -108,12 +110,27 @@ function Tones({ playing, onPlay }: { playing: string; onPlay: (l: Letter) => vo
           <span>
             {t.name} · {t.label}
           </span>
-          <small>
-            {t.zh} · {t.ko}
-          </small>
+          <small lang="zh-Hant">{t.zh}</small>
+          <small lang="ko">{t.ko}</small>
           <small lang="en">{t.en}</small>
         </button>
       ))}
+      <button
+        className={`${styles.toneNeutral} ${playing === neutral.letter ? styles.letterOn : ""}`}
+        onClick={() => {
+          onPlay(neutral);
+          speakLetter(neutral.speak, "zh");
+        }}
+        aria-label={`${neutral.name} ${neutral.label}`}
+      >
+        <b>{neutral.letter}</b>
+        <span>
+          +1 {neutral.name} · {neutral.label}
+        </span>
+        <small lang="zh-Hant">不算第五聲：唸得又輕又短，音高隨前一個字。˙ 寫在注音上方。</small>
+        <small lang="ko">다섯 번째 성조가 아니라, 가볍고 짧게 앞 글자를 따라 읽습니다. ˙는 위에 씁니다.</small>
+        <small lang="en">Not a fifth tone: light and short, its pitch follows the syllable before. ˙ goes on top.</small>
+      </button>
     </div>
   );
 }
@@ -240,7 +257,7 @@ export function Info() {
             <p className={styles.cite}>누르면 들려요 · 點擊發音 · Click to hear · ㄱ → 가 · ㅏ → 아 · 음성 합성</p>
           </div>
           <div className={styles.tonesRow}>
-            <h3 className={styles.tonesTitle}>● 聲調 · 성조 · Tones — 同一個 ma，五種音高 · One Ma, Five Pitches</h3>
+            <h3 className={styles.tonesTitle}>● 注音聲調 (4+1) · 주음 성조 · Zhuyin Tones — 同一個 ma，四個聲調加輕聲 · One Ma, Four Tones + Neutral</h3>
             <Tones playing={playing} onPlay={play} />
           </div>
         </div>
