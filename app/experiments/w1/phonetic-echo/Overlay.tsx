@@ -116,8 +116,8 @@ export function Overlay(p: Props) {
           </p>
 
           <div className={styles.columns}>
-            <button className={`${styles.word} ${isPlaying("tw") ? styles.wordOn : ""}`} onClick={() => p.onPlay(e, "tw")} disabled={p.muted} aria-label={`台語 ${e.taiwanese.written} ${e.taiwanese.tailo} — play`}>
-              <small>台語 · 대만어 · Taiwanese</small>
+            <button className={`${styles.word} ${isPlaying("tw") ? styles.wordOn : ""}`} onClick={() => p.onPlay(e, "tw")} disabled={p.muted} aria-label={`臺語 ${e.taiwanese.written} ${e.taiwanese.tailo} — play`}>
+              <small>臺語 · 대만어 · Taiwanese</small>
               <strong lang="zh-Hant">
                 {e.taiwanese.written} <Speaker active={isPlaying("tw")} />
               </strong>
@@ -138,7 +138,7 @@ export function Overlay(p: Props) {
           {e.status === "false_friend" ? (
             <div className={styles.trap}>
               <p>同樣的漢字，不同的意思 · 같은 한자, 다른 뜻</p>
-              <p lang="zh-Hant">台 {e.hanja}：{e.taiwanese.definition || `與華語「${e.hanja}」同義`}</p>
+              <p lang="zh-Hant">臺 {e.hanja}：{e.taiwanese.definition || `與華語「${e.hanja}」同義`}</p>
               <p lang="ko">
                 한 {e.korean.hangul}：{e.korean.definition} ({e.korean.english})
               </p>
@@ -148,7 +148,7 @@ export function Overlay(p: Props) {
             <>
               <p className={styles.meaning}>{e.korean.english}</p>
               <p className={styles.small} lang="zh-Hant">
-                台語：{e.taiwanese.definition || `臺華共同詞，與華語「${e.hanja}」同義`} — 教育部辭典
+                臺語：{e.taiwanese.definition || `臺華共同詞，與華語「${e.hanja}」同義`} — 教育部辭典
               </p>
               <p className={styles.small} lang="ko">
                 「{e.korean.definition}」 — 한국어기초사전
@@ -171,7 +171,7 @@ export function Overlay(p: Props) {
 
           <p className={styles.credits}>
             <a href={e.taiwanese.url} target="_blank" rel="noreferrer">
-              教育部台語辭典 ↗
+              教育部辭典 ↗
             </a>{" "}
             CC BY-ND 3.0 TW ·{" "}
             <a href={e.korean.url} target="_blank" rel="noreferrer">

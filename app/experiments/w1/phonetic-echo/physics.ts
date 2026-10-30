@@ -16,7 +16,8 @@ export type Block = {
   pair: Pair;
   lang: "tw" | "ko";
   text: string;
-  sub: string; // Tâi-lô on Taiwanese blocks
+  sub: string; // Tâi-lô on Taiwanese blocks, romanization on Korean ones
+  zhuyin: string[] | null; // Mandarin 注音 beside each character (Taiwanese blocks)
   x: number;
   y: number;
   vx: number;
@@ -100,7 +101,8 @@ export class World {
       pair,
       lang,
       text: lang === "tw" ? e.taiwanese.written : e.korean.hangul,
-      sub: lang === "tw" ? e.taiwanese.tailo : "",
+      sub: lang === "tw" ? e.taiwanese.tailo : e.korean.romanization,
+      zhuyin: lang === "tw" ? e.taiwanese.zhuyin : null,
       x: 0, y: 0, vx: 0, vy: 0, angle: 0, spin: 0,
       rest: (r() - 0.5) * 0.16,
       w: 100, h: 60,

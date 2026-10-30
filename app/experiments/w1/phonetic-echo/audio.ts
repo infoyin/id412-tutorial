@@ -21,6 +21,7 @@ let token = 0; // bumps on every stop, so late callbacks from old playback do no
 let playing: Playing = null;
 let listener: (p: Playing) => void = () => {};
 let koreanVoice: SpeechSynthesisVoice | null = null;
+let chineseVoice: SpeechSynthesisVoice | null = null; // for the 注音 chart (zh-TW preferred)
 
 const hasSpeech = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
@@ -29,6 +30,7 @@ function findVoice() {
   if (!hasSpeech()) return;
   const voices = speechSynthesis.getVoices();
   koreanVoice = voices.find((v) => v.lang === "ko-KR") ?? voices.find((v) => v.lang.toLowerCase().startsWith("ko")) ?? null;
+  chineseVoice = voices.find((v) => v.lang === "zh-TW") ?? voices.find((v) => v.lang.toLowerCase().startsWith("zh")) ?? null;
 }
 if (hasSpeech()) {
   findVoice();
@@ -219,6 +221,21 @@ export function playOne(entry: Entry, lang: Lang, then?: () => void) {
   if (lang === "tw") playFile(entry.taiwanese.audio, mine, done);
   else if (entry.korean.audio) playFile(entry.korean.audio.file, mine, done);
   else speakKorean(entry.korean.hangul, mine, done);
+}
+
+// Read a single letter or example syllable from the INFO charts: "ko" (한글) or "zh" (注音,
+// read through an example character). Silent if the browser has no voice for that language.
+export function speakLetter(text: string, language: "ko" | "zh") {
+  stop();
+  if (muted || !hasSpeech()) return;
+  findVoice();
+  const voice = language === "ko" ? koreanVoice : chineseVoice;
+  if (!voice) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = voice;
+  u.lang = voice.lang;
+  u.rate = 0.8;
+  speechSynthesis.speak(u);
 }
 
 // Taiwanese, then Korean.

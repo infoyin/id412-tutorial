@@ -1,5 +1,6 @@
 import falseFriends from "./false-friends.json";
 import koreanAudio from "./korean-audio.json";
+import { romanize } from "./romanize";
 import vocabulary from "./vocabulary.json";
 
 // The vocabulary: Taiwanese ↔ Korean words written with the same Chinese characters.
@@ -33,11 +34,13 @@ export type Entry = {
     audio: string;
     url: string;
     definition: string; // MOE, verbatim ("" for 臺華共同詞: same as Mandarin)
+    zhuyin: string[] | null; // Mandarin 注音 per character (MOE revised Mandarin dictionary)
     example: { han: string; tailo: string; zh: string } | null; // MOE 例句
   };
   korean: {
     hangul: string;
     pronunciation: string; // krdict standard pronunciation, "ː" = long vowel
+    romanization: string; // Revised Romanization, from the pronunciation (romanize.ts)
     definition: string; // krdict, verbatim
     english: string; // krdict's English equivalent
     chinese: string; // krdict's Chinese equivalent (simplified)
@@ -92,11 +95,13 @@ const toEntry = (p: Raw): Entry => ({
     audio: p.taiwanese.audio,
     url: p.taiwanese.url,
     definition: p.taiwanese.definition,
+    zhuyin: (p.taiwanese as { zhuyin?: string[] | null }).zhuyin ?? null,
     example: p.taiwanese.example,
   },
   korean: {
     hangul: p.korean.hangul,
     pronunciation: p.korean.pronunciation,
+    romanization: romanize(p.korean.hangul, p.korean.pronunciation),
     definition: p.korean.definition,
     english: p.korean.english,
     chinese: p.korean.chinese,

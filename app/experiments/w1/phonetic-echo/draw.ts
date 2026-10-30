@@ -33,6 +33,37 @@ function hatchPattern(ctx: CanvasRenderingContext2D) {
   return hatch;
 }
 
+// 注音 beside each character: the width of one column, and the drawing.
+export const zhuyinColumn = (fontSize: number) => fontSize * 0.44;
+
+// Characters with their 注音 stacked to the right, the whole line centred on x = 0.
+// Tone marks ˊˇˋ sit to the right of the last symbol, the neutral tone ˙ above the first.
+function drawWithZhuyin(ctx: CanvasRenderingContext2D, text: string, zhuyin: string[], font: string, fontSize: number, y: number) {
+  ctx.font = font;
+  const chars = [...text];
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  const col = zhuyinColumn(fontSize);
+  const size = fontSize * 0.26;
+  let x = -(widths.reduce((s, w) => s + w, 0) + col * chars.length) / 2;
+  ctx.textAlign = "left";
+  chars.forEach((c, i) => {
+    ctx.font = font;
+    ctx.fillText(c, x, y);
+    x += widths[i];
+    const z = zhuyin[i] ?? "";
+    const symbols = [...z.replace(/[ˊˇˋ˙]/g, "")];
+    const tone = z.match(/[ˊˇˋ]/)?.[0];
+    const step = size * 1.08;
+    const top = y - ((symbols.length - 1) * step) / 2;
+    ctx.font = `500 ${Math.round(size)}px ${FONT}`;
+    symbols.forEach((sym, k) => ctx.fillText(sym, x + size * 0.15, top + k * step));
+    if (tone) ctx.fillText(tone, x + size * 1.05, top + (symbols.length - 1) * step - size * 0.35);
+    if (z.startsWith("˙")) ctx.fillText("˙", x + size * 0.3, top - step * 0.8);
+    x += col;
+  });
+  ctx.textAlign = "center";
+}
+
 // First clause of a definition: "報社、廣播電臺…" → "報社".
 const short = (text: string, max = 12) => (text.split(/[。，、；;,]/)[0] ?? "").slice(0, max);
 
@@ -219,19 +250,21 @@ export function drawField(
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = `${weight} ${fontSize}px ${FONT}`;
-    if (b.lang === "tw") {
-      ctx.fillText(b.text, 0, -fontSize * 0.2);
-      ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${LATIN}`;
-      ctx.globalAlpha = alpha * 0.75;
-      ctx.fillText(b.sub, 0, fontSize * 0.62);
-    } else {
-      ctx.fillText(b.text, 0, fontSize * 0.12);
+    // Main word (with 注音 on Taiwanese blocks), then its romanization underneath:
+    // Tâi-lô for Taiwanese, Revised Romanization for Korean.
+    if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, -fontSize * 0.2);
+    else ctx.fillText(b.text, 0, -fontSize * 0.2);
+    ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
+    ctx.globalAlpha = alpha * 0.75;
+    ctx.fillText(b.sub, 0, fontSize * 0.62);
+    ctx.globalAlpha = alpha;
+    if (b.lang === "ko") {
       // The shared characters surface on the Korean block as the pair resonates.
       const show = Math.max(resonance, solid);
       if (show > 0.01) {
-        ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${FONT}`;
+        ctx.font = `400 ${Math.round(fontSize * 0.3)}px ${FONT}`;
         ctx.globalAlpha = alpha * show;
-        ctx.fillText(pair.entry.hanja, 0, -fontSize * 0.68);
+        ctx.fillText(pair.entry.hanja, 0, -fontSize * 0.88);
       }
     }
 
@@ -239,7 +272,8 @@ export function drawField(
     ctx.font = `400 ${Math.round(fontSize * 0.26)}px ${FONT}`;
     ctx.textAlign = "left";
     ctx.globalAlpha = alpha * 0.5;
-    ctx.fillText(b.lang === "tw" ? "台" : "한", -b.w / 2 + 8, -b.h / 2 + 10);
+    // Inside the plate, clear of a cut top-left corner.
+    ctx.fillText(b.lang === "tw" ? "臺" : "한", -b.w / 2 + unit * (b.cut === 0 ? 1.1 : 0.55), -b.h / 2 + unit * 0.7);
     ctx.restore();
   }
 
@@ -252,7 +286,7 @@ export function drawField(
     const e = pair.entry;
     const lines = [
       "偽友 · 가짜 친구 · false friend",
-      `台 ${e.hanja} — ${short(e.taiwanese.definition) || `同華語「${e.hanja}」`}`,
+      `臺 ${e.hanja} — ${short(e.taiwanese.definition) || `同華語「${e.hanja}」`}`,
       `한 ${e.korean.hangul} — ${short(e.korean.chinese, 8)} · ${short(e.korean.english, 18)}`,
     ];
     const size = Math.max(12, Math.round(fontSize * 0.5));

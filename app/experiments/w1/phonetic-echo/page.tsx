@@ -17,7 +17,7 @@ import {
   type Lang,
   type Playing,
 } from "./audio";
-import { drawField, FONT, LATIN } from "./draw";
+import { drawField, FONT, LATIN, zhuyinColumn } from "./draw";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
@@ -106,9 +106,9 @@ export default function PhoneticEcho() {
     // Block size from its text.
     world.measure = (b) => {
       ctx.font = `500 ${fontSize}px ${FONT}`;
-      let inner = ctx.measureText(b.text).width;
+      let inner = ctx.measureText(b.text).width + (b.zhuyin ? zhuyinColumn(fontSize) * b.zhuyin.length : 0);
       if (b.sub) {
-        ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${LATIN}`;
+        ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
         inner = Math.max(inner, ctx.measureText(b.sub).width);
       }
       b.w = inner + fontSize * 1.4;
@@ -168,6 +168,7 @@ export default function PhoneticEcho() {
     // Pointer: route to the wheel or to a block.
     const pointer: Pointer = { x: -999, y: -999, vx: 0, vy: 0, inside: false };
     let target: "wheel" | "block" | null = null;
+    let press = { x: 0, y: 0, t: 0 }; // to tell a click on a block from a drag
     let lastMove = performance.now();
     const onMove = (e: PointerEvent) => {
       const now = performance.now();
@@ -196,6 +197,7 @@ export default function PhoneticEcho() {
         openWheel(false); // clicking the empty field goes back
       } else if (world.grab(e.clientX, e.clientY)) {
         target = "block";
+        press = { x: e.clientX, y: e.clientY, t: performance.now() };
       }
       if (target) canvas.setPointerCapture(e.pointerId); // keep dragging even off the wheel
     };
@@ -210,7 +212,13 @@ export default function PhoneticEcho() {
         }
         if (action?.type === "fling") flingRef.current(action.strength, action.dir);
       }
-      if (target === "block") world.release();
+      if (target === "block") {
+        // A click (not a drag) on a block plays that word.
+        const b = world.held;
+        const still = Math.hypot(e.clientX - press.x, e.clientY - press.y) < 6 && performance.now() - press.t < 350;
+        if (b && still) playOne(b.pair.entry, b.lang);
+        world.release();
+      }
       target = null;
     };
     const onLeave = () => {

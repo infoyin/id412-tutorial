@@ -9,7 +9,11 @@ Offline, standard library only. Inputs are the two official full-dictionary down
   4. (optional) sutiau-mp3.zip, the MOE recordings: the usable words' files are copied unmodified
      to public/experiments/w1/phonetic-echo/audio/tw/ (renamed 6050(1).mp3 → 6050-1.mp3).
 
-  python3 build-vocabulary.py kautian.ods path/to/krdict-json-folder Unihan_Variants.txt [sutiau-mp3.zip]
+  5. (optional) dict-revised.json: 教育部《重編國語辭典修訂本》 (g0v/moedict-data, CC BY-ND 3.0 TW).
+     Adds Mandarin 注音 (bopomofo) per character, from the whole word's reading so polyphones are
+     right (銀行 ㄧㄣˊ ㄏㄤˊ); single-character readings only when the word is not listed.
+
+  python3 build-vocabulary.py kautian.ods path/to/krdict-json-folder Unihan_Variants.txt [sutiau-mp3.zip] [dict-revised.json]
 
 How pairs are found
   - Korean entries whose 원어 (origin) is all Chinese characters (Sino-Korean words).
@@ -186,6 +190,34 @@ def same_word(translation, hanja, forms):
     return len(translation) == len(hanja) and all(t == s or t in forms.get(s, ()) for s, t in zip(translation, hanja))
 
 
+def zhuyin_table(path):
+    """Word → bopomofo of its first reading, from the MOE revised Mandarin dictionary dump, and
+    character → its commonest reading across all words (北 → ㄅㄟˇ, not a rare single reading)."""
+    words = {}
+    usage = collections.defaultdict(collections.Counter)
+    for e in json.load(open(path, encoding="utf8")):
+        readings = [h.get("bopomofo", "") for h in e.get("heteronyms", []) if h.get("bopomofo")]
+        if not readings or e["title"] in words:
+            continue
+        syllables = re.sub(r"[（(].*?[)）]", "", readings[0]).split()
+        words[e["title"]] = syllables
+        if len(syllables) == len(e["title"]):
+            for c, z in zip(e["title"], syllables):
+                usage[c][z] += 1
+    chars = {c: counts.most_common(1)[0][0] for c, counts in usage.items()}
+    return words, chars
+
+
+def zhuyin_for(word, tables):
+    """Per-character bopomofo, and where it came from ("word", "characters" or None)."""
+    words, chars = tables
+    whole = words.get(word)
+    if whole and len(whole) == len(word):
+        return whole, "word"
+    each = [chars.get(c) for c in word]
+    return (each, "characters") if all(each) else (None, None)
+
+
 def category(semantic):
     for key, name in CATEGORIES:
         if key in semantic:
@@ -193,7 +225,7 @@ def category(semantic):
     return "everyday"
 
 
-def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
+def main(ods_path, kr_folder, unihan_variants, mp3_zip=None, moe_mandarin=None):
     tw = taiwanese(ods_path)
     ko = korean(kr_folder)
     forms = traditional_forms(unihan_variants)
@@ -260,6 +292,11 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
     by_hanja = {p["hanja"]: p for p in pairs}
     false_friends = [{**by_hanja[h], "status": "false_friend"} for h in FALSE_FRIENDS if h in by_hanja]
 
+    if moe_mandarin:
+        table = zhuyin_table(moe_mandarin)
+        for p in usable + false_friends:
+            p["taiwanese"]["zhuyin"], p["taiwanese"]["zhuyinFrom"] = zhuyin_for(p["hanja"], table)
+
     for p in usable + false_friends:
         name = p["taiwanese"]["audioFile"]  # e.g. 6050(1)
         p["taiwanese"]["audio"] = "/experiments/w1/phonetic-echo/audio/tw/" + name.replace("(", "-").rstrip(")") + ".mp3"
@@ -287,10 +324,11 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None):
     json.dump({"note": "Chosen by the AI assistant from both dictionaries' definitions; not human-reviewed.", "pairs": false_friends},
               open(os.path.join(HERE, "false-friends.json"), "w"), ensure_ascii=False, separators=(",", ":"))
     print("false friends:", len(false_friends), "missing:", [h for h in FALSE_FRIENDS if h not in by_hanja])
+    print("zhuyin:", dict(collections.Counter(p["taiwanese"].get("zhuyinFrom") for p in usable + false_friends)))
     print(json.dumps(meta["counts"]), "| categories:", dict(collections.Counter(p["category"] for p in usable)))
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         sys.exit(__doc__)
-    main(*sys.argv[1:5])
+    main(*sys.argv[1:6])

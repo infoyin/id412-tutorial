@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { speakLetter } from "./audio";
+import { HANGUL, TONES, ZHUYIN, type Letter } from "./letters";
 import { ENTRIES } from "./words";
 import styles from "./page.module.css";
 
@@ -64,8 +67,35 @@ function Bar({ parts }: { parts: { label: string; value: number }[] }) {
   );
 }
 
+// A grid of letters; clicking one says it.
+function Letters({ letters, language, playing, onPlay }: { letters: Letter[]; language: "ko" | "zh"; playing: string; onPlay: (l: Letter) => void }) {
+  return (
+    <div className={styles.letters}>
+      {letters.map((l) => (
+        <button
+          key={l.letter}
+          className={playing === l.letter ? styles.letterOn : ""}
+          onClick={() => {
+            onPlay(l);
+            speakLetter(l.speak, language);
+          }}
+          aria-label={`${l.letter} ${l.label}`}
+        >
+          <b>{l.letter}</b>
+          <small>{l.label}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Info() {
   const finals = countFinals();
+  const [playing, setPlaying] = useState(""); // last letter clicked, shown inverted
+  const play = (l: Letter) => {
+    setPlaying(l.letter);
+    setTimeout(() => setPlaying((p) => (p === l.letter ? "" : p)), 900);
+  };
   return (
     <div className={styles.info}>
       <section className={styles.lead}>
@@ -79,9 +109,9 @@ export function Info() {
       </section>
 
       <section>
-        <h3>● 台語 · 대만어</h3>
+        <h3>● 臺語 · 대만어</h3>
         <p lang="zh-Hant">
-          臺灣台語屬於漢語族的閩南語。17 世紀起隨福建漳州、泉州的移民來到臺灣，兩地口音在這裡融合，也吸收了日語等外來詞（例如「自轉車」源自日語）。台語至今保留許多中古漢語的特徵：-m、-p、-t、-k 韻尾，以及讀書用的「文讀」和日常的「白話」兩套讀音。
+          臺灣台語屬於漢語族的閩南語。17 世紀起隨福建漳州、泉州的移民來到臺灣，兩地口音在這裡融合，也吸收了日語等外來詞（例如「自轉車」源自日語）。臺語至今保留許多中古漢語的特徵：-m、-p、-t、-k 韻尾，以及讀書用的「文讀」和日常的「白話」兩套讀音。
         </p>
         <p lang="ko">
           대만어(臺灣台語)는 중국어족 민남어에 속합니다. 17세기부터 푸젠성 장저우·취안저우 이주민과 함께 대만에 들어와 두 지역의 말소리가 섞였고, 일본어에서 온 말도 있습니다(예: 自轉車). 지금도 중세 중국어의 -m, -p, -t, -k 받침과, 글 읽는 소리(文讀)와 일상 소리(白話)라는 두 갈래 읽기를 지키고 있습니다.
@@ -103,12 +133,12 @@ export function Info() {
       <section>
         <h3>● 為何相像 · 왜 비슷할까</h3>
         <p lang="zh-Hant">
-          多數學者認為，韓國漢字音和台語的文讀音，都可以追溯到中古漢語（大約隋唐時期的讀書音）。兩邊各自保存了當時的音節結構，所以韻尾常常對得上：-m 對 ㅁ、-p 對 ㅂ、-k 對 ㄱ，-t 在韓語則規律地變成 ㄹ。華語失去了 -p、-t、-k，-m 也併入 -n。
+          多數學者認為，韓國漢字音和臺語的文讀音，都可以追溯到中古漢語（大約隋唐時期的讀書音）。兩邊各自保存了當時的音節結構，所以韻尾常常對得上：-m 對 ㅁ、-p 對 ㅂ、-k 對 ㄱ，-t 在韓語則規律地變成 ㄹ。華語失去了 -p、-t、-k，-m 也併入 -n。
         </p>
         <p lang="ko">
           한국 한자음과 대만어의 글 읽는 소리(文讀)는 모두 중세 중국어(대략 수·당 시대의 독서음)로 거슬러 올라간다고 보는 견해가 많습니다. 두 언어가 그 음절 구조를 각자 간직해 받침이 자주 맞아떨어집니다: -m↔ㅁ, -p↔ㅂ, -k↔ㄱ, 그리고 -t는 한국어에서 규칙적으로 ㄹ이 됩니다. 표준 중국어는 -p, -t, -k를 잃었고 -m도 -n에 합쳐졌습니다.
         </p>
-        <p className={styles.chartTitle}>台語韻尾 → 韓語받침 · 이 작품의 {ENTRIES.length}쌍에서 센 결과</p>
+        <p className={styles.chartTitle}>臺語韻尾 → 韓語받침 · 이 작품의 {ENTRIES.length}쌍에서 센 결과</p>
         <div className={styles.finals}>
           {finals.map(({ t, total, counts }) => (
             <div key={t} className={styles.finalRow}>
@@ -127,7 +157,7 @@ export function Info() {
             </div>
           ))}
         </div>
-        <p className={styles.cite}>음절 수가 같은 쌍만 · 첫 번째 台羅 읽기 · n = 음절 수</p>
+        <p className={styles.cite}>음절 수가 같은 쌍만 · 첫 번째 臺羅 읽기 · n = 음절 수</p>
       </section>
 
       <section>
@@ -137,16 +167,56 @@ export function Info() {
         <p className={styles.cite}>백만 명 · Ethnologue (Korea Times 2014·2025 인용)</p>
 
         <p className={styles.chartTitle}>臺灣 主要使用語言 · 대만 주로 쓰는 언어</p>
-        <Bar parts={[{ label: "華語 국어", value: 66.3 }, { label: "台語 대만어", value: 31.7 }, { label: "客語 하카어", value: 1.5 }, { label: "其他 기타", value: 0.5 }]} />
+        <Bar parts={[{ label: "華語 국어", value: 66.3 }, { label: "臺語 대만어", value: 31.7 }, { label: "客語 하카어", value: 1.5 }, { label: "其他 기타", value: 0.5 }]} />
         <p className={styles.cite}>
-          % · 2020 人口及住宅普查「主要使用語言」(The News Lens 引述). 台師大 2024 電話調查（15–59 歲，在家使用）：華語 68.8 · 閩南語 29.7 · 客語 1.4（聯合報）
+          % · 2020 人口及住宅普查「主要使用語言」(The News Lens 引述). 臺師大 2024 電話調查（15–59 歲，在家使用）：華語 68.8 · 閩南語 29.7 · 客語 1.4（聯合報）
         </p>
+      </section>
+
+      <section>
+        <h3>● 注音符號 · 주음부호</h3>
+        <p lang="zh-Hant">
+          注音符號是為了標注漢字讀音而設計的符號。1913 年「讀音統一會」議定，1918 年由教育部公布為「注音字母」，1930 年改稱「注音符號」。符號多取自筆畫簡單的古漢字，例如 ㄅ 取自「勹」、ㄇ 取自「冂」。共 37 個符號，加上聲調符號。臺灣至今用它學國語、輸入文字；臺語另有擴充的「臺灣方音符號」，教育部臺語辭典則以 2006 年公布的臺羅拼音為主。方塊上漢字右側的注音，是華語讀音（教育部《重編國語辭典修訂本》）。
+        </p>
+        <p lang="ko">
+          주음부호(注音符號)는 한자의 읽는 소리를 적기 위한 기호입니다. 1913년 ‘독음통일회’에서 정하고 1918년 교육부가 ‘주음자모’로 공포했으며, 1930년에 ‘주음부호’로 이름을 바꿨습니다. 기호는 획이 간단한 옛 한자에서 따왔습니다(예: ㄅ←勹, ㄇ←冂). 기호 37개와 성조 부호가 있으며, 대만에서는 지금도 표준 중국어를 배우고 글자를 입력할 때 씁니다. 대만어에는 확장된 ‘대만 방음 부호’가 있지만, 교육부 대만어 사전은 주로 2006년에 공포된 타이로(臺羅) 로마자를 씁니다. 블록의 한자 오른쪽 주음은 표준 중국어 읽기입니다.
+        </p>
+      </section>
+
+      <section>
+        <h3>● 한글 · 韓文字母</h3>
+        <p lang="zh-Hant">
+          韓文字母（한글）由朝鮮世宗大王在 1443 年創製，1446 年以《訓民正音》頒布。子音的基本字模仿發音器官的形狀：ㄱ 是舌根擋住喉嚨、ㄴ 是舌尖碰到上齒齦、ㅁ 是嘴巴、ㅅ 是牙齒、ㅇ 是喉嚨；母音由天（·）、地（ㅡ）、人（ㅣ）組合而成。現在的基本字母有 24 個（子音 14、母音 10），加上雙子音與複合母音共 40 個（子音 19、母音 21）。
+        </p>
+        <p lang="ko">
+          한글은 1443년 세종대왕이 만들고 1446년 《훈민정음》으로 반포했습니다. 자음 기본자는 발음 기관의 모양을 본떴습니다: ㄱ은 혀뿌리가 목구멍을 막는 모양, ㄴ은 혀끝이 윗잇몸에 닿는 모양, ㅁ은 입, ㅅ은 이, ㅇ은 목구멍. 모음은 하늘(·), 땅(ㅡ), 사람(ㅣ)을 합쳐 만들었습니다. 지금의 기본 자모는 24자(자음 14, 모음 10)이고, 쌍자음과 겹모음을 더하면 40자(자음 19, 모음 21)입니다.
+        </p>
+      </section>
+
+      <section className={styles.charts}>
+        <div>
+          <h3>● 한글 40자 · 韓文四十音</h3>
+          <p className={styles.chartTitle}>자음 子音 19</p>
+          <Letters letters={HANGUL.consonants} language="ko" playing={playing} onPlay={play} />
+          <p className={styles.chartTitle}>모음 母音 21</p>
+          <Letters letters={HANGUL.vowels} language="ko" playing={playing} onPlay={play} />
+          <p className={styles.cite}>누르면 들려요 · 點擊發音 · 자음은 ㅏ와 함께 (ㄱ → 가), 모음은 ㅇ과 함께 (ㅏ → 아)</p>
+        </div>
+        <div>
+          <h3>● 注音符號 · 주음부호 37</h3>
+          <p className={styles.chartTitle}>聲母 21 · 介音 3 · 韻母 13</p>
+          <Letters letters={ZHUYIN} language="zh" playing={playing} onPlay={play} />
+          <p className={styles.chartTitle}>聲調 · 성조</p>
+          <Letters letters={TONES} language="zh" playing={playing} onPlay={play} />
+          <p className={styles.cite}>點擊發音 · 누르면 들려요 · 以例字發音（ㄅ → 玻）· 瀏覽器語音合成</p>
+        </div>
       </section>
 
       <section className={styles.sources}>
         <h3>● 出處 · 출처</h3>
         <p>
           <a href="https://sutian.moe.edu.tw/" target="_blank" rel="noreferrer">教育部《臺灣台語常用詞辭典》</a> ·{" "}
+          <a href="https://dict.revised.moe.edu.tw/" target="_blank" rel="noreferrer">教育部《重編國語辭典修訂本》</a> ·{" "}
           <a href="https://krdict.korean.go.kr/" target="_blank" rel="noreferrer">국립국어원《한국어기초사전》</a> ·{" "}
           <a href="https://www.koreatimes.co.kr/southkorea/20140514/korean-13th-most-widely-spoken-language" target="_blank" rel="noreferrer">Korea Times</a> ·{" "}
           <a href="https://www.thenewslens.com/article/157030" target="_blank" rel="noreferrer">The News Lens</a> ·{" "}
