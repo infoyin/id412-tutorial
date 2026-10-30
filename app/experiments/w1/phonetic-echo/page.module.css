@@ -1479,3 +1479,11 @@
   stroke: currentColor;
   stroke-width: 1.4;
 }
+
+.about dd.wrapAtDot {
+  white-space: normal;
+}
+
+.wrapAtDot span {
+  white-space: nowrap;
+}

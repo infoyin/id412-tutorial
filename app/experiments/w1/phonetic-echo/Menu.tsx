@@ -41,13 +41,17 @@ function About() {
         <dd>Mini Project [ID412] Interactive Space</dd>
         <dt>Created by</dt>
         <dd>Yin Jie Chen · 진윤제 · 陳胤傑</dd>
-        <dd>
-          Research Intern [at]{" "}
-          <a href="https://visual-instruments.kaist.ac.kr/" target="_blank" rel="noreferrer">
-            KAIST Visual Instruments Lab
-          </a>
+        {/* One line, wrapping only at the "·" if the panel is too narrow for both halves. */}
+        <dd className={styles.wrapAtDot}>
+          <span>
+            Research Intern [at]{" "}
+            <a href="https://visual-instruments.kaist.ac.kr/" target="_blank" rel="noreferrer">
+              KAIST Visual Instruments Lab
+            </a>{" "}
+            ·
+          </span>{" "}
+          <span>Exchange Student [from] NTUST, Taiwan Tech</span>
         </dd>
-        <dd>Exchange Student [from] NTUST · Taiwan Tech</dd>
         <dt>Source</dt>
         <dd>
           <a href="https://www.sinica.edu.tw/cp/695" target="_blank" rel="noreferrer">陳彥伶〈語言親緣關係常見的幾個迷思〉中央研究院</a>
