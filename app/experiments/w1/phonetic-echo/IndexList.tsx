@@ -9,22 +9,22 @@ import styles from "./page.module.css";
 // pronunciations appear in the pane on the right. False friends are the last block.
 
 const CATEGORIES: [string, string][] = [
-  ["everyday", "日常 · 일상"],
-  ["time & space", "時空 · 시공간"],
-  ["family", "家庭 · 가족"],
-  ["emotions", "情感 · 감정"],
-  ["food", "飲食 · 음식"],
-  ["nature", "自然 · 자연"],
-  ["education", "教育 · 교육"],
-  ["technology", "科技 · 기술"],
-  ["society", "社會文化 · 사회 문화"],
-  ["abstract", "抽象 · 추상"],
+  ["everyday", "日常 · 일상 · Everyday"],
+  ["time & space", "時空 · 시공간 · Time & Space"],
+  ["family", "家庭 · 가족 · Family"],
+  ["emotions", "情感 · 감정 · Emotions"],
+  ["food", "飲食 · 음식 · Food"],
+  ["nature", "自然 · 자연 · Nature"],
+  ["education", "教育 · 교육 · Education"],
+  ["technology", "科技 · 기술 · Technology"],
+  ["society", "社會文化 · 사회 문화 · Society"],
+  ["abstract", "抽象 · 추상 · Abstract"],
 ];
 
 // Numbered once, in the order shown.
 const GROUPS = [
   ...CATEGORIES.map(([key, name]) => ({ name, entries: ENTRIES.filter((e) => e.category === key).sort((a, b) => a.hanja.localeCompare(b.hanja)) })),
-  { name: "≠ 偽友 · 가짜 친구", entries: FALSE_FRIENDS },
+  { name: "≠ 偽友 · 가짜 친구 · False friends", entries: FALSE_FRIENDS },
 ];
 const NUMBER = new Map<string, number>();
 GROUPS.flatMap((g) => g.entries).forEach((e, i) => NUMBER.set(e.id, i + 1));
@@ -130,7 +130,7 @@ export function IndexList(props: Props) {
       </div>
       <aside className={styles.indexPane} aria-live="polite">
         {/* key: a new word re-mounts the box, so its entrance animation plays again */}
-        {selected ? <Detail key={selected.id} e={selected} {...props} /> : <p className={styles.indexHint}>點一個詞 · 단어를 고르세요 →</p>}
+        {selected ? <Detail key={selected.id} e={selected} {...props} /> : <p className={styles.indexHint}>點一個詞 · 단어를 고르세요 · Choose a word →</p>}
       </aside>
     </div>
   );
