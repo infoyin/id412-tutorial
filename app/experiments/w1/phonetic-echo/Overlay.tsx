@@ -188,9 +188,8 @@ export function Overlay(p: Props) {
       </div>
 
       <div className={styles.toggles}>
-        {/* Poster: a 3:4 snapshot of the field (camera). Pulses in the grid, the best moment. */}
+        {/* Poster: a 3:4 snapshot of the field (camera). */}
         <button
-          className={p.grid ? styles.snapReady : ""}
           onClick={p.onSnap}
           aria-label="poster · 海報 · 포스터 (P)"
           title="海報 · 포스터 · Poster (P)"

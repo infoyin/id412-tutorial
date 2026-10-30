@@ -1408,14 +1408,6 @@
 
 /* ---- Poster snapshot ---- */
 
-.snapReady {
-  opacity: 1 !important;
-  animation: snapGlow 1.6s ease-in-out infinite;
-}
-
-@keyframes snapGlow {
-  50% { transform: scale(1.12); }
-}
 
 .shutter {
   position: fixed;
