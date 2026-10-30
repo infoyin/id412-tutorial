@@ -29,6 +29,8 @@ const GROUPS = [
 ];
 const NUMBER = new Map<string, number>();
 GROUPS.flatMap((g) => g.entries).forEach((e, i) => NUMBER.set(e.id, i + 1));
+// ALL comes first in the tabs and tiles: every word, in number order.
+const TABS = [{ key: "all", name: "ALL · 全部 · 전체", entries: GROUPS.flatMap((g) => g.entries) }, ...GROUPS];
 
 type Props = {
   playing: Playing;
@@ -104,12 +106,12 @@ function Detail({ e, playing, muted, onPlay }: { e: Entry } & Props) {
 export function IndexList(props: Props) {
   const [group, setGroup] = useState<string | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
-  const current = GROUPS.find((g) => g.key === group);
+  const current = TABS.find((g) => g.key === group);
 
   return (
-    <div className={styles.indexLayout}>
+    <div className={`${styles.indexLayout} ${selected ? styles.indexLayoutOpen : ""}`}>
       <div className={styles.indexTabs} role="tablist">
-        {GROUPS.map((g) => (
+        {TABS.map((g) => (
           <button
             key={g.key}
             role="tab"
@@ -140,7 +142,7 @@ export function IndexList(props: Props) {
         </ul>
       ) : (
         <div className={styles.indexTiles}>
-          {GROUPS.map((g) => (
+          {TABS.map((g) => (
             <button key={g.key} onClick={() => setGroup(g.key)}>
               <b>{g.name}</b>
               <span>{g.entries.length}</span>

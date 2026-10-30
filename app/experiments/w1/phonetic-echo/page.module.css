@@ -428,8 +428,11 @@
   max-height: calc(100vh - var(--tab-h));
 }
 
+/* INDEX is only as tall as its content (scrolls if longer than the screen). */
 .tabIndex .tabBody {
   width: min(1040px, calc(100vw - var(--title-w) - var(--tab-w)));
+  height: auto;
+  max-height: calc(100vh - var(--tab-h));
 }
 
 @keyframes unfold {
@@ -633,6 +636,11 @@
   position: relative;
 }
 
+/* With a word open, leave room for its card even under a short list. */
+.indexLayoutOpen {
+  min-height: 560px;
+}
+
 .indexTabs {
   display: flex;
   flex-wrap: wrap;
@@ -715,24 +723,21 @@
 
 /* A word: a translucent sheet over the list (like the comparison wheel), the details on it. */
 .indexSheet {
-  position: fixed;
-  top: var(--tab-h);
-  left: calc(var(--title-w) + var(--tab-w));
-  right: 0;
-  bottom: 0;
+  position: absolute;
+  inset: -8px -18px -40px; /* cover the panel's padding too */
   z-index: 3;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 36px 24px;
-  overflow-y: auto;
   background: color-mix(in srgb, var(--gray) 72%, transparent);
   backdrop-filter: blur(3px);
   animation: appear 0.3s ease both;
 }
 
 .indexSheetCard {
-  position: relative;
+  position: sticky; /* stays in view while a long list scrolls */
+  top: 16px;
   width: min(460px, 100%);
 }
 
@@ -902,7 +907,7 @@
     width: 100vw !important;
   }
   .indexSheet {
-    left: 0;
+    inset: -8px -18px -40px;
   }
 }
 
