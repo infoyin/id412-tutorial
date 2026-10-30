@@ -348,7 +348,7 @@ export function drawField(
     const pair = b.pair;
     const cracked = pair.cracked >= 0;
     const resonance = pair.docked ? 1 : pair.leaving || cracked || world.grid ? 0 : resonanceOf(pair.closeness);
-    const solid = pair.solidity;
+    const solid = Math.max(pair.solidity, b.chosen); // (listen mode: the chosen block fills black)
     const shake = reduced || pair.docked ? 0 : resonance * 1.6;
     // While this word is being pronounced, it breathes.
     const speaking = playing && playing.id === pair.entry.id && playing.lang === b.lang;

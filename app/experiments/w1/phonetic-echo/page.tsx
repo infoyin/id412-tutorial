@@ -388,19 +388,27 @@ export default function PhoneticEcho() {
       } else {
         listen.target = null;
         stop();
+        world.blocks.forEach((b) => (b.chosenTarget = 0));
       }
     };
     const answer = (b: Block) => {
       if (!listen.target) return;
       if (b === listen.target) {
+        // Right: it fills black with white text, both readings play, and only once the second
+        // language has finished does the next word come.
         b.flash = 1;
+        b.chosenTarget = 1;
         particles.burst(b.x, b.y);
         portal();
         const entry = b.pair.entry;
         listen.target = null;
         listen.timer = window.setTimeout(() => {
-          playPair(entry);
-          listen.timer = window.setTimeout(() => listen.on && nextRound(), 3800);
+          playPair(entry, () => {
+            listen.timer = window.setTimeout(() => {
+              b.chosenTarget = 0;
+              if (listen.on) nextRound();
+            }, 900);
+          });
         }, 650);
       } else {
         b.spin += (Math.random() < 0.5 ? -1 : 1) * 7;
@@ -466,6 +474,9 @@ export default function PhoneticEcho() {
       wheel.listenPulse += ((getPlaying() && listen.on ? 0.6 + 0.4 * Math.sin(now / 120) : 0) - wheel.listenPulse) * (1 - Math.exp(-dt * 10));
       // The word being asked can leave the screen (a fling): ask another once things settle.
       if (listen.on && listen.target?.pair.leaving) nextRound();
+      // Keep blocks out from under the listen banner while it shows.
+      const banner = listen.on ? document.querySelector("[data-listen-banner]")?.getBoundingClientRect() : null;
+      world.keepOutBanner = banner ? { x0: banner.left, y0: banner.top, x1: banner.right, y1: banner.bottom } : null;
       // After two misses the answer glows, gently pulsing, until it is found.
       if (listen.on && listen.target && listen.misses >= 2) listen.target.flash = Math.max(listen.target.flash, 0.45 + 0.2 * Math.sin(now / 200));
       // Autoplay.

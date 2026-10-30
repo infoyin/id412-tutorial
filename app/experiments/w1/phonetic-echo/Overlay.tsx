@@ -193,7 +193,7 @@ export function Overlay(p: Props) {
       <Clock />
 
       {p.listening && (
-        <p className={styles.listenBanner} aria-live="polite">
+        <p className={styles.listenBanner} aria-live="polite" data-listen-banner>
           <b>聽 · 듣기 · Listen</b> 點你聽到的詞 · 들은 단어를 누르세요 · Click the word you hear
         </p>
       )}

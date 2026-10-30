@@ -332,9 +332,11 @@ export function speakLetter(text: string, language: "ko" | "zh") {
 }
 
 // Taiwanese, then Korean.
-export function playPair(entry: Entry) {
+// Taiwanese, then Korean; `done` runs once both have finished (or at once when muted).
+export function playPair(entry: Entry, done?: () => void) {
+  if (muted) return done?.();
   playOne(entry, "tw", () => {
     const mine = token; // if anything else starts in the pause, don't interrupt it
-    setTimeout(() => mine === token && !muted && playOne(entry, "ko"), 250);
+    setTimeout(() => mine === token && !muted && playOne(entry, "ko", done), 250);
   });
 }

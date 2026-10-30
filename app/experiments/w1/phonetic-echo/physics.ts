@@ -37,6 +37,8 @@ export type Block = {
   feel: number; // gravity this block currently feels
   hover: number;
   flash: number; // 0…1, a brief ring (listen mode: right answer, or a hint)
+  chosen: number; // 0…1, listen mode: the right answer fills black (eases in and out)
+  chosenTarget: number;
   age: number; // seconds since it entered or started leaving
   entering: boolean; // still flying in from off screen
   alpha: number;
@@ -80,6 +82,7 @@ export class World {
   keepOut = { w: 0, h: 0 }; // the menu row in the top-left corner
   keepOutCorner = { w: 0, h: 0 }; // the size bar in the bottom-right corner
   keepOutTopRight = { w: 0, h: 0 }; // the clock and icons in the top-right corner
+  keepOutBanner: { x0: number; y0: number; x1: number; y1: number } | null = null; // listen-mode banner
   // Grid layout (the ⊞ button): pairs side by side in a Swiss grid instead of floating.
   grid = false;
   private gridSince = 0;
@@ -119,7 +122,7 @@ export class World {
       phase: r() * Math.PI * 2,
       drift: r() * Math.PI * 2,
       lag: 1.5 + r() * 2.5,
-      feel: 0, hover: 0, flash: 0, age: 0,
+      feel: 0, hover: 0, flash: 0, chosen: 0, chosenTarget: 0, age: 0,
       entering: false,
       alpha: 1,
     };
@@ -408,6 +411,7 @@ export class World {
       }
       b.hover = smooth(b.hover, hover, 6, dt);
       b.flash = Math.max(0, b.flash - dt * 0.8);
+      b.chosen += (b.chosenTarget - b.chosen) * (1 - Math.exp(-dt * 8));
     }
 
     // Partners: approach, resonance, docking, solidity.
@@ -518,6 +522,7 @@ export class World {
       { x0: 0, y0: 0, x1: this.keepOut.w, y1: this.keepOut.h },
       { x0: this.width - this.keepOutTopRight.w, y0: 0, x1: this.width, y1: this.keepOutTopRight.h },
       { x0: this.width - this.keepOutCorner.w, y0: this.height - this.keepOutCorner.h, x1: this.width, y1: this.height },
+      ...(this.keepOutBanner ? [this.keepOutBanner] : []),
     ];
     for (const z of zones) {
       if (z.x1 <= z.x0 || z.y1 <= z.y0) continue;
@@ -526,11 +531,12 @@ export class World {
       const up = b.y + hh - z.y0;
       const down = z.y1 - (b.y - hh);
       if (left <= 0 || right <= 0 || up <= 0 || down <= 0) continue;
-      // Only directions that lead back onto the screen.
+      // Only directions that lead back onto the screen (up only if a block fits above the zone,
+      // so nothing is squeezed between the listen banner and the menu).
       const options = [
         { d: left, ok: z.x0 > 0, apply: () => { b.x -= left; if (b.vx > 0) b.vx *= -bounce; if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift; } },
         { d: right, ok: z.x1 < this.width, apply: () => { b.x += right; if (b.vx < 0) b.vx *= -bounce; if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift; } },
-        { d: up, ok: z.y0 > 0, apply: () => { b.y -= up; if (b.vy > 0) b.vy *= -bounce; if (Math.sin(b.drift) > 0) b.drift = -b.drift; } },
+        { d: up, ok: z.y0 > hh * 2, apply: () => { b.y -= up; if (b.vy > 0) b.vy *= -bounce; if (Math.sin(b.drift) > 0) b.drift = -b.drift; } },
         { d: down, ok: z.y1 < this.height, apply: () => { b.y += down; if (b.vy < 0) b.vy *= -bounce; if (Math.sin(b.drift) < 0) b.drift = -b.drift; } },
       ].filter((o) => o.ok);
       options.sort((p, q) => p.d - q.d);
