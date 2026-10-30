@@ -56,10 +56,21 @@ VARIANTS = {"敎": "教", "硏": "研", "靑": "青", "眞": "真", "爲": "為"
 # definitions (新聞 = news vs 신문 = newspaper). Chosen by the AI assistant (2026-10-31) by reading
 # both definitions; not human-reviewed. Written to false-friends.json.
 FALSE_FRIENDS = ["新聞", "工夫", "點心", "料理", "安寧", "便宜", "人事", "試驗", "操心", "千萬", "階段",
-                 "新婦", "焦燥", "豆乳", "經理", "汽車", "人間", "質問", "交代", "斟酌", "種種", "境界"]
+                 "新婦", "焦燥", "豆乳", "經理", "汽車", "人間", "質問", "交代", "斟酌", "種種", "境界",
+                 # food (2026-11-01)
+                 "白飯", "生菜", "花菜", "鰱魚", "饅頭", "石花", "正宗"]
 
-# Pairs whose two definitions the AI assistant compared entry by entry (2026-10-30).
-ASSISTANT_COMPARED = {"時間", "感謝", "結婚", "學生", "文化"}
+# Pairs whose two definitions the AI assistant compared entry by entry and found to mean the same
+# (2026-10-30; food words 2026-11-01). Counts as evidence on both sides; not a human review.
+ASSISTANT_COMPARED = {"時間", "感謝", "結婚", "學生", "文化",
+                      "廚房", "材料", "葡萄", "豆腐", "食品", "竹筍", "薄荷", "甘草", "烏骨雞", "葡萄酒",
+                      "高粱酒", "補藥", "藥酒", "雞卵", "菜蔬", "防腐劑", "五穀", "作物", "靈芝", "肉脯", "小食"}
+
+# Food is thin among the common (초급/중급) words, so food words of any Korean level are usable.
+ANY_LEVEL = {"food"}
+
+# Left out on purpose: 酒店 can mean "hotel" in Taiwan but is "bar" (주점) in Korean.
+EXCLUDE = {"酒店"}
 
 # krdict semantic category (first part) → the categories used in the piece.
 CATEGORIES = [
@@ -245,7 +256,7 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None, moe_mandarin=None):
         options = [o for o in re.split(r"[,，;；、/ ]+", k["chinese"]) if o]
         korean_side = any(same_word(o, hanja, forms) for o in options)
         taiwanese_side = t["kind"] == "臺華共同詞" or hanja in t["definition"] or hanja in ASSISTANT_COMPARED
-        same_meaning = korean_side and taiwanese_side
+        same_meaning = (korean_side and taiwanese_side) or hanja in ASSISTANT_COMPARED
         pairs.append({
             "id": f"{hanja}-{k['id']}",
             "hanja": hanja,
@@ -286,7 +297,8 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None, moe_mandarin=None):
         })
 
     usable = [p for p in pairs
-              if p["status"] == "dictionary_matched" and p["korean"]["level"] in ("초급", "중급")
+              if p["status"] == "dictionary_matched" and p["hanja"] not in EXCLUDE
+              and (p["korean"]["level"] in ("초급", "중급") or p["category"] in ANY_LEVEL)
               and p["taiwanese"]["audioFile"] and p["korean"]["pronunciation"]]
     rest = [p for p in pairs if p not in usable]
     by_hanja = {p["hanja"]: p for p in pairs}

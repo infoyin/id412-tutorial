@@ -77,6 +77,13 @@ const FALSE_FRIEND_NOTES: Record<string, NonNullable<Entry["falseFriend"]>> = {
   斟酌: { twEnglish: "careful, cautious", why: { zh: "臺語形容做事小心謹慎；韓語 짐작 是估計、猜想。", ko: "대만어는 조심스러움, 한국어 짐작은 어림잡아 헤아림입니다." } },
   種種: { twEnglish: "all kinds of", why: { zh: "臺語指各種各樣；韓語 종종 是「有時、偶爾」。", ko: "대만어는 여러 가지, 한국어 종종은 ‘가끔’입니다." } },
   境界: { twEnglish: "level of attainment", why: { zh: "臺語指學問或技藝達到的程度；韓語 경계 是邊界。", ko: "대만어는 도달한 경지, 한국어 경계는 경계선입니다." } },
+  白飯: { twEnglish: "plain cooked rice", why: { zh: "臺語指白米飯；韓語 백반 是飯、湯加小菜的家常套餐。", ko: "대만어는 흰 쌀밥, 한국어 백반은 밥·국·반찬이 나오는 한 상입니다." } },
+  生菜: { twEnglish: "raw greens, lettuce", why: { zh: "臺語指可生吃的青菜；韓語 생채 是不煮、加調味拌的涼拌菜。", ko: "대만어는 날로 먹는 채소(상추 등), 한국어 생채는 양념한 무침입니다." } },
+  花菜: { twEnglish: "cauliflower", why: { zh: "臺語指花椰菜；韓語 화채 是加水果的冰涼甜飲。", ko: "대만어는 콜리플라워, 한국어 화채는 과일을 띄운 차가운 음료입니다." } },
+  鰱魚: { twEnglish: "silver carp", why: { zh: "臺語指白鰱、黑鰱等淡水魚；韓語 연어 是鮭魚。", ko: "대만어는 민물고기 백련어, 한국어 연어는 바다에서 돌아오는 연어입니다." } },
+  饅頭: { twEnglish: "steamed bun", why: { zh: "臺語指發酵蒸成的饅頭；韓語 만두 是包餡的餃子。", ko: "대만어는 소 없는 찐빵, 한국어 만두는 소를 넣은 만두입니다." } },
+  石花: { twEnglish: "agar seaweed (for jelly)", why: { zh: "臺語指石花菜，一種紅藻；韓語 석화 是牡蠣。", ko: "대만어는 우뭇가사리(해초), 한국어 석화는 굴입니다." } },
+  正宗: { twEnglish: "authentic, genuine", why: { zh: "臺語（和華語一樣）指道地、正統；韓語 정종 是日本清酒。", ko: "대만어는 ‘정통의, 진짜’, 한국어 정종은 일본식 청주입니다." } },
 };
 
 // Short notes on what the two sounds share (written by us, 2026-10-30).

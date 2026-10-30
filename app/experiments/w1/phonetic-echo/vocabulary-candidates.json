@@ -5,9 +5,9 @@
  },
  "counts": {
   "matchedForms": 4038,
-  "usable": 460,
-  "dictionaryMatched": 1845,
-  "candidate": 2193
+  "usable": 491,
+  "dictionaryMatched": 1863,
+  "candidate": 2175
  },
  "pairs": [
   {
@@ -3697,44 +3697,6 @@
    }
   },
   {
-   "id": "主食-91891",
-   "hanja": "主食",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "主食",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "主食",
-    "tailo": "tsú-si̍t",
-    "definition": "",
-    "example": null,
-    "audioFile": "26055(1)",
-    "sourceId": "26055",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/26055/"
-   },
-   "korean": {
-    "hangul": "주식",
-    "pronunciation": "주식",
-    "definition": "밥이나 빵과 같이 끼니에 주가 되는 음식.",
-    "english": "staple",
-    "chinese": "主食",
-    "example": "밀은 세계의 많은 사람들이 주식으로 하는 곡류이다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 음식",
-    "sourceId": "91891",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=91891"
-   }
-  },
-  {
    "id": "主體-77101",
    "hanja": "主體",
    "category": "society",
@@ -4246,44 +4208,6 @@
     "semantic": "",
     "sourceId": "68191",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=68191"
-   }
-  },
-  {
-   "id": "五穀-70151",
-   "hanja": "五穀",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "五谷",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": true,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "五穀",
-    "tailo": "ngóo-kok",
-    "definition": "泛指各種主要的穀物。普通說法以稻、小米、高梁、大麥、豆類為五穀。",
-    "example": null,
-    "audioFile": "759(1)",
-    "sourceId": "759",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/759/"
-   },
-   "korean": {
-    "hangul": "오곡",
-    "pronunciation": "오ː곡",
-    "definition": "다섯 가지 중요한 곡식.",
-    "english": "five grains",
-    "chinese": "五谷",
-    "example": "대보름날에 어머니는 오곡으로 밥을 지으셨다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 곡류",
-    "sourceId": "70151",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=70151"
    }
   },
   {
@@ -7508,44 +7432,6 @@
     "semantic": "",
     "sourceId": "76092",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=76092"
-   }
-  },
-  {
-   "id": "作物-73722",
-   "hanja": "作物",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "作物",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": true,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "作物",
-    "tailo": "tsok-bu̍t",
-    "definition": "指人工栽培的植物，通常指農作物。",
-    "example": null,
-    "audioFile": "2903(1)",
-    "sourceId": "2903",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/2903/"
-   },
-   "korean": {
-    "hangul": "작물",
-    "pronunciation": "장물",
-    "definition": "논밭에서 심어 가꾸는 곡식이나 채소.",
-    "english": "crop; produce",
-    "chinese": "作物",
-    "example": "밀은 벼, 옥수수와 함께 세계 삼대 작물이라 불린다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "73722",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=73722"
    }
   },
   {
@@ -44881,48 +44767,6 @@
    }
   },
   {
-   "id": "小食-63635",
-   "hanja": "小食",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "少量进食",
-    "translationIsSameWord": false,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "小食",
-    "tailo": "sió-tsia̍h",
-    "definition": "食量小的。",
-    "example": {
-     "han": "這个囡仔無開脾，真小食。",
-     "tailo": "Tsit ê gín-á bô khui-pî, tsin sió-tsia̍h.",
-     "zh": "這個孩子胃口沒開，食量很小。"
-    },
-    "audioFile": "13619(1)",
-    "sourceId": "13619",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/13619/"
-   },
-   "korean": {
-    "hangul": "소식",
-    "pronunciation": "소ː식",
-    "definition": "음식을 적게 먹음.",
-    "english": "light eating; eating little",
-    "chinese": "少量进食",
-    "example": "지나친 소식은 건강을 해칠 수 있다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식사 및 조리 행위",
-    "sourceId": "63635",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=63635"
-   }
-  },
-  {
    "id": "少女-63597",
    "hanja": "少女",
    "category": "family",
@@ -48690,44 +48534,6 @@
     "semantic": "사회 생활 > 언어 행위",
     "sourceId": "76481",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=76481"
-   }
-  },
-  {
-   "id": "廚房-25953",
-   "hanja": "廚房",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "厨房",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "廚房",
-    "tailo": "tû-pâng",
-    "definition": "在屋內專供烹調食物的地方。",
-    "example": null,
-    "audioFile": "11034(1)",
-    "sourceId": "11034",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/11034/"
-   },
-   "korean": {
-    "hangul": "주방",
-    "pronunciation": "주방",
-    "definition": "음식을 만들거나 차리는 곳.",
-    "english": "kitchen",
-    "chinese": "厨房",
-    "example": "배가 고픈 아이가 혹시 먹을 것이 있는지 자주 주방 근처를 왔다 갔다 했다.",
-    "level": "중급",
-    "pos": "명사",
-    "semantic": "식생활 > 식생활 관련 장소",
-    "sourceId": "25953",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=25953"
    }
   },
   {
@@ -70743,44 +70549,6 @@
    }
   },
   {
-   "id": "材料-71211",
-   "hanja": "材料",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "材料",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "材料",
-    "tailo": "tsâi-liāu",
-    "definition": "一切可供製作的原料或可供取用的資料。",
-    "example": null,
-    "audioFile": "3242(1)",
-    "sourceId": "3242",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/3242/"
-   },
-   "korean": {
-    "hangul": "재료",
-    "pronunciation": "재료",
-    "definition": "물건을 만드는 데 쓰이는 것.",
-    "english": "material; ingredient",
-    "chinese": "材料",
-    "example": "주된 재료가 털실인 스웨터는 따뜻하고 부드러워 즐겨 입는다.",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "71211",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=71211"
-   }
-  },
-  {
    "id": "材質-74787",
    "hanja": "材質",
    "category": "everyday",
@@ -71128,44 +70896,6 @@
     "semantic": "경제 생활 > 경제 수단",
     "sourceId": "72645",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=72645"
-   }
-  },
-  {
-   "id": "果汁-21347",
-   "hanja": "果汁",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "果汁",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "果汁",
-    "tailo": "kó-tsiap",
-    "definition": "",
-    "example": null,
-    "audioFile": "25116(1)",
-    "sourceId": "25116",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/25116/"
-   },
-   "korean": {
-    "hangul": "과즙",
-    "pronunciation": "과ː즙",
-    "definition": "과일에서 배어 나오거나 짜낸 액체.",
-    "english": "fruit juice",
-    "chinese": "果汁",
-    "example": "지수는 매일 아침마다 신선한 과일에서 짜낸 과즙을 마신다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "21347",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=21347"
    }
   },
   {
@@ -74432,7 +74162,13 @@
     "example": null,
     "audioFile": "25533(1)",
     "sourceId": "25533",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/25533/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/25533/",
+    "zhuyin": [
+     "ㄓㄥˋ",
+     "ㄗㄨㄥ"
+    ],
+    "zhuyinFrom": "word",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/25533-1.mp3"
    },
    "korean": {
     "hangul": "정종",
@@ -84105,44 +83841,6 @@
    }
   },
   {
-   "id": "烏骨雞-70153",
-   "hanja": "烏骨雞",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": true,
-    "krdictChineseTranslation": "乌骨鸡",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "烏骨雞",
-    "tailo": "oo-kut-ke/oo-kut-kue",
-    "definition": "雞的品種之一，皮、骨都是黑色的，常用來燉補藥。",
-    "example": null,
-    "audioFile": "6277(1)",
-    "sourceId": "6277",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/6277/"
-   },
-   "korean": {
-    "hangul": "오골계",
-    "pronunciation": "오골계",
-    "definition": "살과 뼈가 검붉은 색이고 흰색, 검은색, 붉은 갈색의 털을 가진 닭.",
-    "english": "silky; silky fowl",
-    "chinese": "乌骨鸡",
-    "example": "어린아이들은 우리 안에 있는 오골계를 까마귀로 착각했다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "70153",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=70153"
-   }
-  },
-  {
    "id": "無價-54841",
    "hanja": "無價",
    "category": "society",
@@ -85078,44 +84776,6 @@
     "semantic": "인간 > 태도",
     "sourceId": "67472",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=67472"
-   }
-  },
-  {
-   "id": "熱量-67833",
-   "hanja": "熱量",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "热量",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "熱量",
-    "tailo": "jia̍t-liōng/lia̍t-liōng",
-    "definition": "",
-    "example": null,
-    "audioFile": "22894(1)",
-    "sourceId": "22894",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/22894/"
-   },
-   "korean": {
-    "hangul": "열량",
-    "pronunciation": "열량",
-    "definition": "음식이나 연료 등으로 얻을 수 있는 에너지의 양.",
-    "english": "heat value; amount of heat",
-    "chinese": "热量",
-    "example": "나는 살을 빼기 위해 운동을 하여 열량을 소비했다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 영양",
-    "sourceId": "67833",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=67833"
    }
   },
   {
@@ -88253,44 +87913,6 @@
    }
   },
   {
-   "id": "甘草-22486",
-   "hanja": "甘草",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "甘草",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "甘草",
-    "tailo": "kam-tshó",
-    "definition": "草本植物。奇數羽狀複葉，藍紫色蝶形花。根與地下莖都可以入藥，有益氣、瀉火、解毒等功用，味道甘甜。",
-    "example": null,
-    "audioFile": "1935(1)",
-    "sourceId": "1935",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/1935/"
-   },
-   "korean": {
-    "hangul": "감초",
-    "pronunciation": "감초",
-    "definition": "한방 재료로 널리 쓰이는 단맛의 풀. 또는 그 뿌리.",
-    "english": "licorice",
-    "chinese": "甘草",
-    "example": "언니는 약재인 감초가 들어간 화장품을 사용한다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "22486",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=22486"
-   }
-  },
-  {
    "id": "生存-63227",
    "hanja": "生存",
    "category": "everyday",
@@ -88708,7 +88330,13 @@
     "example": null,
     "audioFile": "1965(1)",
     "sourceId": "1965",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/1965/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/1965/",
+    "zhuyin": [
+     "ㄕㄥ",
+     "ㄘㄞˋ"
+    ],
+    "zhuyinFrom": "word",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/1965-1.mp3"
    },
    "korean": {
     "hangul": "생채",
@@ -91837,44 +91465,6 @@
    }
   },
   {
-   "id": "白米-58668",
-   "hanja": "白米",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "白米",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "白米",
-    "tailo": "pe̍h-bí",
-    "definition": "",
-    "example": null,
-    "audioFile": "25038(1)",
-    "sourceId": "25038",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/25038/"
-   },
-   "korean": {
-    "hangul": "백미",
-    "pronunciation": "뱅미",
-    "definition": "흰 쌀.",
-    "english": "polished rice; milled rice",
-    "chinese": "白米",
-    "example": "엄마는 현미와 백미를 반반씩 섞어서 밥을 지으셨다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 곡류",
-    "sourceId": "58668",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=58668"
-   }
-  },
-  {
    "id": "白色-14430",
    "hanja": "白色",
    "category": "abstract",
@@ -92010,7 +91600,13 @@
     "example": null,
     "audioFile": "1970(1)",
     "sourceId": "1970",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/1970/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/1970/",
+    "zhuyin": [
+     "ㄅㄞˊ",
+     "ㄈㄢˋ"
+    ],
+    "zhuyinFrom": "word",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/1970-1.mp3"
    },
    "korean": {
     "hangul": "백반",
@@ -94168,7 +93764,13 @@
     "example": null,
     "audioFile": "13986(1)",
     "sourceId": "13986",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/13986/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/13986/",
+    "zhuyin": [
+     "ㄕˊ",
+     "ㄏㄨㄚ"
+    ],
+    "zhuyinFrom": "characters",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/13986-1.mp3"
    },
    "korean": {
     "hangul": "석화",
@@ -97597,44 +97199,6 @@
    }
   },
   {
-   "id": "竹筍-76704",
-   "hanja": "竹筍",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "竹笋",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "竹筍",
-    "tailo": "tik-sún",
-    "definition": "竹子地下莖所生的嫩芽。可供食用，亦可入藥，有消渴、利尿的療效。",
-    "example": null,
-    "audioFile": "2747(1)",
-    "sourceId": "2747",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/2747/"
-   },
-   "korean": {
-    "hangul": "죽순",
-    "pronunciation": "죽쑨",
-    "definition": "대나무의 땅속줄기에서 돋아나는 어린싹.",
-    "english": "bamboo shoot",
-    "chinese": "竹笋",
-    "example": "모든 대나무의 죽순을 식용할 수 있는 것은 아니다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "76704",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=76704"
-   }
-  },
-  {
    "id": "符合-59971",
    "hanja": "符合",
    "category": "abstract",
@@ -98910,44 +98474,6 @@
     "semantic": "삶 > 병과 증상",
     "sourceId": "49468",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=49468"
-   }
-  },
-  {
-   "id": "糧食-90588",
-   "hanja": "糧食",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "粮食",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "糧食",
-    "tailo": "niû-si̍t",
-    "definition": "",
-    "example": null,
-    "audioFile": "23538(1)",
-    "sourceId": "23538",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/23538/"
-   },
-   "korean": {
-    "hangul": "양식",
-    "pronunciation": "양식",
-    "definition": "살기 위해 필요한 사람의 먹을거리.",
-    "english": "food",
-    "chinese": "粮食",
-    "example": "지독한 흉년으로 마을 사람들은 모두 겨울을 지낼 양식이 없어서 걱정했다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 곡류",
-    "sourceId": "90588",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=90588"
    }
   },
   {
@@ -104505,44 +104031,6 @@
    }
   },
   {
-   "id": "肉脯-71064",
-   "hanja": "肉脯",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "肉脯",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "肉脯",
-    "tailo": "bah-póo",
-    "definition": "肉干。用肉類焙乾製造而成的片狀食品。",
-    "example": null,
-    "audioFile": "2726(1)",
-    "sourceId": "2726",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/2726/"
-   },
-   "korean": {
-    "hangul": "육포",
-    "pronunciation": "육포",
-    "definition": "쇠고기를 얇게 썰어서 말린 것.",
-    "english": "beef jerky",
-    "chinese": "肉脯",
-    "example": "고기를 오랫동안 저장하는 방법 중 하나는 얇게 썰어서 말려 육포로 만드는 것이다.",
-    "level": "없음",
-    "pos": "명사",
-    "semantic": "식생활 > 음식",
-    "sourceId": "71064",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=71064"
-   }
-  },
-  {
    "id": "肉質-71053",
    "hanja": "肉質",
    "category": "everyday",
@@ -104578,44 +104066,6 @@
     "semantic": "",
     "sourceId": "71053",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=71053"
-   }
-  },
-  {
-   "id": "肉類-70338",
-   "hanja": "肉類",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "肉类",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "肉類",
-    "tailo": "bah-luī",
-    "definition": "",
-    "example": null,
-    "audioFile": "26128(1)",
-    "sourceId": "26128",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/26128/"
-   },
-   "korean": {
-    "hangul": "육류",
-    "pronunciation": "융뉴",
-    "definition": "사람이 먹을 수 있는 소, 돼지, 닭 등의 고기 종류.",
-    "english": "meat; poultry",
-    "chinese": "肉类",
-    "example": "요즘은 건강을 위해 육류를 피하는 사람들이 늘고 있다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "70338",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=70338"
    }
   },
   {
@@ -107060,7 +106510,13 @@
     "example": null,
     "audioFile": "4465(1)",
     "sourceId": "4465",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/4465/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/4465/",
+    "zhuyin": [
+     "ㄏㄨㄚ",
+     "ㄘㄞˋ"
+    ],
+    "zhuyinFrom": "characters",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/4465-1.mp3"
    },
    "korean": {
     "hangul": "화채",
@@ -107744,48 +107200,6 @@
     "semantic": "동식물 > 식물류",
     "sourceId": "83910",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=83910"
-   }
-  },
-  {
-   "id": "菜蔬-72036",
-   "hanja": "菜蔬",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "菜，蔬菜",
-    "translationIsSameWord": false,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "菜蔬",
-    "tailo": "tshài-se",
-    "definition": "蔬菜。一切可供食用的青菜瓜果。",
-    "example": {
-     "han": "伊愛食菜蔬，無愛食肉。",
-     "tailo": "I ài tsia̍h tshài-se, bô ài tsia̍h bah.",
-     "zh": "他喜歡吃蔬菜，不喜歡吃肉。"
-    },
-    "audioFile": "8968(1)",
-    "sourceId": "8968",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/8968/"
-   },
-   "korean": {
-    "hangul": "채소",
-    "pronunciation": "채ː소",
-    "definition": "밭에서 기르며 주로 그 잎이나 줄기, 열매를 먹는 농작물.",
-    "english": "vegetable",
-    "chinese": "菜，蔬菜",
-    "example": "엄마는 옥상에 작은 밭을 만들어 직접 채소를 가꾸신다.",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 채소",
-    "sourceId": "72036",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=72036"
    }
   },
   {
@@ -108643,82 +108057,6 @@
    }
   },
   {
-   "id": "葡萄-62808",
-   "hanja": "葡萄",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "葡萄",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "葡萄",
-    "tailo": "phû-tô",
-    "definition": "水果名。呈球形或者橢圓形，為紫色或淡綠色，果肉半透明，酸甜多汁，可以生食、乾製和釀酒。",
-    "example": null,
-    "audioFile": "9985(1)",
-    "sourceId": "9985",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/9985/"
-   },
-   "korean": {
-    "hangul": "포도",
-    "pronunciation": "포도",
-    "definition": "달면서도 약간 신맛이 나는 작은 열매가 뭉쳐서 송이를 이루는 보라색 과일.",
-    "english": "grape",
-    "chinese": "葡萄",
-    "example": "포도 한 송이에 얼마죠?",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 과일",
-    "sourceId": "62808",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=62808"
-   }
-  },
-  {
-   "id": "葡萄酒-71345",
-   "hanja": "葡萄酒",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "葡萄酒",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "葡萄酒",
-    "tailo": "phû-tô-tsiú",
-    "definition": "以葡萄釀製的酒類。",
-    "example": null,
-    "audioFile": "9986(1)",
-    "sourceId": "9986",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/9986/"
-   },
-   "korean": {
-    "hangul": "포도주",
-    "pronunciation": "포도주",
-    "definition": "포도를 원료로 하여 만든 술.",
-    "english": "wine",
-    "chinese": "葡萄酒",
-    "example": "나는 작년에 담가 놓았던 포도주를 꺼내 마셨다.",
-    "level": "중급",
-    "pos": "명사",
-    "semantic": "식생활 > 음료",
-    "sourceId": "71345",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=71345"
-   }
-  },
-  {
    "id": "薄命-57285",
    "hanja": "薄命",
    "category": "everyday",
@@ -108754,44 +108092,6 @@
     "semantic": "삶 > 삶의 상태",
     "sourceId": "57285",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=57285"
-   }
-  },
-  {
-   "id": "薄荷-601914",
-   "hanja": "薄荷",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "薄荷",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "薄荷",
-    "tailo": "po̍k-hô",
-    "definition": "草本植物。莖和葉子有清涼的香味，可以入藥，也可提煉成芳香化合物加在食品中。",
-    "example": null,
-    "audioFile": "12323(1)",
-    "sourceId": "12323",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/12323/"
-   },
-   "korean": {
-    "hangul": "박하",
-    "pronunciation": "바카",
-    "definition": "향신료로 널리 쓰이는 상쾌한 향과 시원한 맛의 풀.",
-    "english": "peppermint",
-    "chinese": "薄荷",
-    "example": "나는 박하 향처럼 상쾌한 냄새가 나는 샴푸를 좋아한다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "601914",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=601914"
    }
   },
   {
@@ -109188,48 +108488,6 @@
     "semantic": "삶 > 약품류",
     "sourceId": "67009",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=67009"
-   }
-  },
-  {
-   "id": "藥酒-17448",
-   "hanja": "藥酒",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "药酒，补酒",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "藥酒",
-    "tailo": "io̍h-tsiú",
-    "definition": "以各種藥材浸泡製成的酒。",
-    "example": {
-     "han": "伊相信食藥酒會補身體。",
-     "tailo": "I siong-sìn tsia̍h io̍h-tsiú ē póo sin-thé.",
-     "zh": "他相信喝藥酒能補身體。"
-    },
-    "audioFile": "12854(1)",
-    "sourceId": "12854",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/12854/"
-   },
-   "korean": {
-    "hangul": "약주",
-    "pronunciation": "약쭈",
-    "definition": "약으로 마시는 술.",
-    "english": "medicinal wine",
-    "chinese": "药酒，补酒",
-    "example": "이 술은 몸에 좋아 약주라 불린다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 음료",
-    "sourceId": "17448",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=17448"
    }
   },
   {
@@ -111220,44 +110478,6 @@
     "semantic": "과학 > 과학 및 기술",
     "sourceId": "91698",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=91698"
-   }
-  },
-  {
-   "id": "補藥-59306",
-   "hanja": "補藥",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "补药",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "補藥",
-    "tailo": "póo-io̍h",
-    "definition": "滋養身體的藥物或食物。",
-    "example": null,
-    "audioFile": "10047(1)",
-    "sourceId": "10047",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/10047/"
-   },
-   "korean": {
-    "hangul": "보약",
-    "pronunciation": "보ː약",
-    "definition": "몸의 기운을 높여 주고 건강하도록 도와주는 약.",
-    "english": "invigorant; tonic",
-    "chinese": "补药",
-    "example": "어머니는 몸이 약한 자식을 위해 정성스럽게 보약을 달이셨다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 음식",
-    "sourceId": "59306",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=59306"
    }
   },
   {
@@ -115711,44 +114931,6 @@
    }
   },
   {
-   "id": "調理-75433",
-   "hanja": "調理",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "调理，调养",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "調理",
-    "tailo": "tiâu-lí",
-    "definition": "",
-    "example": null,
-    "audioFile": "26664(1)",
-    "sourceId": "26664",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/26664/"
-   },
-   "korean": {
-    "hangul": "조리",
-    "pronunciation": "조리",
-    "definition": "건강을 되찾도록 몸을 보살피거나 병을 낫게 함.",
-    "english": "care",
-    "chinese": "调理，调养",
-    "example": "지수는 출산 후 친정에서 조리를 할 생각이다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식사 및 조리 행위",
-    "sourceId": "75433",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=75433"
-   }
-  },
-  {
    "id": "談判-18418",
    "hanja": "談判",
    "category": "technology",
@@ -118348,48 +117530,6 @@
     "semantic": "식생활 > 음료",
     "sourceId": "46812",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=46812"
-   }
-  },
-  {
-   "id": "豆腐-45275",
-   "hanja": "豆腐",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "豆腐",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "豆腐",
-    "tailo": "tāu-hū",
-    "definition": "黃豆磨成豆汁之後，再加工製成的食品。",
-    "example": {
-     "han": "豆腐豉鹽來煎真好食。",
-     "tailo": "Tāu-hū sīnn-iâm lâi tsian tsin hó-tsia̍h.",
-     "zh": "豆腐醃鹽來煎很好吃。"
-    },
-    "audioFile": "3490(1)",
-    "sourceId": "3490",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/3490/"
-   },
-   "korean": {
-    "hangul": "두부",
-    "pronunciation": "두부",
-    "definition": "콩을 갈아서 만든 희고 부드러운 음식.",
-    "english": "tofu",
-    "chinese": "豆腐",
-    "example": "오늘 아침에는 두부를 넣고 된장국을 끓여 먹었다.",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "45275",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=45275"
    }
   },
   {
@@ -122786,44 +121926,6 @@
     "semantic": "경제 생활 > 경제 행위 주체",
     "sourceId": "28581",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=28581"
-   }
-  },
-  {
-   "id": "農藥-43843",
-   "hanja": "農藥",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "农药",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "農藥",
-    "tailo": "lông-io̍h",
-    "definition": "",
-    "example": null,
-    "audioFile": "22840(1)",
-    "sourceId": "22840",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/22840/"
-   },
-   "korean": {
-    "hangul": "농약",
-    "pronunciation": "농약",
-    "definition": "농작물에 해로운 벌레, 잡초 등을 없애는 약품.",
-    "english": "agricultural chemicals; agrichemicals",
-    "chinese": "农药",
-    "example": "독한 농약을 뿌렸더니 온갖 해로운 벌레와 잡초가 금방 사라졌다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "43843",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=43843"
    }
   },
   {
@@ -131631,44 +130733,6 @@
    }
   },
   {
-   "id": "防腐劑-57838",
-   "hanja": "防腐劑",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "防腐剂",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "防腐劑",
-    "tailo": "hông-hú-tse",
-    "definition": "一種防止東西腐敗的藥劑。",
-    "example": null,
-    "audioFile": "3491(1)",
-    "sourceId": "3491",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/3491/"
-   },
-   "korean": {
-    "hangul": "방부제",
-    "pronunciation": "방부제",
-    "definition": "미생물의 활동을 막아 음식이나 화장품, 약품 등이 썩지 않게 하는 물질.",
-    "english": "preservative",
-    "chinese": "防腐剂",
-    "example": "이 식품은 방부제를 전혀 첨가하지 않은 천연 식품이다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식사 및 조리 행위",
-    "sourceId": "57838",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=57838"
-   }
-  },
-  {
    "id": "防衛-58119",
    "hanja": "防衛",
    "category": "society",
@@ -133467,48 +132531,6 @@
    }
   },
   {
-   "id": "雞卵-15355",
-   "hanja": "雞卵",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": true,
-    "krdictChineseTranslation": "鸡蛋",
-    "translationIsSameWord": false,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "雞卵",
-    "tailo": "ke-nn̄g/kue-nn̄g",
-    "definition": "雞蛋。",
-    "example": {
-     "han": "我欲去買雞卵。",
-     "tailo": "Guá beh khì bé ke-nn̄g.",
-     "zh": "我要去買雞蛋。"
-    },
-    "audioFile": "12679(1)",
-    "sourceId": "12679",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/12679/"
-   },
-   "korean": {
-    "hangul": "계란",
-    "pronunciation": "계란",
-    "definition": "닭의 알.",
-    "english": "egg",
-    "chinese": "鸡蛋",
-    "example": "끓는 물에 계란을 완전히 익힌 것을 완숙이라고 한다.",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "15355",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=15355"
-   }
-  },
-  {
    "id": "離別-24895",
    "hanja": "離別",
    "category": "society",
@@ -134506,44 +133528,6 @@
     "semantic": "인간 > 인지 행위",
     "sourceId": "67670",
     "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=67670"
-   }
-  },
-  {
-   "id": "靈芝-21997",
-   "hanja": "靈芝",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "灵芝",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": true,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "靈芝",
-    "tailo": "lîng-tsi",
-    "definition": "蕈菇類。實體有一長柄，上面有一腎形菌蓋，呈現黑褐色，有環形雲紋。蓋上有許多細孔，呈白色或淡褐色。古代以靈芝為仙草，服食後可駐顏不老，具起死回生的神效。",
-    "example": null,
-    "audioFile": "13341(1)",
-    "sourceId": "13341",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/13341/"
-   },
-   "korean": {
-    "hangul": "영지",
-    "pronunciation": "영지",
-    "definition": "십 센티미터 정도의 줄기에 심장 모양이나 원형의 갓이 있고 붉은 갈색의 윤이 나는, 약으로 쓰는 버섯.",
-    "english": "Reishi mushroom",
-    "chinese": "灵芝",
-    "example": "아버지는 편찮으신 할아버지를 위해 약으로 쓸 영지를 사 오셨다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "21997",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=21997"
    }
   },
   {
@@ -136217,44 +135201,6 @@
    }
   },
   {
-   "id": "風味-84402",
-   "hanja": "風味",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "风味",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "風味",
-    "tailo": "hong-bī",
-    "definition": "",
-    "example": null,
-    "audioFile": "22929(1)",
-    "sourceId": "22929",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/22929/"
-   },
-   "korean": {
-    "hangul": "풍미",
-    "pronunciation": "풍미",
-    "definition": "음식의 고급스러운 맛.",
-    "english": "flavor; savor",
-    "chinese": "风味",
-    "example": "우리는 술의 풍미를 음미하며 밤새 이야기를 나눴다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식사 및 조리 행위",
-    "sourceId": "84402",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=84402"
-   }
-  },
-  {
    "id": "風水-84417",
    "hanja": "風水",
    "category": "nature",
@@ -136685,82 +135631,6 @@
    }
   },
   {
-   "id": "食品-66277",
-   "hanja": "食品",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "食品",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "食品",
-    "tailo": "si̍t-phín",
-    "definition": "指可以供食用的物品。",
-    "example": null,
-    "audioFile": "5607(1)",
-    "sourceId": "5607",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/5607/"
-   },
-   "korean": {
-    "hangul": "식품",
-    "pronunciation": "식품",
-    "definition": "사람이 먹는 음식물.",
-    "english": "food",
-    "chinese": "食品",
-    "example": "최근 환자를 위한 다양한 영양 식품들이 판매되고 있다.",
-    "level": "초급",
-    "pos": "명사",
-    "semantic": "식생활 > 식재료",
-    "sourceId": "66277",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=66277"
-   }
-  },
-  {
-   "id": "食用-90743",
-   "hanja": "食用",
-   "category": "food",
-   "status": "dictionary_matched",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "食用",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "臺華共同詞",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "食用",
-    "tailo": "si̍t-iōng",
-    "definition": "",
-    "example": null,
-    "audioFile": "22372(1)",
-    "sourceId": "22372",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/22372/"
-   },
-   "korean": {
-    "hangul": "식용",
-    "pronunciation": "시굥",
-    "definition": "먹을 것으로 씀. 또는 그런 것.",
-    "english": "being edible",
-    "chinese": "食用",
-    "example": "할머니는 마당에서 식용으로 닭을 기르신다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 식사 및 조리 행위",
-    "sourceId": "90743",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=90743"
-   }
-  },
-  {
    "id": "食醋-65326",
    "hanja": "食醋",
    "category": "food",
@@ -137094,7 +135964,13 @@
     "example": null,
     "audioFile": "12937(1)",
     "sourceId": "12937",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/12937/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/12937/",
+    "zhuyin": [
+     "ㄇㄢˊ",
+     "˙ㄊㄡ"
+    ],
+    "zhuyinFrom": "word",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/12937-1.mp3"
    },
    "korean": {
     "hangul": "만두",
@@ -138343,44 +137219,6 @@
    }
   },
   {
-   "id": "高粱酒-23655",
-   "hanja": "高粱酒",
-   "category": "food",
-   "status": "candidate",
-   "evidence": {
-    "sameWrittenForm": true,
-    "variantNormalised": false,
-    "krdictChineseTranslation": "高粱酒",
-    "translationIsSameWord": true,
-    "taiwaneseEntryType": "主詞目",
-    "taiwaneseDefinitionHasWord": false,
-    "assistantCompared": false,
-    "editorReviewed": false
-   },
-   "taiwanese": {
-    "written": "高粱酒",
-    "tailo": "kau-liâng-tsiú",
-    "definition": "由高粱所釀成的酒。",
-    "example": null,
-    "audioFile": "6867(1)",
-    "sourceId": "6867",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/6867/"
-   },
-   "korean": {
-    "hangul": "고량주",
-    "pronunciation": "고량주",
-    "definition": "수수로 만든 알코올 농도 60% 내외의 중국식 소주.",
-    "english": "kaoliang spirits; kaoliang liquor",
-    "chinese": "高粱酒",
-    "example": "고량주를 마신 사람들은 금세 모두 얼굴이 빨개졌다.",
-    "level": "고급",
-    "pos": "명사",
-    "semantic": "식생활 > 음료",
-    "sourceId": "23655",
-    "url": "https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=23655"
-   }
-  },
-  {
    "id": "高級-28073",
    "hanja": "高級",
    "category": "abstract",
@@ -138866,7 +137704,13 @@
     "example": null,
     "audioFile": "13256(1)",
     "sourceId": "13256",
-    "url": "https://sutian.moe.edu.tw/zh-hant/su/13256/"
+    "url": "https://sutian.moe.edu.tw/zh-hant/su/13256/",
+    "zhuyin": [
+     "ㄌㄧㄢˊ",
+     "ㄩˊ"
+    ],
+    "zhuyinFrom": "word",
+    "audio": "/experiments/w1/phonetic-echo/audio/tw/13256-1.mp3"
    },
    "korean": {
     "hangul": "연어",
