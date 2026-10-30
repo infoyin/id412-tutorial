@@ -6,9 +6,9 @@ import type { Entry } from "./words";
 import styles from "./page.module.css";
 
 // The row of rectangles at the top left: the title (paper), INFO (ink) and INDEX (gray).
-// Clicking INFO or INDEX grows it down into a tall block of the same colour; INDEX also widens
-// to the right so the word list can spread out in columns. One open at a time; click the tab
-// again or press Esc to fold it back.
+// Clicking INFO or INDEX unfolds a tall block of the same colour from under the tab toward the
+// middle of the screen. One open at a time; click the tab again, click anywhere outside the
+// block, or press Esc to fold it back. The page keeps floating words out of this row.
 
 type Tab = "info" | "index";
 
@@ -28,7 +28,7 @@ export function Menu(props: Props) {
   }, []);
 
   const tab = (id: Tab, title: string, sub: string, content: React.ReactNode) => (
-    <div className={`${styles.tab} ${id === "info" ? styles.tabInfo : styles.tabIndex} ${open === id ? styles.tabOpen : ""}`}>
+    <div className={`${styles.tab} ${id === "info" ? styles.tabInfo : styles.tabIndex}`}>
       <button className={styles.tabLabel} onClick={() => setOpen(open === id ? null : id)} aria-expanded={open === id}>
         <span>{title}</span>
         <span>{sub}</span>
@@ -38,7 +38,8 @@ export function Menu(props: Props) {
   );
 
   return (
-    <nav className={styles.menu} aria-label="PHONETIC ECHO · INFO · INDEX">
+    <nav className={styles.menu} aria-label="PHONETIC ECHO · INFO · INDEX" data-menu>
+      {open && <div className={styles.backdrop} onClick={() => setOpen(null)} />}
       <div className={`${styles.tab} ${styles.tabTitle}`}>
         <div className={styles.tabLabel}>
           <span>PHONETIC ECHO</span>

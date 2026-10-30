@@ -325,9 +325,12 @@
   }
 }
 
-/* ---- INFO / INDEX tabs: rectangles that grow down into tall blocks ---- */
+/* ---- Title, INFO, INDEX: a row of rectangles; INFO / INDEX open a tall block below ---- */
 
 .menu {
+  --tab-h: 80px;
+  --title-w: 240px;
+  --tab-w: 200px;
   position: absolute;
   top: 0;
   left: 0;
@@ -338,12 +341,16 @@
 }
 
 .tab {
-  width: 200px;
-  height: 80px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.5s cubic-bezier(0.65, 0, 0.25, 1), height 0.6s cubic-bezier(0.65, 0, 0.25, 1);
+  position: relative;
+  width: var(--tab-w);
+  height: var(--tab-h);
+}
+
+.tabTitle {
+  width: var(--title-w);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 
 .tabInfo {
@@ -356,51 +363,33 @@
   color: var(--ink);
 }
 
-.tabOpen {
-  width: min(440px, 100vw);
-  height: 100vh;
+/* ".menu" raises specificity above ".root button { font: inherit }", so the title and both
+   tabs get exactly the same size, spacing and line height. */
+.menu .tabLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  padding: 13px 14px;
+  border: none;
+  background: none;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-/* INDEX spreads out to the right. */
-.tabIndex.tabOpen {
-  width: min(1040px, calc(100vw - 400px)); /* the title and INFO tabs take 400px */
-}
-
-/* The title: same rectangle, paper colour, not clickable. */
-.tabTitle {
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1.5px var(--ink);
+.menu .tabLabel span:first-child {
+  font-size: 22px;
 }
 
 .tabTitle .tabLabel {
   cursor: default;
-}
-
-.tabTitle .tabLabel span:first-child {
-  font-size: 17px;
-  letter-spacing: 0.06em;
-}
-
-.tabLabel {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 10px 14px;
-  border: none;
-  background: none;
-  font-weight: 700 !important;
-  font-size: 18px !important;
-  line-height: 1.1;
-  text-align: left;
-  cursor: pointer;
-}
-
-.tabLabel span:first-child {
-  font-size: 22px;
-  letter-spacing: 0.02em;
 }
 
 .tabLabel:focus-visible {
@@ -408,18 +397,62 @@
   outline-offset: -4px;
 }
 
+/* The opened block: same colour as its tab, growing out from the tab's corner toward the
+   middle of the screen. */
 .tabBody {
-  flex: 1;
+  position: absolute;
+  top: var(--tab-h);
+  left: 0;
+  height: calc(100vh - var(--tab-h));
   overflow-y: auto;
-  padding: 8px 14px 40px;
-  animation: appear 0.6s ease 0.35s both;
+  padding: 8px 18px 40px;
+  background: inherit;
+  color: inherit;
+  animation: unfold 0.55s cubic-bezier(0.65, 0, 0.25, 1) both;
+}
+
+.tabInfo .tabBody {
+  width: min(1000px, calc(100vw - var(--title-w) - 24px));
+}
+
+.tabIndex .tabBody {
+  width: min(1040px, calc(100vw - var(--title-w) - var(--tab-w)));
+}
+
+@keyframes unfold {
+  from { clip-path: inset(0 100% 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Clicking anywhere outside the open block closes it. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
 }
 
 /* INFO content */
 
+.info {
+  columns: 300px;
+  column-gap: 32px;
+}
+
 .info section {
+  break-inside: avoid;
   padding: 14px 0 18px;
   border-top: 1px solid currentColor;
+}
+
+/* The opening paragraph runs across all columns. */
+.info .lead {
+  column-span: all;
+  border-top: none;
+}
+
+.info .lead p {
+  max-width: 760px;
+  font-size: 15px;
 }
 
 .info h3 {
@@ -512,7 +545,7 @@
 }
 
 .indexColumns {
-  columns: 220px;
+  columns: 200px;
   column-gap: 14px;
 }
 
@@ -681,11 +714,21 @@
 }
 
 @media (max-width: 760px) {
-  .tab {
-    width: 33.4vw;
+  .menu {
+    --title-w: 34vw;
+    --tab-w: 33vw;
   }
-  .tabIndex.tabOpen {
-    width: 100vw;
+  .menu .tabLabel {
+    font-size: 12px;
+    padding: 12px 10px;
+  }
+  .menu .tabLabel span:first-child {
+    font-size: 14px;
+  }
+  .tabBody {
+    position: fixed;
+    left: 0;
+    width: 100vw !important;
   }
   .indexLayout {
     grid-template-columns: 1fr;
@@ -693,9 +736,6 @@
   .indexPane {
     order: -1;
     position: static;
-  }
-  .tabOpen {
-    width: 100vw;
   }
 }
 

@@ -32,6 +32,8 @@ export class Wheel {
   pull = 0; // -1…1, smoothed; read by the physics as gravity
   selected = 0;
   count = 1;
+  hovered = false; // pointer over the wheel: it grows a little
+  private hover = 0;
   private pullTarget = 0;
   private dragging = false;
   private start = { x: 0, y: 0, t: 0 };
@@ -52,7 +54,7 @@ export class Wheel {
   // (wide screens), or wheel on top and annotation below (narrow screens).
   geometry(w: number, h: number, open = this.open) {
     const r0 = Math.min(Math.max(h * 0.34, 130), 300, w * 0.34);
-    const closed = { x: r0 * 0.22, y: h / 2, r: r0 };
+    const closed = { x: r0 * 0.22, y: h / 2, r: r0 * (1 + 0.05 * this.hover) };
     const rWide = Math.min(h * 0.38, 340, (w - NOTE_WIDTH - GAP - 64) / 2);
     const wide = rWide >= 170;
     let target: { x: number; y: number; r: number };
@@ -158,6 +160,7 @@ export class Wheel {
 
   update(dt: number) {
     this.open = smooth(this.open, this.isOpen ? 1 : 0, 3.2, dt);
+    this.hover = smooth(this.hover, (this.hovered || this.dragging) && !this.isOpen ? 1 : 0, 8, dt);
     // Gravity follows the pull quickly while held, and lingers after letting go.
     this.pull = smooth(this.pull, this.pullTarget, this.dragging ? 3 : 0.7, dt);
     if (this.dragging) return;
@@ -268,6 +271,33 @@ export class Wheel {
       const from = -Math.PI / 2 + 0.12; // top of the wheel; down-pull grows clockwise
       ctx.arc(0, 0, r * 1.03, from, from + this.pull * Math.PI * 0.9, this.pull < 0);
       ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // Two curved arrows along the rim, top and bottom of the visible side: "turn me".
+    // They point clockwise, the way a downward drag turns the wheel.
+    if (e < 0.99) {
+      ctx.globalAlpha = 1 - e;
+      ctx.strokeStyle = theme.ink;
+      ctx.fillStyle = theme.ink;
+      ctx.lineWidth = 1.5;
+      const rr = r * 1.1;
+      for (const [from, to] of [[-1.75, -1.12], [0.95, 1.5]]) {
+        ctx.beginPath();
+        ctx.arc(0, 0, rr, from, to);
+        ctx.stroke();
+        // Arrowhead at the end, pointing along the circle.
+        const x = Math.cos(to) * rr;
+        const y = Math.sin(to) * rr;
+        const tx = -Math.sin(to);
+        const ty = Math.cos(to);
+        ctx.beginPath();
+        ctx.moveTo(x + tx * 9, y + ty * 9);
+        ctx.lineTo(x - ty * 5, y + tx * 5);
+        ctx.lineTo(x + ty * 5, y - tx * 5);
+        ctx.closePath();
+        ctx.fill();
+      }
       ctx.globalAlpha = 1;
     }
 

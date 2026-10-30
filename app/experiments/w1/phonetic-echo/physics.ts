@@ -75,6 +75,7 @@ export class World {
   energy = 0; // smoothed speed of the dragged block, px/s
   left = 0; // keep new homes right of this (the wheel)
   obstacle: Circle = { x: 0, y: 0, r: 0 };
+  keepOut = { w: 0, h: 0 }; // the menu row in the top-left corner
   private pending: { at: number; entries: Entry[] } | null = null;
   private time = 0;
   measure: (b: Block) => void = () => {};
@@ -481,6 +482,21 @@ export class World {
           b.x = m + b.w / 2;
           if (b.vx < 0) b.vx *= -bounce;
           if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
+        }
+      }
+      // Keep out of the menu row at the top left: push out along the shallower side.
+      const free = b !== this.held && !b.entering && !b.pair.leaving;
+      const ox = this.keepOut.w + b.w / 2 + 8 - b.x;
+      const oy = this.keepOut.h + b.h / 2 + 8 - b.y;
+      if (free && ox > 0 && oy > 0) {
+        if (ox < oy) {
+          b.x += ox;
+          if (b.vx < 0) b.vx *= -bounce;
+          if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
+        } else {
+          b.y += oy;
+          if (b.vy < 0) b.vy *= -bounce;
+          if (Math.sin(b.drift) < 0) b.drift = -b.drift;
         }
       }
       // Keep out of the wheel.

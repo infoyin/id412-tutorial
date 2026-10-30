@@ -132,8 +132,11 @@ export default function PhoneticEcho() {
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.038, 16), 30));
+      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.044, 18), 34));
       world.resize(innerWidth, innerHeight);
+      // Floating words stay out of the menu row (title, INFO, INDEX).
+      const menu = document.querySelector("[data-menu]")?.getBoundingClientRect();
+      world.keepOut = { w: menu?.right ?? 0, h: menu?.bottom ?? 0 };
       const closed = wheel.geometry(innerWidth, innerHeight, 0);
       world.left = closed.x + closed.r + 32;
       const g = wheel.geometry(innerWidth, innerHeight, 1);
@@ -160,7 +163,8 @@ export default function PhoneticEcho() {
       pointer.inside = true;
       lastMove = now;
       if (target === "wheel") wheel.move(e.clientX, e.clientY, innerWidth, innerHeight);
-      const over = wheel.hit(e.clientX, e.clientY, innerWidth, innerHeight) || (!wheel.isOpen && world.blockAt(e.clientX, e.clientY));
+      wheel.hovered = wheel.hit(e.clientX, e.clientY, innerWidth, innerHeight);
+      const over = wheel.hovered || (!wheel.isOpen && world.blockAt(e.clientX, e.clientY));
       canvas.style.cursor = target ? "grabbing" : over ? "grab" : "default";
     };
     const onDown = (e: PointerEvent) => {
@@ -192,6 +196,7 @@ export default function PhoneticEcho() {
     };
     const onLeave = () => {
       pointer.inside = false;
+      wheel.hovered = false;
     };
     const onKey = (e: KeyboardEvent) => {
       if (!wheel.isOpen) return;
