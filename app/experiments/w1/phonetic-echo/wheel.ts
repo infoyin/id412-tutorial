@@ -271,8 +271,10 @@ export class Wheel {
     ctx.fillStyle = INK;
     ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.05, 10))));
     if (e > 0.5) {
-      ctx.fillText("×", 0, -r * 0.06);
-      ctx.fillText("back · 返回 · 돌아가기", 0, r * 0.07);
+      // Three short lines so they fit inside the hub.
+      ctx.fillText("×", 0, -r * 0.08);
+      ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.036, 9))));
+      ["back", "返回", "돌아가기"].forEach((line, i) => ctx.fillText(line, 0, r * (0.0 + i * 0.055)));
     } else {
       ctx.textAlign = "left";
       ctx.fillText("↓ 重力 · 중력", -r * 0.1, -r * 0.34);
