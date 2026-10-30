@@ -1512,7 +1512,10 @@
 }
 
 .clock b {
-  margin-right: 6px;
+  margin-right: 2px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
 }
 
 @media (max-width: 760px) {

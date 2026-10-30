@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 // Top right: the time in Taipei, now and then the time in Seoul (in Korean), one hour apart.
-//   臺北 2026.10.31（六）11:32:54 AM   ↔   서울 2026.10.31 (토) 오후 12:32:54
+//   🇹🇼 2026.10.31（六）11:32:54 AM   ↔   🇰🇷 2026.10.31 (토) 오후 12:32:54
 // Rendered only after mount, so the server's time never mismatches the browser's.
 
 const SWITCH = 6; // seconds each city is shown
@@ -45,11 +45,11 @@ export function Clock() {
     <p className={styles.clock} aria-live="off" data-clock>
       {korean ? (
         <span key="ko" lang="ko">
-          <b>서울</b> {t.date} ({KO_DAYS[t.day]}) {t.pm ? "오후" : "오전"} {t.time}
+          <b aria-label="서울">🇰🇷</b> {t.date} ({KO_DAYS[t.day]}) {t.pm ? "오후" : "오전"} {t.time}
         </span>
       ) : (
         <span key="zh" lang="zh-Hant">
-          <b>臺北</b> {t.date}（{ZH_DAYS[t.day]}）{t.time} {t.pm ? "PM" : "AM"}
+          <b aria-label="臺北">🇹🇼</b> {t.date}（{ZH_DAYS[t.day]}）{t.time} {t.pm ? "PM" : "AM"}
         </span>
       )}
     </p>
