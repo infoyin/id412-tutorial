@@ -1,33 +1,51 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { playPair, setMuted, stop } from "./audio";
+import { getPlaying, koreanVoiceStatus, onPlaying, playOne, playPair, setMuted, stop, type Lang, type Playing } from "./audio";
 import { drawField, FONT, LATIN } from "./draw";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
-import { TUNING } from "./settings";
+import { pairCount, TUNING } from "./settings";
 import { Wheel } from "./wheel";
-import { ENTRIES, VERIFIED, type Entry } from "./words";
+import { Rotation, type Entry } from "./words";
 import styles from "./page.module.css";
 
 // PHONETIC ECHO — Taiwanese and Korean words that share Chinese characters, as outlined paper
-// blocks floating on a white field. Drag a word to its partner: they attract, resonate, dock and
-// fill black. Pull the half-hidden wheel on the left down and the field falls; click it to open
-// the comparison wheel.
+// blocks on a white field. Drag a word to its partner: they attract, resonate, dock, fill black
+// and are pronounced. The half-hidden wheel on the left: drag = gravity, fling = scatter the
+// field and bring new words, click = the comparison wheel, where each word can be replayed.
 
 export default function PhoneticEcho() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const worldRef = useRef<World | null>(null);
   const wheelRef = useRef<Wheel | null>(null);
+  const shownRef = useRef<Entry[]>([]);
+  const flingRef = useRef<(strength: number, dir: number) => void>(() => {});
+  const [shown, setShown] = useState<Entry[]>([]);
+  const [selectedId, setSelectedState] = useState<string | null>(null);
+  const selectedRef = useRef<string | null>(null); // the same, readable from the event handlers
+  const setSelectedId = (id: string | null) => {
+    selectedRef.current = id;
+    setSelectedState(id);
+  };
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(0);
   const [place, setPlace] = useState({ left: 0, top: 0, wide: true });
   const [muted, setMutedState] = useState(false);
   const [started, setStarted] = useState(false);
   const [announce, setAnnounce] = useState("");
+  const [playing, setPlayingState] = useState<Playing>(null);
+  const [koreanVoice, setKoreanVoice] = useState<boolean | null>(null);
 
   const openWheel = (value: boolean) => {
-    wheelRef.current?.setOpen(value);
+    const wheel = wheelRef.current;
+    if (!wheel) return;
+    if (value) {
+      // Keep the pair last connected or chosen, if it is still on screen.
+      const i = shownRef.current.findIndex((e) => e.id === selectedRef.current);
+      wheel.select(Math.max(i, 0));
+      setSelectedId(shownRef.current[Math.max(i, 0)]?.id ?? null);
+    }
+    wheel.setOpen(value);
     setOpen(value);
     setStarted(true);
   };
@@ -36,7 +54,7 @@ export default function PhoneticEcho() {
     const wheel = wheelRef.current;
     if (!wheel) return;
     wheel.select(wheel.selected + delta);
-    setSelected(wheel.selected);
+    setSelectedId(shownRef.current[wheel.selected]?.id ?? null);
   };
 
   useEffect(() => {
@@ -44,35 +62,63 @@ export default function PhoneticEcho() {
     const ctx = canvas.getContext("2d")!;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const world = new World(innerWidth, innerHeight);
-    const wheel = new Wheel(ENTRIES.length);
+    const wheel = new Wheel();
+    const rotation = new Rotation();
     worldRef.current = world;
     wheelRef.current = wheel;
-    let fontSize = 0;
+    let fontSize = 24;
+    let lastFling = -Infinity;
 
-    const measure = () => {
-      world.measure(ctx, `500 ${fontSize}px ${FONT}`, `400 ${Math.round(fontSize * 0.36)}px ${LATIN}`, fontSize);
+    // Block size from its text.
+    world.measure = (b) => {
+      ctx.font = `500 ${fontSize}px ${FONT}`;
+      let inner = ctx.measureText(b.text).width;
+      if (b.sub) {
+        ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${LATIN}`;
+        inner = Math.max(inner, ctx.measureText(b.sub).width);
+      }
+      b.w = inner + fontSize * 1.4;
+      b.h = fontSize * 2.4;
     };
+    world.onChange = (entries) => {
+      shownRef.current = entries;
+      wheel.setCount(entries.length);
+      setShown(entries);
+    };
+    world.onConnect = (pair) => {
+      playPair(pair.entry);
+      setSelectedId(pair.entry.id);
+      setAnnounce(`${pair.entry.taiwanese.written} · ${pair.entry.korean.hangul}`);
+    };
+    onPlaying(setPlayingState);
+    const checkVoice = () => setKoreanVoice(koreanVoiceStatus());
+    checkVoice();
+    if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", checkVoice);
+
+    // A fling scatters the field and brings the next words (with a cooldown).
+    flingRef.current = (strength, dir) => {
+      const now = performance.now() / 1000;
+      if (now - lastFling < TUNING.flingCooldown) return;
+      lastFling = now;
+      world.fling(strength, dir, rotation.next(pairCount(innerWidth, innerHeight)));
+    };
+
     const resize = () => {
       const dpr = Math.min(devicePixelRatio || 1, TUNING.maxDpr);
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.042, 18), 34));
+      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.038, 16), 30));
       world.resize(innerWidth, innerHeight);
-      measure();
-      // The annotation sits right of the open wheel, or below it on narrow screens.
+      const closed = wheel.geometry(innerWidth, innerHeight, 0);
+      world.left = closed.x + closed.r + 32;
       const g = wheel.geometry(innerWidth, innerHeight, 1);
-      setPlace(g.wide ? { left: g.x + g.r + 56, top: Math.max(g.y - g.r, 90), wide: true } : { left: 0, top: g.y + g.r + 24, wide: false });
+      setPlace({ ...g.note, wide: g.wide });
     };
     resize();
-    world.scatter(wheel.geometry(innerWidth, innerHeight, 0).r + 40);
-    document.fonts?.ready.then(measure);
+    world.spawn(rotation.next(pairCount(innerWidth, innerHeight)), "home");
+    document.fonts?.ready.then(() => world.blocks.forEach((b) => world.measure(b)));
     window.addEventListener("resize", resize);
-
-    world.onConnect = (i) => {
-      playPair(VERIFIED[i]);
-      setAnnounce(`${VERIFIED[i].taiwanese.written} · ${VERIFIED[i].korean.hangul}`);
-    };
 
     // Pointer: route to the wheel or to a block.
     const pointer: Pointer = { x: -999, y: -999, vx: 0, vy: 0, inside: false };
@@ -90,9 +136,8 @@ export default function PhoneticEcho() {
       pointer.inside = true;
       lastMove = now;
       if (target === "wheel") wheel.move(e.clientX, e.clientY, innerWidth, innerHeight);
-      const overWheel = wheel.hit(e.clientX, e.clientY, innerWidth, innerHeight);
-      const overBlock = !wheel.isOpen && world.blockAt(e.clientX, e.clientY);
-      canvas.style.cursor = target ? "grabbing" : overWheel || overBlock ? "grab" : "default";
+      const over = wheel.hit(e.clientX, e.clientY, innerWidth, innerHeight) || (!wheel.isOpen && world.blockAt(e.clientX, e.clientY));
+      canvas.style.cursor = target ? "grabbing" : over ? "grab" : "default";
     };
     const onDown = (e: PointerEvent) => {
       onMove(e);
@@ -105,17 +150,18 @@ export default function PhoneticEcho() {
       } else if (world.grab(e.clientX, e.clientY)) {
         target = "block";
       }
-      if (target) canvas.setPointerCapture(e.pointerId);
+      if (target) canvas.setPointerCapture(e.pointerId); // keep dragging even off the wheel
     };
     const onUp = (e: PointerEvent) => {
       if (target === "wheel") {
-        const action = wheel.up(e.clientX, e.clientY, innerWidth, innerHeight, ENTRIES);
+        const action = wheel.up(e.clientX, e.clientY, innerWidth, innerHeight);
         if (action?.type === "open") openWheel(true);
         if (action?.type === "close") openWheel(false);
         if (action?.type === "select") {
           wheel.select(action.index);
-          setSelected(action.index);
+          setSelectedId(shownRef.current[action.index]?.id ?? null);
         }
+        if (action?.type === "fling") flingRef.current(action.strength, action.dir);
       }
       if (target === "block") world.release();
       target = null;
@@ -138,7 +184,7 @@ export default function PhoneticEcho() {
 
     let frame = 0;
     let last = performance.now();
-    let shown = -1;
+    let shownSelected = -1;
     const loop = (now: number) => {
       const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
@@ -146,14 +192,15 @@ export default function PhoneticEcho() {
       pointer.vy *= Math.exp(-dt * 6);
       wheel.update(dt);
       const g = wheel.geometry(innerWidth, innerHeight);
-      world.pull = wheel.pull;
+      world.pull = wheel.isOpen ? 0 : wheel.pull;
       world.obstacle = { x: g.x, y: g.y, r: g.r };
-      world.update(dt, now / 1000, pointer, reduced);
-      drawField(ctx, world, fontSize, wheel.open, reduced);
-      wheel.draw(ctx, innerWidth, innerHeight, ENTRIES, `400 SIZEpx ${FONT}`);
-      if (wheel.selected !== shown) {
-        shown = wheel.selected;
-        setSelected(shown);
+      world.update(dt, pointer, reduced);
+      drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced);
+      wheel.draw(ctx, innerWidth, innerHeight, shownRef.current, `400 SIZEpx ${FONT}`);
+      // Turning the open wheel changes the annotation (state only changes when the sector does).
+      if (wheel.isOpen && wheel.selected !== shownSelected) {
+        shownSelected = wheel.selected;
+        setSelectedId(shownRef.current[shownSelected]?.id ?? null);
       }
       frame = requestAnimationFrame(loop);
     };
@@ -168,8 +215,11 @@ export default function PhoneticEcho() {
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
       canvas.removeEventListener("pointerleave", onLeave);
+      if ("speechSynthesis" in window) speechSynthesis.removeEventListener("voiceschanged", checkVoice);
+      onPlaying(() => {});
       stop();
     };
+    // openWheel and step only use refs and state setters, so setting up once is safe.
   }, []);
 
   const toggleSound = () => {
@@ -177,25 +227,31 @@ export default function PhoneticEcho() {
     setMutedState(!muted);
   };
 
+  const entry = shown.find((e) => e.id === selectedId) ?? shown[0] ?? null;
+
   return (
     <main className={styles.root}>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden />
       <Overlay
         started={started}
         open={open}
-        entry={ENTRIES[selected]}
+        entry={entry}
         place={place}
         muted={muted}
+        playing={playing}
+        koreanVoice={koreanVoice}
         announce={announce}
-        pairs={VERIFIED}
+        pairs={shown}
         onToggleSound={toggleSound}
-        onPlay={(entry: Entry) => playPair(entry)}
+        onPlay={(e: Entry, lang: Lang) => playOne(e, lang)}
         onStep={step}
         onOpen={() => openWheel(true)}
         onClose={() => openWheel(false)}
+        onShuffle={() => flingRef.current(1, 1)}
         onBringTogether={(i) => {
           setStarted(true);
-          worldRef.current?.bringTogether(i);
+          const pair = worldRef.current?.current()[i];
+          if (pair) worldRef.current?.bringTogether(pair);
         }}
       />
     </main>

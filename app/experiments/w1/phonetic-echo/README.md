@@ -1,26 +1,27 @@
 # Phonetic Echo
 
-A black-and-white typographic field: Taiwanese and Korean words that share Chinese characters (感謝 / 감사) float as outlined paper blocks. Drag a word to its partner: they attract, resonate, dock and fill black, and the Taiwanese recording plays. A paper wheel half-hidden on the left edge controls the field: pull it down and everything falls; click it and it opens into a comparison wheel.
+A black-and-white typographic field of Taiwanese and Korean words that share Chinese characters (感謝 / 감사), as outlined paper blocks. Drag a word to its partner: they attract, resonate, dock, fill black and are pronounced (Taiwanese, then Korean). The paper wheel at the left edge drives the field: drag it for gravity, fling it to scatter everything and bring new words, click it for the comparison wheel, where each word can be replayed.
 
 - Route: /experiments/w1/phonetic-echo
-- Week: W1 · Tech: Canvas 2D + HTML overlay
-- Inputs: drag words, drag/click the wheel, keyboard (Tab, Enter, ↑↓, Esc)
-- Parameters (`settings.ts`): driftSpeed, gravityStrength (live: wheel pull), magneticStrength (live: drag speed), connectionDistance, solidityProgress
+- Week: W1 · Tech: Canvas 2D + HTML overlay, Web Speech API
+- Inputs: drag words; drag / fling / click the wheel; keyboard (Tab, Enter, ↑↓, Esc)
+- Parameters (`settings.ts`): gravityStrength ← wheel drag distance · flingImpulse ← wheel release speed (> flingSpeed 1500 px/s) · angularMomentum (wheel spin, block spin) · magneticStrength ← word drag speed · settlingDamping (drops at a fling, eases back)
 
 ## How it works
-- `physics.ts`: blocks with position, velocity, angle, spin. Home spring + drift, wheel gravity (each block feels it with its own lag), air drag, box collisions, partner attraction. Stages: approach (dashed line) → resonance (double rule, echo outline, hanja on the Korean block) → docked, filling black. A hard flick undocks.
-- `wheel.ts`: drag down = gravity (up = lift), springs back, gravity fades slowly. Click = comparison mode: outer ring Taiwanese, inner ring Korean, the sector at the ◀ is selected.
-- `draw.ts` draws the field, `Overlay.tsx` the title, instruction, sound toggle, annotation, keyboard controls. `audio.ts`: Taiwanese recording, then Korean if one exists; mutable.
-- `words.ts`: 5 verified pairs (float in the field) + 12 candidates (on the wheel only, marked ○).
-- `check-candidates.mjs`: looks up new pairs in both dictionaries → JSON. `node app/experiments/w1/phonetic-echo/check-candidates.mjs 電話:전화`. Found in both ≠ verified: a person still compares meanings.
+- `physics.ts`: blocks with position, velocity, angle, spin; home spring, wheel gravity, damping, box collisions, walls, partner attraction. Fling = impulse away from the wheel; old pairs fly out and fade, the next set flies in from the edges (`transitionSeconds`).
+- `wheel.ts`: drag = gravity, fling (speed over the last 100 ms, cooldown 2.5 s), click (< 6 px) = open. Open = wheel + annotation centred as one group.
+- `words.ts`: loads `vocabulary.json`; `Rotation` picks 6–10 pairs per set, mixing categories, avoiding recent ones.
+- `audio.ts`: one voice at a time. Taiwanese = MOE recording. Korean = Lingua Libre recording if any, else browser `ko-KR` speech synthesis (never another language's voice). Mute stops both.
+- `draw.ts`, `Overlay.tsx`: drawing; title, instruction, sound toggle, annotation (click a word to hear it).
+
+## Vocabulary data
+`build-vocabulary.py` (offline, standard library) matches 教育部《臺灣台語常用詞辭典》 `kautian.ods` against the 《한국어기초사전》 full JSON download by identical characters, using Unicode Unihan to compare krdict's Chinese translations. `dictionary_matched` needs evidence on both sides; the rest is `candidate`. Nothing is `editor_reviewed`. Run without arguments to see the inputs. Current: 4038 forms, 1845 dictionary_matched, 460 usable (`vocabulary.json`), 3578 others in `vocabulary-candidates.json`. `fetch-korean-audio.mjs` gets the Lingua Libre recordings (20 words).
 
 ## Sources
-- 教育部《臺灣台語常用詞辭典》 https://sutian.moe.edu.tw/, CC BY-ND 3.0 TW: Tâi-lô, recordings (unmodified, `public/experiments/w1/phonetic-echo/audio/`).
-- 국립국어원《한국어기초사전》 https://krdict.korean.go.kr/, CC BY-SA 2.0 KR: pronunciation, definitions. Korean recordings not bundled: each file's license is set separately and none is stated, so the annotation links to the entry.
-- Ours: English/中文 meanings, sound notes, Hangul romanization.
+Taiwanese text and recordings: MOE, CC BY-ND 3.0 TW (recordings unmodified, `public/…/audio/tw/`). Korean text: 국립국어원, CC BY-SA 2.0 KR. Korean recordings: Lingua Libre (`korean-audio.json`, CC0 / CC BY-SA 4.0). krdict's own recordings are not used: their license is not stated.
 
 ## Run
 pnpm dev → open /experiments/w1/phonetic-echo
 
 ## Status / next
-Works with mouse and keyboard. Next: compare the 12 candidates by hand and promote them; Korean audio once a license is confirmed.
+Works; checked in Chrome. Limits: Korean speech depends on the browser having a Korean voice; only 20 words have a human Korean recording; pairs are not human-reviewed.

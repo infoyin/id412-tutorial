@@ -1,14 +1,24 @@
+import { SETTINGS, TUNING } from "./settings";
 import type { Entry } from "./words";
 
-// The paper wheel on the left edge. Half hidden by default.
-// - Drag it down (or up): it turns, and how far it is pulled becomes gravity (or lift) on the field.
-//   Let go and it springs back slowly; the pull fades with a lag, so the words drift home.
-// - Click it: it slides out and grows into the comparison wheel. Outer ring = Taiwanese,
-//   inner ring = Korean, one sector per entry; the sector at the pointer (3 o'clock) is selected.
-//   Drag to turn, click a sector to go there, click the hub to go back.
+// The paper wheel on the left edge, a little more than half hidden.
+// - Drag it slowly: it turns, and how far it is pulled becomes gravity (down) or lift (up).
+//   Let go: it keeps turning a moment, slows, and springs back; gravity fades with a lag.
+// - Fling it (pointer faster than TUNING.flingSpeed when released): "fling" with a strength,
+//   which scatters the field and brings new words. The wheel spins on with that momentum.
+// - Click it (moves < 6 px): it moves to the centre and opens into the comparison wheel,
+//   with the annotation beside it. Outer ring = Taiwanese, inner ring = Korean; the sector
+//   at the ◀ is selected. Drag to turn, click a sector to go there, click the hub to go back.
 
-export type WheelAction = { type: "open" } | { type: "close" } | { type: "select"; index: number } | null;
+export type WheelAction =
+  | { type: "open" }
+  | { type: "close" }
+  | { type: "select"; index: number }
+  | { type: "fling"; strength: number; dir: number }
+  | null;
 
+export const NOTE_WIDTH = 400; // the annotation beside the open wheel
+const GAP = 56;
 const INK = "#111";
 const PAPER = "#fbfbf9";
 const smooth = (current: number, target: number, rate: number, dt: number) => current + (target - current) * (1 - Math.exp(-rate * dt));
@@ -17,36 +27,54 @@ const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
 export class Wheel {
   angle = 0;
-  omega = 0;
+  omega = 0; // rad/s
   open = 0; // 0 closed … 1 comparison mode (animated)
   isOpen = false;
   pull = 0; // -1…1, smoothed; read by the physics as gravity
   selected = 0;
+  count = 1;
   private pullTarget = 0;
   private dragging = false;
   private start = { x: 0, y: 0, t: 0 };
   private last = { y: 0, a: 0, t: 0 };
+  private samples: { x: number; y: number; t: number }[] = [];
   private moved = 0;
-  private count: number;
-
-  constructor(count: number) {
-    this.count = count;
-  }
 
   private get step() {
-    return (Math.PI * 2) / this.count;
+    return (Math.PI * 2) / Math.max(this.count, 1);
   }
 
-  // Where the wheel is now: half off the left edge when closed, whole and larger when open.
-  // On narrow screens the open wheel sits at the top centre instead.
+  setCount(n: number) {
+    this.count = Math.max(n, 1);
+    this.selected = Math.min(this.selected, this.count - 1);
+  }
+
+  // Closed: centre a little inside the left edge. Open: wheel + annotation centred as one group
+  // (wide screens), or wheel on top and annotation below (narrow screens).
   geometry(w: number, h: number, open = this.open) {
-    const wide = w >= 760;
-    const r0 = Math.min(Math.max(h * 0.36, 140), 320, w * 0.36); // half of it shows
-    const r1 = Math.min(h * 0.4, wide ? w * 0.28 : w * 0.44, 360);
+    const r0 = Math.min(Math.max(h * 0.34, 130), 300, w * 0.34);
+    const closed = { x: r0 * 0.22, y: h / 2, r: r0 };
+    const rWide = Math.min(h * 0.38, 340, (w - NOTE_WIDTH - GAP - 64) / 2);
+    const wide = rWide >= 170;
+    let target: { x: number; y: number; r: number };
+    let note: { left: number; top: number };
+    if (wide) {
+      const left = (w - (rWide * 2 + GAP + NOTE_WIDTH)) / 2;
+      target = { x: left + rWide, y: h / 2, r: rWide };
+      note = { left: left + rWide * 2 + GAP, top: Math.max(h / 2 - rWide, 72) };
+    } else {
+      const r = Math.min(h * 0.26, w * 0.42, 260);
+      target = { x: w / 2, y: r + 64, r };
+      note = { left: 16, top: r * 2 + 88 };
+    }
     const e = ease(open);
-    const openX = wide ? r1 + 56 : w / 2;
-    const openY = wide ? h / 2 : r1 + 72;
-    return { x: openX * e, y: h / 2 + (openY - h / 2) * e, r: r0 + (r1 - r0) * e, wide };
+    return {
+      x: closed.x + (target.x - closed.x) * e,
+      y: closed.y + (target.y - closed.y) * e,
+      r: closed.r + (target.r - closed.r) * e,
+      wide,
+      note,
+    };
   }
 
   hit(x: number, y: number, w: number, h: number) {
@@ -57,7 +85,7 @@ export class Wheel {
   setOpen(open: boolean) {
     this.isOpen = open;
     this.pullTarget = 0;
-    if (open) this.selected = this.nearest();
+    this.omega = 0;
   }
 
   select(index: number) {
@@ -75,6 +103,7 @@ export class Wheel {
     this.moved = 0;
     this.start = { x, y, t };
     this.last = { y, a: Math.atan2(y - g.y, x - g.x), t };
+    this.samples = [{ x, y, t }];
   }
 
   move(x: number, y: number, w: number, h: number) {
@@ -91,24 +120,41 @@ export class Wheel {
     if (this.isOpen) this.selected = this.nearest();
     else this.pullTarget = Math.max(-1, Math.min(1, (y - this.start.y) / (g.r * 0.9)));
     this.last = { y, a, t };
+    this.samples.push({ x, y, t });
+    while (this.samples.length > 2 && t - this.samples[0].t > 100) this.samples.shift();
   }
 
-  up(x: number, y: number, w: number, h: number, entries: Entry[]): WheelAction {
+  // Pointer speed over the last ~100 ms, px/s, signed by vertical direction.
+  private releaseSpeed() {
+    const a = this.samples[0];
+    const b = this.samples[this.samples.length - 1];
+    const dt = Math.max((b.t - a.t) / 1000, 0.016);
+    return { speed: Math.hypot(b.x - a.x, b.y - a.y) / dt, dir: Math.sign(b.y - a.y) || 1 };
+  }
+
+  up(x: number, y: number, w: number, h: number): WheelAction {
     if (!this.dragging) return null;
     this.dragging = false;
     this.pullTarget = 0;
     const isClick = this.moved < 6 && performance.now() - this.start.t < 500;
-    if (!isClick) {
-      if (this.isOpen) this.selected = this.nearest();
+    if (isClick) {
+      if (!this.isOpen) return { type: "open" };
+      const g = this.geometry(w, h);
+      if (Math.hypot(x - g.x, y - g.y) < g.r * 0.22) return { type: "close" };
+      const local = Math.atan2(y - g.y, x - g.x) - this.angle;
+      return { type: "select", index: ((Math.round(local / this.step) % this.count) + this.count) % this.count };
+    }
+    if (this.isOpen) {
+      this.selected = this.nearest();
       return null;
     }
-    if (!this.isOpen) return { type: "open" };
-    const g = this.geometry(w, h);
-    if (Math.hypot(x - g.x, y - g.y) < g.r * 0.22) return { type: "close" };
-    // Which sector was clicked?
-    const local = Math.atan2(y - g.y, x - g.x) - this.angle;
-    const index = ((Math.round(local / this.step) % entries.length) + entries.length) % entries.length;
-    return { type: "select", index };
+    const { speed, dir } = this.releaseSpeed();
+    if (this.moved > 30 && speed > TUNING.flingSpeed) {
+      // Momentum: the wheel spins on in the direction it was flung.
+      this.omega = dir * (speed / 160) * SETTINGS.angularMomentum;
+      return { type: "fling", strength: Math.min(0.3 + (speed - TUNING.flingSpeed) / TUNING.flingSpeed, 1.5), dir };
+    }
+    return null;
   }
 
   update(dt: number) {
@@ -117,24 +163,25 @@ export class Wheel {
     this.pull = smooth(this.pull, this.pullTarget, this.dragging ? 3 : 0.7, dt);
     if (this.dragging) return;
     if (this.isOpen) {
-      // Turn to the selected sector (the nearest way round).
       const target = this.angle + wrap(-this.selected * this.step - this.angle);
       this.omega += ((target - this.angle) * 40 - this.omega * 11) * dt;
     } else {
-      // A slow return spring, like a dial.
-      this.omega += (-wrap(this.angle) * 2.2 - this.omega * 2.4) * dt;
+      // Spin freely while fast (friction scales with angularMomentum), then a slow return spring.
+      const friction = 1.2 / SETTINGS.angularMomentum;
+      const spring = Math.abs(this.omega) > 2 ? 0 : 2.2;
+      this.omega += (-wrap(this.angle) * spring - this.omega * (friction + spring)) * dt;
     }
     this.angle += this.omega * dt;
   }
 
   draw(ctx: CanvasRenderingContext2D, w: number, h: number, entries: Entry[], font: string) {
-    const g = this.geometry(w, h);
-    const { x, y, r } = g;
+    const { x, y, r } = this.geometry(w, h);
     const e = ease(this.open);
+    const step = this.step;
     ctx.save();
     ctx.translate(x, y);
 
-    // Disk, rings, hub.
+    // Disk, rings.
     ctx.fillStyle = PAPER;
     ctx.strokeStyle = INK;
     ctx.lineWidth = 1.5;
@@ -160,11 +207,8 @@ export class Wheel {
       ctx.stroke();
     }
 
-    const step = this.step;
-    const size = r * 0.075;
-
     // Comparison mode: sector lines, the selected sector filled black.
-    if (e > 0.01) {
+    if (e > 0.01 && entries.length) {
       ctx.globalAlpha = e;
       const sel = this.selected * step + this.angle;
       ctx.fillStyle = INK;
@@ -184,45 +228,38 @@ export class Wheel {
       ctx.globalAlpha = 1;
     }
 
-    // Labels: Taiwanese (outer ring) and Korean (inner ring). Closed: verified Taiwanese only.
+    // Labels: Taiwanese (outer ring) and, when open, Korean (inner ring).
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    const size = r * 0.075;
     entries.forEach((entry, i) => {
-      if (e < 0.5 && entry.status !== "verified") return;
       const a = i * step + this.angle;
       const flip = Math.cos(a) < 0;
       const selected = e > 0.5 && i === this.selected;
-      const candidate = entry.status !== "verified";
-      ctx.fillStyle = selected ? PAPER : candidate ? "#8b8b86" : INK;
+      ctx.fillStyle = selected ? PAPER : INK;
       for (const [text, radius, scale] of [
         [entry.taiwanese.written, 0.76, 1],
         [e > 0.5 ? entry.korean.hangul : "", 0.42, 0.9],
       ] as const) {
+        if (!text) continue;
         ctx.save();
         ctx.rotate(a);
         ctx.translate(r * radius, 0);
         if (flip) ctx.rotate(Math.PI);
-        ctx.font = font.replace("SIZE", String(Math.round(size * scale)));
+        ctx.font = font.replace("SIZE", String(Math.round(size * scale * (text.length > 2 ? 0.8 : 1))));
         ctx.fillText(text, 0, 0);
         ctx.restore();
       }
-      // Candidates carry a hollow mark at the rim, verified pairs a filled one (not colour alone).
       ctx.beginPath();
       ctx.arc(Math.cos(a) * r * 0.86, Math.sin(a) * r * 0.86, 2.5, 0, Math.PI * 2);
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = selected ? PAPER : INK;
-      if (candidate) ctx.stroke();
-      else {
-        ctx.fillStyle = selected ? PAPER : INK;
-        ctx.fill();
-      }
-      ctx.strokeStyle = INK;
+      ctx.fill();
     });
 
-    // Gravity gauge: a thick arc on the visible half that grows with the pull.
+    // Gravity gauge: a thick arc on the visible side that grows with the pull.
     if (e < 0.99 && Math.abs(this.pull) > 0.01) {
       ctx.globalAlpha = 1 - e;
       ctx.lineWidth = 4;
+      ctx.strokeStyle = INK;
       ctx.beginPath();
       const from = -Math.PI / 2 + 0.12; // top of the wheel; down-pull grows clockwise
       ctx.arc(0, 0, r * 1.03, from, from + this.pull * Math.PI * 0.9, this.pull < 0);
@@ -232,14 +269,15 @@ export class Wheel {
 
     // Hub text and the pointer notch at 3 o'clock.
     ctx.fillStyle = INK;
-    ctx.font = font.replace("SIZE", String(Math.round(r * 0.05)));
+    ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.05, 10))));
     if (e > 0.5) {
       ctx.fillText("×", 0, -r * 0.06);
       ctx.fillText("back · 返回 · 돌아가기", 0, r * 0.07);
     } else {
       ctx.textAlign = "left";
-      ctx.fillText("↓ 重力 · 중력", r * 0.06, -r * 0.05);
-      ctx.fillText("○ 對照 · 비교", r * 0.06, r * 0.07);
+      ctx.fillText("↓ 重力 · 중력", -r * 0.1, -r * 0.34);
+      ctx.fillText("⇣⇣ 換詞 · 새 단어", -r * 0.1, -r * 0.27);
+      ctx.fillText("○ 對照 · 비교", -r * 0.1, r * 0.3);
     }
     ctx.beginPath();
     ctx.moveTo(r + 4, 0);

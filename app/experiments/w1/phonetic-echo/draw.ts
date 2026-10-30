@@ -1,3 +1,4 @@
+import type { Playing } from "./audio";
 import type { Block, World } from "./physics";
 import { TUNING } from "./settings";
 
@@ -8,9 +9,10 @@ export const FONT = '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingF
 // Tâi-lô needs a font with the combining mark in a̍; many CJK fonts draw a box instead.
 export const LATIN = '"Helvetica Neue", Arial, sans-serif';
 
-export const PAPER = "#fbfbf9";
+const PAPER = "#fbfbf9";
 const INK = "#111";
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+const resonanceOf = (close: number) => clamp01((close - TUNING.resonateFrom) / (TUNING.connectAt - TUNING.resonateFrom));
 
 // Irregular plate: a rectangle with jittered corners and maybe one cut corner.
 function plate(ctx: CanvasRenderingContext2D, b: Block, unit: number, grow = 0) {
@@ -39,7 +41,15 @@ function plate(ctx: CanvasRenderingContext2D, b: Block, unit: number, grow = 0) 
   ctx.closePath();
 }
 
-export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize: number, dim: number, reduced: boolean) {
+export function drawField(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  fontSize: number,
+  dim: number,
+  playing: Playing,
+  time: number,
+  reduced: boolean,
+) {
   const { width, height } = world;
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, width, height);
@@ -57,15 +67,14 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
   const fade = 1 - dim * 0.94; // blocks step back in comparison mode
 
   // Tension lines between partners (under the blocks, whose fill hides the inside part).
-  world.closeness.forEach((close, i) => {
-    if (close < 0.02 || world.docked[i]) return;
-    const tw = world.blocks.find((b) => b.pair === i && b.lang === "tw")!;
-    const ko = world.blocks.find((b) => b.pair === i && b.lang === "ko")!;
-    const resonance = clamp01((close - TUNING.resonateFrom) / (TUNING.connectAt - TUNING.resonateFrom));
+  for (const pair of world.pairs) {
+    const { tw, ko, closeness } = pair;
+    if (closeness < 0.02 || pair.docked || pair.leaving) continue;
+    const resonance = resonanceOf(closeness);
     ctx.strokeStyle = resonance > 0 ? INK : "#9a9a95";
     ctx.lineWidth = 0.75;
     ctx.setLineDash(resonance > 0 ? [] : [3, 5]);
-    ctx.globalAlpha = fade * Math.min(1, close / TUNING.resonateFrom);
+    ctx.globalAlpha = fade * Math.min(1, closeness / TUNING.resonateFrom);
     const nx = -(ko.y - tw.y);
     const ny = ko.x - tw.x;
     const len = Math.hypot(nx, ny) || 1;
@@ -77,20 +86,24 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
       ctx.stroke();
     }
     ctx.setLineDash([]);
-  });
+  }
 
   const unit = fontSize * 0.5;
   for (const b of world.blocks) {
-    const i = b.pair;
-    const docked = world.docked[i];
-    const resonance = docked ? 1 : clamp01((world.closeness[i] - TUNING.resonateFrom) / (TUNING.connectAt - TUNING.resonateFrom));
-    const solid = world.solidity[i];
-    const shake = reduced || docked ? 0 : resonance * 1.6;
+    const pair = b.pair;
+    const resonance = pair.docked ? 1 : pair.leaving ? 0 : resonanceOf(pair.closeness);
+    const solid = pair.solidity;
+    const shake = reduced || pair.docked ? 0 : resonance * 1.6;
+    // While this word is being pronounced, it breathes.
+    const speaking = playing && playing.id === pair.entry.id && playing.lang === b.lang;
+    const pulse = speaking ? (reduced ? 0.6 : 0.5 + 0.5 * Math.sin(time * 9)) : 0;
+    const alpha = fade * b.alpha;
 
     ctx.save();
-    ctx.globalAlpha = fade;
+    ctx.globalAlpha = alpha;
     ctx.translate(b.x + (Math.random() - 0.5) * shake, b.y + (Math.random() - 0.5) * shake);
     ctx.rotate(b.angle);
+    if (speaking) ctx.scale(1 + pulse * 0.06, 1 + pulse * 0.06);
 
     // Lifted paper: a gray shadow plate under the held block.
     if (b === world.held) {
@@ -102,12 +115,13 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
       ctx.restore();
     }
 
-    // Resonance: an echo outline, slightly larger and turned.
-    if (resonance > 0 && solid < 1) {
+    // Resonance (or speech): an echo outline, slightly larger and turned.
+    const echo = Math.max(resonance * (1 - solid), pulse);
+    if (echo > 0) {
       ctx.save();
-      ctx.rotate(0.03 * resonance);
-      plate(ctx, b, unit, 3 + resonance * 4);
-      ctx.strokeStyle = `rgba(17, 17, 17, ${resonance * 0.5 * (1 - solid)})`;
+      ctx.rotate(0.03 * echo);
+      plate(ctx, b, unit, 3 + echo * 4);
+      ctx.strokeStyle = `rgba(17, 17, 17, ${echo * 0.6})`;
       ctx.lineWidth = 0.75;
       ctx.stroke();
       ctx.restore();
@@ -119,7 +133,7 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
     ctx.fillStyle = `rgb(${g}, ${g}, ${g})`;
     ctx.fill();
     ctx.strokeStyle = INK;
-    ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6;
+    ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6 + pulse;
     ctx.stroke();
 
     // Text: black on white, white on black; heavier as it resonates and solidifies.
@@ -131,7 +145,7 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
     if (b.lang === "tw") {
       ctx.fillText(b.text, 0, -fontSize * 0.2);
       ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${LATIN}`;
-      ctx.globalAlpha = fade * 0.75;
+      ctx.globalAlpha = alpha * 0.75;
       ctx.fillText(b.sub, 0, fontSize * 0.62);
     } else {
       ctx.fillText(b.text, 0, fontSize * 0.12);
@@ -139,15 +153,15 @@ export function drawField(ctx: CanvasRenderingContext2D, world: World, fontSize:
       const show = Math.max(resonance, solid);
       if (show > 0.01) {
         ctx.font = `400 ${Math.round(fontSize * 0.36)}px ${FONT}`;
-        ctx.globalAlpha = fade * show;
-        ctx.fillText(b.hanja, 0, -fontSize * 0.68);
+        ctx.globalAlpha = alpha * show;
+        ctx.fillText(pair.entry.hanja, 0, -fontSize * 0.68);
       }
     }
 
     // Language tag in the corner.
     ctx.font = `400 ${Math.round(fontSize * 0.26)}px ${FONT}`;
     ctx.textAlign = "left";
-    ctx.globalAlpha = fade * 0.5;
+    ctx.globalAlpha = alpha * 0.5;
     ctx.fillText(b.lang === "tw" ? "台" : "한", -b.w / 2 + 8, -b.h / 2 + 10);
     ctx.restore();
   }

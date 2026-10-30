@@ -1,17 +1,18 @@
 import { SETTINGS, TUNING } from "./settings";
-import { VERIFIED } from "./words";
+import type { Entry } from "./words";
 
 // The word field: outlined blocks with position, velocity, angle and spin.
-// Forces: a soft spring to a wandering home spot, gravity from the wheel (each block feels it with
-// its own small lag), air drag, partner attraction, collisions between blocks, walls and the wheel.
-// Partners pass three stages: approach (closeness < resonateFrom) → resonance → docked and solidifying.
+// Forces: a soft spring to a wandering home spot, gravity from the wheel (each block feels it
+// with its own lag), drag (settlingDamping), partner attraction, box collisions, walls, the wheel.
+// A fling gives every block an impulse; the old set flies out and fades while a new set
+// flies in from the edges and settles.
+// Partners pass three stages: approach → resonance → docked and filling black.
 
 export type Block = {
-  pair: number; // index into VERIFIED
+  pair: Pair;
   lang: "tw" | "ko";
   text: string;
   sub: string; // Tâi-lô on Taiwanese blocks
-  hanja: string; // shown on Korean blocks as they resonate
   x: number;
   y: number;
   vx: number;
@@ -22,13 +23,27 @@ export type Block = {
   w: number;
   h: number;
   jitter: number[]; // 8 corner offsets (fractions) that make the plate irregular
-  cut: number; // which corner is chamfered, -1 for none
+  cut: number; // chamfered corner, -1 for none
   homeX: number;
   homeY: number;
   phase: number;
   lag: number; // how quickly this block feels a change in gravity
   feel: number; // gravity this block currently feels
   hover: number;
+  age: number; // seconds since it entered or started leaving
+  entering: boolean; // still flying in from off screen
+  alpha: number;
+};
+
+export type Pair = {
+  entry: Entry;
+  tw: Block;
+  ko: Block;
+  closeness: number; // 0–1 from the gap between the two blocks
+  solidity: number; // 0 outline … 1 solid black
+  docked: boolean;
+  side: number; // Korean block docks on this side of the Taiwanese one
+  leaving: boolean;
 };
 
 export type Pointer = { x: number; y: number; vx: number; vy: number; inside: boolean };
@@ -39,36 +54,44 @@ const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 
 export class World {
   blocks: Block[] = [];
+  pairs: Pair[] = [];
   width: number;
   height: number;
   held: Block | null = null;
   private grabX = 0;
   private grabY = 0;
-  guided: number | null = null; // keyboard: pair being brought together
+  guided: Pair | null = null; // keyboard: pair being brought together
   pull = 0; // -1…1, set from the wheel every frame
-  gravity = 0; // live gravityStrength, px/s²
+  gravity = 0; // live gravityStrength
   magnetic = SETTINGS.magneticStrength; // live magneticStrength
+  damping = SETTINGS.settlingDamping; // live settlingDamping
   energy = 0; // smoothed speed of the dragged block, px/s
-  closeness = VERIFIED.map(() => 0);
-  solidity = VERIFIED.map(() => 0); // 0 outline … 1 solid black
-  docked = VERIFIED.map(() => false);
-  private side = VERIFIED.map(() => 1); // Korean block docks on this side of the Taiwanese one
-  obstacle: Circle = { x: 0, y: 0, r: 0 }; // the wheel
-  onConnect: (pair: number) => void = () => {};
+  left = 0; // keep new homes right of this (the wheel)
+  obstacle: Circle = { x: 0, y: 0, r: 0 };
+  private pending: { at: number; entries: Entry[] } | null = null;
+  private time = 0;
+  measure: (b: Block) => void = () => {};
+  onConnect: (pair: Pair) => void = () => {};
+  onChange: (entries: Entry[]) => void = () => {};
 
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
-    VERIFIED.forEach((e, i) => {
-      this.blocks.push(this.make(i, "tw", e.taiwanese.written, e.taiwanese.tailo ?? "", ""));
-      this.blocks.push(this.make(i, "ko", e.korean.hangul, "", e.hanja));
-    });
   }
 
-  private make(pair: number, lang: "tw" | "ko", text: string, sub: string, hanja: string): Block {
+  // Pairs on screen (not leaving).
+  current() {
+    return this.pairs.filter((p) => !p.leaving);
+  }
+
+  private make(pair: Pair, lang: "tw" | "ko"): Block {
     const r = Math.random;
+    const e = pair.entry;
     return {
-      pair, lang, text, sub, hanja,
+      pair,
+      lang,
+      text: lang === "tw" ? e.taiwanese.written : e.korean.hangul,
+      sub: lang === "tw" ? e.taiwanese.tailo : "",
       x: 0, y: 0, vx: 0, vy: 0, angle: 0, spin: 0,
       rest: (r() - 0.5) * 0.16,
       w: 100, h: 60,
@@ -77,47 +100,67 @@ export class World {
       homeX: 0, homeY: 0,
       phase: r() * Math.PI * 2,
       lag: 1.5 + r() * 2.5,
-      feel: 0,
-      hover: 0,
+      feel: 0, hover: 0, age: 0,
+      entering: false,
+      alpha: 1,
     };
   }
 
-  // Block sizes from the text. Call after fonts load and on resize.
-  measure(ctx: CanvasRenderingContext2D, font: string, latin: string, fontSize: number) {
-    for (const b of this.blocks) {
-      ctx.font = font;
-      let inner = ctx.measureText(b.text).width;
-      if (b.sub) {
-        ctx.font = latin;
-        inner = Math.max(inner, ctx.measureText(b.sub).width);
-      }
-      b.w = inner + fontSize * 1.4;
-      b.h = fontSize * 2.4;
+  // Put a new set of pairs in. "home": appear in place. "edges": fly in from off screen.
+  spawn(entries: Entry[], from: "home" | "edges") {
+    const fresh: Block[] = [];
+    for (const entry of entries) {
+      const pair = { entry, closeness: 0, solidity: 0, docked: false, side: 1, leaving: false } as Pair;
+      pair.tw = this.make(pair, "tw");
+      pair.ko = this.make(pair, "ko");
+      this.pairs.push(pair);
+      fresh.push(pair.tw, pair.ko);
     }
+    fresh.forEach((b) => this.measure(b));
+    this.scatter(fresh);
+    for (const b of fresh) {
+      b.x = b.homeX;
+      b.y = b.homeY;
+      if (from === "edges") {
+        // Start beyond the nearest edge, moving toward home.
+        const toLeft = b.homeX, toRight = this.width - b.homeX, toTop = b.homeY, toBottom = this.height - b.homeY;
+        const nearest = Math.min(toRight, toTop, toBottom, toLeft + 200);
+        if (nearest === toRight) b.x = this.width + b.w;
+        else if (nearest === toTop) b.y = -b.h;
+        else if (nearest === toBottom) b.y = this.height + b.h;
+        else b.x = -b.w;
+        b.vx = (b.homeX - b.x) * (2 + Math.random());
+        b.vy = (b.homeY - b.y) * (2 + Math.random());
+        b.spin = (Math.random() - 0.5) * 6 * SETTINGS.angularMomentum;
+        b.entering = true;
+      }
+      this.blocks.push(b);
+    }
+    this.onChange(this.current().map((p) => p.entry));
   }
 
-  // Spread homes over the free part of the screen, partners apart.
-  scatter(left: number) {
+  // Spread homes over the free part of the screen, partners apart, away from other homes.
+  private scatter(fresh: Block[]) {
     const reach = this.reach();
-    const placed: Block[] = [];
-    for (const b of this.blocks) {
+    const placed = this.blocks.filter((b) => !b.pair.leaving);
+    for (const b of fresh) {
       let best = { x: 0, y: 0, score: -Infinity };
       for (let k = 0; k < 60; k++) {
-        const x = left + b.w / 2 + Math.random() * Math.max(this.width - left - b.w - 40, 1);
-        const y = this.height * 0.18 + Math.random() * this.height * 0.64;
-        let score = Math.min(9999, ...placed.map((o) => Math.hypot(o.x - x, o.y - y) - (o.w + b.w) / 3));
+        const x = this.left + b.w / 2 + Math.random() * Math.max(this.width - this.left - b.w - 48, 1);
+        const y = this.height * 0.16 + Math.random() * this.height * 0.66;
+        let score = Math.min(9999, ...placed.map((o) => Math.hypot(o.homeX - x, o.homeY - y) - (o.w + b.w) / 3));
         const partner = placed.find((o) => o.pair === b.pair);
-        if (partner && Math.hypot(partner.x - x, partner.y - y) < reach * 1.5) score -= 400;
+        if (partner && Math.hypot(partner.homeX - x, partner.homeY - y) < reach * 1.5) score -= 400;
         if (score > best.score) best = { x, y, score };
       }
-      b.homeX = b.x = best.x;
-      b.homeY = b.y = best.y;
+      b.homeX = best.x;
+      b.homeY = best.y;
       placed.push(b);
     }
   }
 
   reach() {
-    return SETTINGS.connectionDistance * Math.min(this.width, this.height);
+    return TUNING.connectionDistance * Math.min(this.width, this.height);
   }
 
   resize(width: number, height: number) {
@@ -126,15 +169,42 @@ export class World {
       b.homeX *= width / this.width;
       b.y *= height / this.height;
       b.homeY *= height / this.height;
+      this.measure(b);
     }
     this.width = width;
     this.height = height;
+  }
+
+  // Shake the field: every block gets an impulse away from the wheel, plus spin.
+  // strength ~0.3 (just over the threshold) … 1.5; dir = +1 flung down, -1 up.
+  // Then a new set of words flies in, partway through the transition.
+  fling(strength: number, dir: number, next: Entry[]) {
+    this.held = null;
+    this.guided = null;
+    this.damping = 0.08; // nearly frictionless at first; eases back to settlingDamping
+    for (const pair of this.pairs) {
+      if (pair.leaving) continue;
+      pair.leaving = true;
+      pair.docked = false;
+      for (const b of [pair.tw, pair.ko]) {
+        const away = Math.atan2(b.y - this.obstacle.y, b.x - this.obstacle.x);
+        const angle = away + (Math.random() - 0.5) * 1.6;
+        const speed = SETTINGS.flingImpulse * strength * (0.6 + Math.random() * 0.8);
+        b.vx += Math.cos(angle) * speed;
+        b.vy += Math.sin(angle) * speed + dir * speed * 0.35;
+        b.spin += (Math.random() - 0.5) * 2 * 9 * SETTINGS.angularMomentum * strength;
+        b.age = 0;
+      }
+    }
+    this.pending = { at: this.time + TUNING.transitionSeconds * 0.3, entries: next };
+    this.onChange([]);
   }
 
   // Topmost block under a point, in the block's own rotated frame.
   blockAt(x: number, y: number) {
     for (let i = this.blocks.length - 1; i >= 0; i--) {
       const b = this.blocks[i];
+      if (b.pair.leaving) continue;
       const c = Math.cos(-b.angle);
       const s = Math.sin(-b.angle);
       const lx = (x - b.x) * c - (y - b.y) * s;
@@ -150,9 +220,8 @@ export class World {
       this.grabX = x - this.held.x;
       this.grabY = y - this.held.y;
       this.guided = null;
-      // Bring it to the front.
       this.blocks.splice(this.blocks.indexOf(this.held), 1);
-      this.blocks.push(this.held);
+      this.blocks.push(this.held); // to the front
     }
     return this.held;
   }
@@ -162,14 +231,8 @@ export class World {
   }
 
   // Keyboard fallback: the Korean block glides to its Taiwanese partner.
-  bringTogether(pair: number) {
-    if (!this.docked[pair]) this.guided = pair;
-  }
-
-  private partners(pair: number) {
-    const tw = this.blocks.find((b) => b.pair === pair && b.lang === "tw")!;
-    const ko = this.blocks.find((b) => b.pair === pair && b.lang === "ko")!;
-    return [tw, ko] as const;
+  bringTogether(pair: Pair) {
+    if (!pair.docked && !pair.leaving) this.guided = pair;
   }
 
   // Gap between two blocks' boxes (0 when touching or overlapping).
@@ -179,14 +242,21 @@ export class World {
     return Math.hypot(gx, gy);
   }
 
-  update(dt: number, time: number, pointer: Pointer, reduced: boolean) {
+  update(dt: number, pointer: Pointer, reduced: boolean) {
+    this.time += dt;
+    if (this.pending && this.time >= this.pending.at) {
+      this.spawn(this.pending.entries, "edges");
+      this.pending = null;
+    }
+
     const reach = this.reach();
     const speed = Math.hypot(pointer.vx, pointer.vy);
     this.energy = smooth(this.energy, this.held ? speed : 0, 4, dt);
-    // Live parameters: the wheel sets gravity, a fast drag strengthens attraction.
-    this.gravity = SETTINGS.gravityStrength * this.pull;
+    // Live parameters.
+    this.gravity = SETTINGS.gravityStrength * this.pull * Math.abs(this.pull); // pull² keeps small drags subtle
     this.magnetic = SETTINGS.magneticStrength * (1 + Math.min(this.energy / 1200, 1.5));
-    const drift = SETTINGS.driftSpeed * (reduced ? 0.3 : 1);
+    this.damping = smooth(this.damping, SETTINGS.settlingDamping, 1.6 / TUNING.transitionSeconds, dt);
+    const drift = TUNING.driftSpeed * (reduced ? 0.3 : 1);
     const anchor = 1.2 * (1 - Math.min(Math.abs(this.pull) * 1.6, 1)) ** 2; // home spring gives way to gravity
 
     const ax = new Map<Block, number>();
@@ -197,16 +267,23 @@ export class World {
     };
 
     for (const b of this.blocks) {
+      b.age += dt;
       b.feel = smooth(b.feel, this.gravity, b.lag, dt);
       let hover = 0;
-      if (b === this.held) {
-        // Spring after the pointer (slight inertia), tilt with the motion.
+      if (b.pair.leaving) {
+        force(b, -b.vx * this.damping * 0.5, b.feel - b.vy * this.damping * 0.5);
+        // Fade out over the second half of the transition.
+        b.alpha = clamp01(1 - (b.age - TUNING.transitionSeconds * 0.4) / (TUNING.transitionSeconds * 0.6));
+      } else if (b === this.held) {
         force(b, (pointer.x - this.grabX - b.x) * 140 - b.vx * 18, (pointer.y - this.grabY - b.y) * 140 - b.vy * 18);
         hover = 1;
       } else {
-        const hx = b.homeX + Math.sin(time * 0.05 + b.phase) * drift * 3;
-        const hy = b.homeY + Math.cos(time * 0.04 + b.phase * 1.3) * drift * 2;
-        force(b, (hx - b.x) * anchor - b.vx * 0.9, (hy - b.y) * anchor + b.feel - b.vy * 0.9);
+        const t = this.time;
+        const hx = b.homeX + Math.sin(t * 0.05 + b.phase) * drift * 3;
+        const hy = b.homeY + Math.cos(t * 0.04 + b.phase * 1.3) * drift * 2;
+        const k = b.entering ? 3 : anchor; // a new block is guided home more firmly
+        force(b, (hx - b.x) * k - b.vx * this.damping, (hy - b.y) * k + b.feel - b.vy * this.damping);
+        if (b.entering && b.age > 0.3 && this.inside(b)) b.entering = false;
         if (pointer.inside && !this.held) {
           const d = Math.hypot(pointer.x - b.x, pointer.y - b.y);
           hover = clamp01(1 - (d - Math.max(b.w, b.h) / 2) / 120);
@@ -217,69 +294,88 @@ export class World {
     }
 
     // Partners: approach, resonance, docking, solidity.
-    VERIFIED.forEach((_, i) => {
-      const [tw, ko] = this.partners(i);
+    for (const pair of this.pairs) {
+      const { tw, ko } = pair;
+      const rate = TUNING.solidityRate * dt;
+      if (pair.leaving) {
+        pair.solidity = Math.max(0, pair.solidity - rate);
+        continue;
+      }
       const close = clamp01(1 - this.gap(tw, ko) / reach);
-      this.closeness[i] = close;
-      const active = this.held === tw || this.held === ko || this.guided === i;
-      const rate = SETTINGS.solidityProgress * dt;
+      pair.closeness = close;
+      const active = this.held === tw || this.held === ko || this.guided === pair;
 
-      if (this.docked[i]) {
+      if (pair.docked) {
         // Docked: the Korean block holds its place beside the Taiwanese one, same tilt.
-        const s = this.side[i];
-        const tx = tw.x + s * ((tw.w + ko.w) / 2 + 6);
+        const tx = tw.x + pair.side * ((tw.w + ko.w) / 2 + 6);
         const kx = (tx - ko.x) * 70 - (ko.vx - tw.vx) * 12;
         const ky = (tw.y - ko.y) * 70 - (ko.vy - tw.vy) * 12;
         force(ko, kx, ky);
         force(tw, -kx * 0.5, -ky * 0.5);
         ko.spin += (tw.angle - ko.angle) * 8 * dt;
-        this.solidity[i] = Math.min(1, this.solidity[i] + rate);
-        // A hard flick pulls them apart again.
-        if (active && this.energy > 1800) this.docked[i] = false;
+        pair.solidity = Math.min(1, pair.solidity + rate);
+        if (active && this.energy > 1800) pair.docked = false; // a hard flick pulls them apart
       } else {
         const d = Math.hypot(ko.x - tw.x, ko.y - tw.y) || 1;
         const pull = this.magnetic * close * close * (active ? 520 : 30);
         if (this.held !== tw) force(tw, ((ko.x - tw.x) / d) * pull, ((ko.y - tw.y) / d) * pull);
         if (this.held !== ko) force(ko, ((tw.x - ko.x) / d) * pull, ((tw.y - ko.y) / d) * pull);
-        this.solidity[i] = Math.max(0, this.solidity[i] - rate * 0.5);
+        pair.solidity = Math.max(0, pair.solidity - rate * 0.5);
         // Only a hand (or the keyboard) makes the final connection; gravity alone can't.
         if (active && close >= TUNING.connectAt) {
-          this.docked[i] = true;
-          this.side[i] = Math.sign(ko.x - tw.x) || 1;
-          if (this.guided === i) this.guided = null;
-          this.onConnect(i);
+          pair.docked = true;
+          pair.side = Math.sign(ko.x - tw.x) || 1;
+          if (this.guided === pair) this.guided = null;
+          this.onConnect(pair);
         }
       }
-    });
+    }
 
-    if (this.guided !== null) {
-      const [tw, ko] = this.partners(this.guided);
+    if (this.guided) {
+      const { tw, ko } = this.guided;
       force(ko, (tw.x - ko.x) * 8 - ko.vx * 4, (tw.y - ko.y) * 8 - ko.vy * 4);
     }
 
-    // Integrate.
+    // Integrate. Spin settles with the same damping as motion.
     for (const b of this.blocks) {
       b.vx += (ax.get(b) ?? 0) * dt;
       b.vy += (ay.get(b) ?? 0) * dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
-      // Tilt: springs back to rest, swings with sideways motion.
       const target = b === this.held ? Math.max(-0.35, Math.min(0.35, b.vx * 0.0006)) : b.rest;
-      b.spin += ((target - b.angle) * 5 - b.spin * 2.2 + b.vx * 0.0015) * dt;
+      const spring = b.pair.leaving ? 0 : 5;
+      b.spin += ((target - b.angle) * spring - b.spin * (0.4 + this.damping * 2) + b.vx * 0.0015) * dt;
       b.angle += b.spin * dt;
     }
 
     this.collide();
+
+    // Drop blocks that have left or faded out.
+    const gone = (b: Block) => b.pair.leaving && (b.alpha <= 0 || !this.near(b));
+    this.pairs = this.pairs.filter((p) => !(gone(p.tw) && gone(p.ko)));
+    this.blocks = this.blocks.filter((b) => this.pairs.includes(b.pair));
+  }
+
+  private inside(b: Block) {
+    return b.x - b.w / 2 > 0 && b.x + b.w / 2 < this.width && b.y - b.h / 2 > 0 && b.y + b.h / 2 < this.height;
+  }
+
+  private near(b: Block) {
+    const m = 300;
+    return b.x > -m && b.x < this.width + m && b.y > -m && b.y < this.height + m;
   }
 
   // Soft box collisions (rotation ignored), then walls and the wheel.
   private collide() {
     const list = this.blocks;
+    // Leaving blocks only collide early on, so they can scatter out freely.
+    const solid = (b: Block) => !b.pair.leaving || b.age < 0.5;
     for (let i = 0; i < list.length; i++) {
+      const a = list[i];
+      if (!solid(a)) continue;
       for (let j = i + 1; j < list.length; j++) {
-        const a = list[i];
         const b = list[j];
-        if (a.pair === b.pair && this.docked[a.pair]) continue;
+        if (!solid(b) || (a.pair === b.pair && a.pair.docked)) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const ox = (a.w + b.w) / 2 - Math.abs(dx);
@@ -292,10 +388,12 @@ export class World {
           const s = Math.sign(dx) || 1;
           a.x -= s * ox * wa;
           b.x += s * ox * wb;
-          const closing = (a.vx - b.vx) * s; // > 0 when moving into each other
+          const closing = (a.vx - b.vx) * s;
           if (closing > 0) {
             if (wa) a.vx -= s * closing * 0.6;
             if (wb) b.vx += s * closing * 0.6;
+            a.spin -= closing * 0.002 * s;
+            b.spin += closing * 0.002 * s;
           }
         } else {
           const s = Math.sign(dy) || 1;
@@ -314,24 +412,29 @@ export class World {
     }
 
     const m = 12;
+    const bounce = 0.45;
     for (const b of list) {
-      if (b.y + b.h / 2 > this.height - m) {
-        b.y = this.height - m - b.h / 2;
-        if (b.vy > 0) b.vy *= -0.25;
-        b.vx *= 0.96;
-      }
-      if (b.y - b.h / 2 < m) {
-        b.y = m + b.h / 2;
-        if (b.vy < 0) b.vy *= -0.25;
-        b.vx *= 0.96;
-      }
-      if (b.x + b.w / 2 > this.width - m) {
-        b.x = this.width - m - b.w / 2;
-        if (b.vx > 0) b.vx *= -0.3;
-      }
-      if (b.x - b.w / 2 < m) {
-        b.x = m + b.w / 2;
-        if (b.vx < 0) b.vx *= -0.3;
+      // New blocks pass through the edges while flying in; old ones bounce once, then may leave.
+      const walls = !b.entering && (!b.pair.leaving || b.age < 0.6);
+      if (walls) {
+        if (b.y + b.h / 2 > this.height - m) {
+          b.y = this.height - m - b.h / 2;
+          if (b.vy > 0) b.vy *= -bounce;
+          b.vx *= 0.96;
+        }
+        if (b.y - b.h / 2 < m) {
+          b.y = m + b.h / 2;
+          if (b.vy < 0) b.vy *= -bounce;
+          b.vx *= 0.96;
+        }
+        if (b.x + b.w / 2 > this.width - m) {
+          b.x = this.width - m - b.w / 2;
+          if (b.vx > 0) b.vx *= -bounce;
+        }
+        if (b.x - b.w / 2 < m) {
+          b.x = m + b.w / 2;
+          if (b.vx < 0) b.vx *= -bounce;
+        }
       }
       // Keep out of the wheel.
       const o = this.obstacle;
@@ -339,7 +442,7 @@ export class World {
       const dy = b.y - o.y;
       const d = Math.hypot(dx, dy) || 1;
       const min = o.r + Math.min(b.w, b.h) / 2 + 8;
-      if (d < min && b !== this.held) {
+      if (d < min && b !== this.held && !b.pair.leaving) {
         b.x = o.x + (dx / d) * min;
         b.y = o.y + (dy / d) * min;
         const inward = (b.vx * dx + b.vy * dy) / d;
