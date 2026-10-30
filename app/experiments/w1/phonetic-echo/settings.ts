@@ -25,7 +25,7 @@ export const TUNING = {
   flingSpeed: 1500, // px/s of pointer speed on the wheel that counts as a fling
   flingCooldown: 2.5, // seconds before another fling can renew the words
   transitionSeconds: 1.6, // old words fly out and fade, new ones enter, over about this long
-  autoplayAfter: 15, // seconds without input before the piece starts playing itself
+  autoplayAfter: 10, // seconds without input before the piece starts playing itself
   autoplayStep: 4.5, // seconds between its moves
   maxDpr: 2,
 };
@@ -36,5 +36,5 @@ export function pairCount(width: number, height: number, scale = 1) {
   return Math.round(Math.min(10, Math.max(4, (width * height) / 110000 / (scale * scale))));
 }
 
-// The size bar: block scale from the default (smallest) up to this.
-export const SIZE = { min: 1, max: 1.6, step: 0.05 };
+// The size bar: block scale from min to max; the page starts in the middle.
+export const SIZE = { min: 1, max: 1.6, step: 0.05, start: 1.3 };

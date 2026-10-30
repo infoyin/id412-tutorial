@@ -94,7 +94,7 @@ export default function PhoneticEcho() {
   }, []);
   const threeDRef = useRef(false); // the compass button: 3D blocks
   const [threeD, setThreeD] = useState(false);
-  const [scale, setScaleState] = useState(SIZE.min); // block size from the size bar
+  const [scale, setScaleState] = useState(SIZE.start); // block size from the size bar
   const [shown, setShown] = useState<Entry[]>([]);
   const [selectedId, setSelectedState] = useState<string | null>(null);
   const selectedRef = useRef<string | null>(null); // the same, readable from the event handlers
@@ -158,7 +158,7 @@ export default function PhoneticEcho() {
     worldRef.current = world;
     wheelRef.current = wheel;
     let fontSize = 24;
-    let scale = SIZE.min;
+    let scale = SIZE.start;
     const baseFont = () => Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.052, 20), 40);
     let lastFling = -Infinity;
 
