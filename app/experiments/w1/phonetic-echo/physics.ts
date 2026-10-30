@@ -505,6 +505,37 @@ export class World {
     return b.x > -m && b.x < this.width + m && b.y > -m && b.y < this.height + m;
   }
 
+  // Push a block out of the corner zones, along whichever side is shallower.
+  private keepOutOf(b: Block, bounce: number) {
+    const m = 12;
+    const c = Math.abs(Math.cos(b.angle));
+    const sn = Math.abs(Math.sin(b.angle));
+    const hw = (b.w * c + b.h * sn) / 2 + m; // half extents of the turned block
+    const hh = (b.w * sn + b.h * c) / 2 + m;
+    const zones = [
+      { x0: 0, y0: 0, x1: this.keepOut.w, y1: this.keepOut.h },
+      { x0: this.width - this.keepOutTopRight.w, y0: 0, x1: this.width, y1: this.keepOutTopRight.h },
+      { x0: this.width - this.keepOutCorner.w, y0: this.height - this.keepOutCorner.h, x1: this.width, y1: this.height },
+    ];
+    for (const z of zones) {
+      if (z.x1 <= z.x0 || z.y1 <= z.y0) continue;
+      const left = b.x + hw - z.x0; // how far to move left to clear
+      const right = z.x1 - (b.x - hw);
+      const up = b.y + hh - z.y0;
+      const down = z.y1 - (b.y - hh);
+      if (left <= 0 || right <= 0 || up <= 0 || down <= 0) continue;
+      // Only directions that lead back onto the screen.
+      const options = [
+        { d: left, ok: z.x0 > 0, apply: () => { b.x -= left; if (b.vx > 0) b.vx *= -bounce; if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift; } },
+        { d: right, ok: z.x1 < this.width, apply: () => { b.x += right; if (b.vx < 0) b.vx *= -bounce; if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift; } },
+        { d: up, ok: z.y0 > 0, apply: () => { b.y -= up; if (b.vy > 0) b.vy *= -bounce; if (Math.sin(b.drift) > 0) b.drift = -b.drift; } },
+        { d: down, ok: z.y1 < this.height, apply: () => { b.y += down; if (b.vy < 0) b.vy *= -bounce; if (Math.sin(b.drift) < 0) b.drift = -b.drift; } },
+      ].filter((o) => o.ok);
+      options.sort((p, q) => p.d - q.d);
+      options[0]?.apply();
+    }
+  }
+
   // Soft box collisions (rotation ignored), then walls and the wheel.
   private collide() {
     const list = this.blocks;
@@ -582,49 +613,10 @@ export class World {
           if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
         }
       }
-      // Keep out of the menu row at the top left: push out along the shallower side.
-      const free = b !== this.held && !b.entering && !b.pair.leaving;
-      const ox = this.keepOut.w + b.w / 2 + 8 - b.x;
-      const oy = this.keepOut.h + b.h / 2 + 8 - b.y;
-      if (free && ox > 0 && oy > 0) {
-        if (ox < oy) {
-          b.x += ox;
-          if (b.vx < 0) b.vx *= -bounce;
-          if (Math.cos(b.drift) < 0) b.drift = Math.PI - b.drift;
-        } else {
-          b.y += oy;
-          if (b.vy < 0) b.vy *= -bounce;
-          if (Math.sin(b.drift) < 0) b.drift = -b.drift;
-        }
-      }
-      // Same for the clock and icons at the top right.
-      const tx = b.x + b.w / 2 + 8 - (this.width - this.keepOutTopRight.w);
-      const ty = this.keepOutTopRight.h + b.h / 2 + 8 - b.y;
-      if (free && tx > 0 && ty > 0) {
-        if (tx < ty) {
-          b.x -= tx;
-          if (b.vx > 0) b.vx *= -bounce;
-          if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift;
-        } else {
-          b.y += ty;
-          if (b.vy < 0) b.vy *= -bounce;
-          if (Math.sin(b.drift) < 0) b.drift = -b.drift;
-        }
-      }
-      // Same for the size bar at the bottom right.
-      const cx = b.x + b.w / 2 + 8 - (this.width - this.keepOutCorner.w);
-      const cy = b.y + b.h / 2 + 8 - (this.height - this.keepOutCorner.h);
-      if (free && cx > 0 && cy > 0) {
-        if (cx < cy) {
-          b.x -= cx;
-          if (b.vx > 0) b.vx *= -bounce;
-          if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift;
-        } else {
-          b.y -= cy;
-          if (b.vy > 0) b.vy *= -bounce;
-          if (Math.sin(b.drift) > 0) b.drift = -b.drift;
-        }
-      }
+      // Keep out of the three corners with controls (menu top left, clock and icons top right,
+      // tools bottom right). Measured with the block's turned extent, so a tilted corner can't poke
+      // in either. Applies to held and incoming blocks too; only leaving ones pass.
+      if (!b.pair.leaving) this.keepOutOf(b, bounce);
       // Keep out of the wheel.
       const o = this.obstacle;
       const dx = b.x - o.x;

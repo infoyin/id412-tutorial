@@ -1497,6 +1497,7 @@
   margin: 0;
   display: flex;
   align-items: center;
+  padding-top: 3px; /* the CJK line box sits high: centre the text on the icons */
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
