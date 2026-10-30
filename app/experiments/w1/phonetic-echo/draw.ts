@@ -2,6 +2,7 @@ import type { Playing } from "./audio";
 import type { Block, World } from "./physics";
 import { TUNING } from "./settings";
 import { drawCube } from "./cube";
+import { FONT_STYLES, LATIN_FACE, weightFor, type FontStyle } from "./fonts";
 import { FOIL, foil, grain, mix, theme } from "./theme";
 
 // Drawing the field: paper background, a few editorial rules, tension lines between partners,
@@ -9,7 +10,31 @@ import { FOIL, foil, grain, mix, theme } from "./theme";
 
 export const FONT = '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
 // Tâi-lô needs a font with the combining mark in a̍; many CJK fonts draw a box instead.
-export const LATIN = '"Helvetica Neue", Arial, sans-serif';
+export const LATIN = LATIN_FACE;
+
+// The block typeface (fonts.ts). Changing it flips the blocks over one by one, left to right:
+// each shows the old face until it is edge-on, then the new one.
+export const typeface = { style: FONT_STYLES[0], prev: FONT_STYLES[0], changedAt: -100 };
+let fieldWidth = 1;
+
+export function setTypeface(style: FontStyle, time: number) {
+  typeface.prev = typeface.style;
+  typeface.style = style;
+  typeface.changedAt = time;
+}
+
+// 0…1 through this block's flip (1 when done).
+function flipOf(b: Block, time: number) {
+  const delay = (b.x / fieldWidth) * 0.5;
+  return Math.min(Math.max((time - typeface.changedAt - delay) / 0.4, 0), 1);
+}
+
+// The CSS font for a block's main word: its face, and a weight that grows as the pair comes
+// together (light while floating, heaviest once connected and solid).
+export function blockFont(b: Block, fontSize: number, k: number, face: FontStyle) {
+  const family = b.lang === "tw" ? face.tw : face.ko;
+  return `${weightFor(face, k, b.lang)} ${fontSize}px ${family}, ${FONT}`;
+}
 // Mixed lines (Hangul, Han and Tâi-lô together): Latin first so a̍ draws, then the CJK fonts.
 const LABEL = `"Helvetica Neue", Arial, ${FONT}`;
 
@@ -115,15 +140,14 @@ function plate(ctx: CanvasRenderingContext2D, b: Block, unit: number, grow = 0) 
 
 // The words on a block, centred on (0, 0): text black on white, white on black; heavier as it
 // resonates and solidifies. Used on the flat blocks and painted onto the 3D cubes.
-function drawText(ctx: CanvasRenderingContext2D, b: Block, fontSize: number, alpha: number, resonance: number, solid: number, unit: number) {
+function drawText(ctx: CanvasRenderingContext2D, b: Block, fontSize: number, alpha: number, resonance: number, solid: number, unit: number, time: number) {
   const pair = b.pair;
-  // Text: black on white, white on black; heavier as it resonates and solidifies.
-  const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
+  const face = flipOf(b, time) < 0.5 ? typeface.prev : typeface.style;
   // On foil (dark mode) the text is near-black, and silver once the block turns black.
   ctx.fillStyle = theme.dark ? (solid > 0.5 ? FOIL.light : FOIL.ink) : solid > 0.5 ? theme.paper : theme.ink;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `${weight} ${fontSize}px ${FONT}`;
+  ctx.font = blockFont(b, fontSize, Math.max(solid, resonance * 0.6, b.hover * 0.15), face);
   // Taiwanese: characters with 注音, Tâi-lô underneath.
   // Korean: Hangul, then the shared characters (they surface as the pair resonates),
   // then the Revised Romanization.
@@ -283,6 +307,7 @@ export function drawField(
   depth: { amount: number; x: number; y: number } = { amount: 0, x: 0, y: 0 },
 ) {
   const { width, height } = world;
+  fieldWidth = width;
   ctx.fillStyle = theme.paper;
   ctx.fillRect(0, 0, width, height);
 
@@ -291,7 +316,8 @@ export function drawField(
   // Tension lines between partners (under the blocks, whose fill hides the inside part).
   for (const pair of world.pairs) {
     const { tw, ko, closeness } = pair;
-    if (closeness < 0.02 || pair.docked || pair.leaving || pair.cracked >= 0) continue;
+    // (In the grid every pair sits side by side, so there is no "approach" to show.)
+    if (closeness < 0.02 || pair.docked || pair.leaving || pair.cracked >= 0 || world.grid) continue;
     const resonance = resonanceOf(closeness);
     ctx.strokeStyle = resonance > 0 ? theme.ink : theme.mid;
     ctx.lineWidth = 0.75;
@@ -319,7 +345,7 @@ export function drawField(
   for (const b of world.blocks) {
     const pair = b.pair;
     const cracked = pair.cracked >= 0;
-    const resonance = pair.docked ? 1 : pair.leaving || cracked ? 0 : resonanceOf(pair.closeness);
+    const resonance = pair.docked ? 1 : pair.leaving || cracked || world.grid ? 0 : resonanceOf(pair.closeness);
     const solid = pair.solidity;
     const shake = reduced || pair.docked ? 0 : resonance * 1.6;
     // While this word is being pronounced, it breathes.
@@ -334,7 +360,7 @@ export function drawField(
     // 3D: a sliced cube (cube.ts) that turns toward the cursor; the word is painted on its front.
     if (depth.amount > 0.01) {
       const span = Math.max(width, height);
-      const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
+      const weight = Math.round(Math.max(solid, resonance * 0.6) * 10) + (flipOf(b, time) < 0.5 ? typeface.prev.id : typeface.style.id);
       ctx.rotate(b.angle * (1 - depth.amount * 0.7));
       drawCube(ctx, b, {
         amount: depth.amount,
@@ -346,7 +372,7 @@ export function drawField(
         paint: (c) => {
           if (cracked) fillCracked(c, b, 0, true);
           else fillFace(c, b, solid, 0, true);
-          drawText(c, b, fontSize, 1, resonance, solid, unit);
+          drawText(c, b, fontSize, 1, resonance, solid, unit, time);
         },
       });
       ctx.restore();
@@ -356,6 +382,9 @@ export function drawField(
 
     ctx.rotate(b.angle);
     ctx.scale(near, near);
+    // Typeface change: the block turns edge-on and back (a flip about its vertical axis).
+    const flip = flipOf(b, time);
+    if (flip < 1) ctx.scale(Math.max(0.03, Math.abs(Math.cos(flip * Math.PI))), 1);
     if (speaking) ctx.scale(1 + pulse * 0.06, 1 + pulse * 0.06);
 
     // Lifted paper: a gray shadow plate under the held block.
@@ -402,7 +431,7 @@ export function drawField(
       ctx.stroke();
     }
 
-    drawText(ctx, b, fontSize, alpha, resonance, solid, unit);
+    drawText(ctx, b, fontSize, alpha, resonance, solid, unit, time);
     ctx.restore();
   }
 

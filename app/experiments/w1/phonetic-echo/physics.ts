@@ -78,6 +78,10 @@ export class World {
   obstacle: Circle = { x: 0, y: 0, r: 0 };
   keepOut = { w: 0, h: 0 }; // the menu row in the top-left corner
   keepOutCorner = { w: 0, h: 0 }; // the size bar in the bottom-right corner
+  // Grid layout (the ⊞ button): pairs side by side in a Swiss grid instead of floating.
+  grid = false;
+  private gridSince = 0;
+  private gridTargets = new Map<Block, { x: number; y: number; delay: number }>();
   private pending: { at: number; entries: Entry[] } | null = null;
   private time = 0;
   measure: (b: Block) => void = () => {};
@@ -232,6 +236,52 @@ export class World {
     this.onCrack(pair);
   }
 
+  setGrid(on: boolean) {
+    this.grid = on;
+    this.gridSince = this.time;
+    // Leaving the grid: a small push outward from the middle, each block in its own direction,
+    // and the pair being "close" no longer counts (they have to be found again).
+    if (!on) {
+      const cx = this.blocks.reduce((t, b) => t + b.x, 0) / Math.max(this.blocks.length, 1);
+      const cy = this.blocks.reduce((t, b) => t + b.y, 0) / Math.max(this.blocks.length, 1);
+      for (const b of this.blocks) {
+        const a = Math.atan2(b.y - cy, b.x - cx) + (Math.random() - 0.5);
+        b.drift = a;
+        b.vx += Math.cos(a) * 260;
+        b.vy += Math.sin(a) * 260;
+      }
+    }
+  }
+
+  // Where each block sits in the grid: pairs left to right (Taiwanese, then Korean), rows top to
+  // bottom, centred in the free area (right of the wheel, under the menu, clear of the size bar).
+  private layoutGrid() {
+    this.gridTargets.clear();
+    const pairs = this.current();
+    if (!pairs.length) return;
+    const blocks = pairs.flatMap((p) => [p.tw, p.ko]);
+    const cellW = Math.max(...blocks.map((b) => b.w)) + 10;
+    const cellH = Math.max(...blocks.map((b) => b.h)) + 14;
+    const gap = cellW * 0.35; // between pairs
+    const left = this.left;
+    const right = this.width - Math.max(this.keepOutCorner.w, 24) - 24;
+    const top = this.keepOut.h + 28;
+    const bottom = this.height - 28;
+    const perRow = Math.max(1, Math.floor((right - left + gap) / (2 * cellW + gap)));
+    const rows = Math.ceil(pairs.length / perRow);
+    const usedW = Math.min(perRow, pairs.length) * (2 * cellW + gap) - gap;
+    const x0 = left + (right - left - usedW) / 2;
+    const y0 = top + Math.max(0, (bottom - top - rows * cellH) / 2);
+    pairs.forEach((p, i) => {
+      const col = i % perRow;
+      const row = Math.floor(i / perRow);
+      const x = x0 + col * (2 * cellW + gap);
+      const y = y0 + row * cellH + cellH / 2;
+      this.gridTargets.set(p.tw, { x: x + cellW / 2, y, delay: i * 0.05 });
+      this.gridTargets.set(p.ko, { x: x + cellW * 1.5, y, delay: i * 0.05 + 0.025 });
+    });
+  }
+
   // Keep at most n pairs: the extra ones (never one being held) drift off and fade.
   trim(n: number) {
     const over = this.current().length - n;
@@ -303,6 +353,7 @@ export class World {
 
   update(dt: number, pointer: Pointer, reduced: boolean) {
     this.time += dt;
+    if (this.grid) this.layoutGrid();
     if (this.pending && this.time >= this.pending.at) {
       this.spawn(this.pending.entries, "edges");
       this.pending = null;
@@ -339,6 +390,10 @@ export class World {
         // Flying in: guided to its spot until it is on screen.
         force(b, (b.homeX - b.x) * 3 - b.vx * this.damping, (b.homeY - b.y) * 3 + b.feel - b.vy * this.damping);
         if (b.age > 0.3 && this.inside(b)) b.entering = false;
+      } else if (this.grid && this.gridTargets.has(b) && this.time - this.gridSince > this.gridTargets.get(b)!.delay) {
+        // Grid: a damped spring to its cell, one block after another.
+        const t = this.gridTargets.get(b)!;
+        force(b, (t.x - b.x) * 22 - b.vx * 8, (t.y - b.y) * 22 - b.vy * 8);
       } else {
         // Weightless: steer toward its own drift velocity; the direction slowly turns.
         b.drift += Math.sin(this.time * 0.13 + b.phase) * 0.15 * dt;
@@ -376,8 +431,11 @@ export class World {
         const tx = tw.x + pair.side * ((tw.w + ko.w) / 2 + 6);
         const kx = (tx - ko.x) * 70 - (ko.vx - tw.vx) * 12;
         const ky = (tw.y - ko.y) * 70 - (ko.vy - tw.vy) * 12;
-        force(ko, kx, ky);
-        force(tw, -kx * 0.5, -ky * 0.5);
+        if (!this.grid) {
+          // (In the grid, the pair's two cells already sit side by side.)
+          force(ko, kx, ky);
+          force(tw, -kx * 0.5, -ky * 0.5);
+        }
         ko.spin += (tw.angle - ko.angle) * 8 * dt;
         pair.solidity = Math.min(1, pair.solidity + rate);
         if (active && this.energy > 1800) pair.docked = false; // a hard flick pulls them apart
@@ -414,11 +472,19 @@ export class World {
       b.vy += (ay.get(b) ?? 0) * dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
-      // Held: tilt with the motion. Floating: sway slowly around its resting tilt.
-      const target = b === this.held ? Math.max(-0.35, Math.min(0.35, b.vx * 0.0006)) : b.rest + Math.sin(this.time * 0.12 + b.phase) * 0.45;
+      // Held: tilt with the motion. Grid: square. Floating: sway slowly around its resting tilt.
+      const target =
+        b === this.held ? Math.max(-0.35, Math.min(0.35, b.vx * 0.0006)) : this.grid ? 0 : b.rest + Math.sin(this.time * 0.12 + b.phase) * 0.45;
       const spring = b.pair.leaving ? 0 : 5;
-      b.spin += ((target - b.angle) * spring - b.spin * (0.4 + this.damping * 2) + b.vx * 0.0015) * dt;
-      b.angle += b.spin * dt;
+      if (this.grid && b !== this.held && !b.pair.leaving) {
+        // Grid: turn back to square the short way round, firmly, ignoring knocks.
+        b.angle = Math.atan2(Math.sin(b.angle), Math.cos(b.angle));
+        b.spin = 0;
+        b.angle += (0 - b.angle) * (1 - Math.exp(-dt * 8));
+      } else {
+        b.spin += ((target - b.angle) * spring - b.spin * (0.4 + this.damping * 2) + b.vx * 0.0015) * dt;
+        b.angle += b.spin * dt;
+      }
     }
 
     this.collide();
@@ -441,8 +507,9 @@ export class World {
   // Soft box collisions (rotation ignored), then walls and the wheel.
   private collide() {
     const list = this.blocks;
-    // Leaving blocks only collide early on, so they can scatter out freely.
-    const solid = (b: Block) => !b.pair.leaving || b.age < 0.5;
+    // Leaving blocks only collide early on, so they can scatter out freely. In the grid, blocks
+    // pass through each other on the way to their cells (the grid itself keeps them apart).
+    const solid = (b: Block) => !this.grid && (!b.pair.leaving || b.age < 0.5);
     for (let i = 0; i < list.length; i++) {
       const a = list[i];
       if (!solid(a)) continue;

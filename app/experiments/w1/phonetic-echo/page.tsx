@@ -23,7 +23,8 @@ import {
   type Lang,
   type Playing,
 } from "./audio";
-import { drawField, FONT, LATIN, zhuyinColumn } from "./draw";
+import { blockFont, drawField, FONT, LATIN, setTypeface, typeface, zhuyinColumn } from "./draw";
+import { FONT_STYLES } from "./fonts";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
@@ -45,6 +46,34 @@ export default function PhoneticEcho() {
   const shownRef = useRef<Entry[]>([]);
   const flingRef = useRef<(strength: number, dir: number) => void>(() => {});
   const rescaleRef = useRef<(scale: number) => void>(() => {});
+  const styleRef = useRef<(id: string) => void>(() => {});
+  const [fontStyle, setFontStyle] = useState(FONT_STYLES[0].id);
+  const [grid, setGrid] = useState(false);
+  const chooseFont = (id: string) => {
+    setFontStyle(id);
+    styleRef.current(id);
+  };
+  const toggleGrid = () => {
+    const on = !worldRef.current?.grid;
+    worldRef.current?.setGrid(on);
+    setGrid(on);
+  };
+  // Keyboard: F cycles the typeface, G toggles the grid (not while typing in a field).
+  const keysRef = useRef({ chooseFont, toggleGrid, fontStyle });
+  keysRef.current = { chooseFont, toggleGrid, fontStyle };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea")) return;
+      const k = keysRef.current;
+      if (e.key === "f" || e.key === "F") {
+        const i = FONT_STYLES.findIndex((f) => f.id === k.fontStyle);
+        k.chooseFont(FONT_STYLES[(i + 1) % FONT_STYLES.length].id);
+      }
+      if (e.key === "g" || e.key === "G") k.toggleGrid();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const threeDRef = useRef(false); // the compass button: 3D blocks
   const [threeD, setThreeD] = useState(false);
   const [scale, setScaleState] = useState(SIZE.min); // block size from the size bar
@@ -116,8 +145,9 @@ export default function PhoneticEcho() {
     let lastFling = -Infinity;
 
     // Block size from its text.
+    // Block size from its text, measured in the current face at its heaviest weight.
     world.measure = (b) => {
-      ctx.font = `500 ${fontSize}px ${FONT}`;
+      ctx.font = blockFont(b, fontSize, 1, typeface.style);
       let inner = ctx.measureText(b.text).width + (b.zhuyin ? zhuyinColumn(fontSize) * b.zhuyin.length : 0);
       if (b.sub) {
         ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
@@ -130,6 +160,22 @@ export default function PhoneticEcho() {
       shownRef.current = entries;
       wheel.setCount(entries.length);
       setShown(entries);
+      ensureFonts();
+    };
+
+    // The Chinese and Korean fonts arrive in slices: ask for the characters on screen in the
+    // current face (light and heavy), then re-measure the blocks once they are in.
+    function ensureFonts() {
+      const loads = world.blocks.flatMap((b) => [0, 1].map((k) => document.fonts?.load(blockFont(b, 40, k, typeface.style), b.text)));
+      Promise.all(loads).then(() => world.blocks.forEach((b) => world.measure(b)));
+    }
+
+    // The Aa menu: a new face for every block (they flip over to it).
+    styleRef.current = (id) => {
+      const next = FONT_STYLES.find((f) => f.id === id);
+      if (!next || next === typeface.style) return;
+      setTypeface(next, performance.now() / 1000);
+      ensureFonts();
     };
     // A pair connects: the portal sound, then the two pronunciations.
     world.onConnect = (pair) => {
@@ -188,7 +234,7 @@ export default function PhoneticEcho() {
     };
     resize();
     world.spawn(rotation.next(pairCount(innerWidth, innerHeight, scale)), "home");
-    document.fonts?.ready.then(() => world.blocks.forEach((b) => world.measure(b)));
+    ensureFonts();
     window.addEventListener("resize", resize);
 
     // Pointer: route to the wheel or to a block.
@@ -351,6 +397,10 @@ export default function PhoneticEcho() {
         onToggleDark={() => applyDark(!dark)}
         scale={scale}
         threeD={threeD}
+        fontStyle={fontStyle}
+        onFontStyle={chooseFont}
+        grid={grid}
+        onToggleGrid={toggleGrid}
         onToggle3D={() => {
           threeDRef.current = !threeDRef.current;
           setThreeD(threeDRef.current);

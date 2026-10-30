@@ -1,5 +1,7 @@
 import type { Lang, Playing } from "./audio";
 import type { Entry } from "./words";
+import { useState } from "react";
+import { FONT_STYLES } from "./fonts";
 import { SIZE } from "./settings";
 import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
@@ -26,6 +28,10 @@ type Props = {
   onScale: (scale: number) => void;
   threeD: boolean;
   onToggle3D: () => void;
+  fontStyle: string;
+  onFontStyle: (id: string) => void;
+  grid: boolean;
+  onToggleGrid: () => void;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -79,6 +85,7 @@ function ThemeIcon({ dark }: { dark: boolean }) {
 }
 
 export function Overlay(p: Props) {
+  const [fontMenu, setFontMenu] = useState(false);
   const e = p.entry;
   const isPlaying = (lang: Lang) => !!e && p.playing?.id === e.id && p.playing.lang === lang;
 
@@ -97,6 +104,52 @@ export function Overlay(p: Props) {
 
       {/* Block size: + on top, − below, a short vertical bar between. */}
       <div className={styles.sizeBar} data-size-bar>
+        {/* Typeface: Aa opens a small menu, each row set in its own fonts. */}
+        <div className={styles.fontPick}>
+          <button
+            className={`${styles.tool} ${fontMenu ? styles.toolOn : ""}`}
+            onClick={() => setFontMenu(!fontMenu)}
+            aria-expanded={fontMenu}
+            aria-label="typeface · 字體 · 글꼴 (F)"
+            title="字體 · 글꼴 · Typeface (F)"
+          >
+            <span className={styles.aa}>Aa</span>
+          </button>
+          {fontMenu && (
+            <ul className={styles.fontMenu}>
+              {FONT_STYLES.map((f) => (
+                <li key={f.id}>
+                  <button
+                    className={f.id === p.fontStyle ? styles.fontOn : ""}
+                    onClick={() => {
+                      p.onFontStyle(f.id);
+                      setFontMenu(false);
+                    }}
+                  >
+                    <span className={styles.fontSample}>
+                      <span style={{ fontFamily: f.tw }}>字</span> <span style={{ fontFamily: f.ko }}>자</span>{" "}
+                      <span style={{ fontFamily: f.tw }}>Aa</span>
+                    </span>
+                    <span>{f.name}</span>
+                    {f.id === p.fontStyle && <span>●</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {/* Grid: floating ↔ a Swiss grid, pairs side by side. */}
+        <button
+          className={`${styles.tool} ${p.grid ? styles.toolOn : ""}`}
+          onClick={p.onToggleGrid}
+          aria-pressed={p.grid}
+          aria-label="grid · 排版 · 격자 (G)"
+          title="排版 · 격자 · Grid (G)"
+        >
+          <svg viewBox="0 0 32 32" aria-hidden className={styles.gridIcon}>
+            {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={6 + c * 7.5} y={6 + r * 7.5} width="5" height="5" rx="0.6" />))}
+          </svg>
+        </button>
         <button
           className={`${styles.compass} ${p.threeD ? styles.compassOn : ""}`}
           onClick={p.onToggle3D}

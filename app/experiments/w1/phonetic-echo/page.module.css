@@ -1305,3 +1305,101 @@
 @keyframes titleIn {
   from { opacity: 0; transform: translateY(3px); }
 }
+
+/* ---- Bottom-right tools: Aa (typeface) and ⊞ (grid), above the compass ---- */
+
+.sizeBar .tool {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+  padding: 2px;
+  opacity: 0.75;
+}
+
+.sizeBar .tool:hover,
+.sizeBar .toolOn {
+  opacity: 1;
+}
+
+.aa {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.toolOn .aa {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.gridIcon {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.gridIcon rect {
+  transition: fill 0.3s;
+}
+
+.toolOn .gridIcon rect {
+  fill: currentColor;
+}
+
+/* The typeface menu, sliding out to the left of the toolbar. */
+.fontPick {
+  position: relative;
+}
+
+.fontMenu {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: -6px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  animation: appear 0.25s ease both;
+}
+
+.fontMenu button {
+  display: grid !important;
+  grid-template-columns: 96px max-content 14px;
+  align-items: center;
+  gap: 10px;
+  width: auto !important;
+  height: auto !important;
+  padding: 6px 8px !important;
+  border: none;
+  background: none;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fontMenu button:hover {
+  background: var(--gray);
+}
+
+.fontSample {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.fontOn .fontSample {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
