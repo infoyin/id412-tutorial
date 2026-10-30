@@ -2,7 +2,7 @@ import type { Playing } from "./audio";
 import type { Block, World } from "./physics";
 import { TUNING } from "./settings";
 import { drawCube } from "./cube";
-import { mix, theme } from "./theme";
+import { FOIL, foil, grain, mix, theme } from "./theme";
 
 // Drawing the field: paper background, a few editorial rules, tension lines between partners,
 // and the outlined blocks. Black and white only; grays for in-between states.
@@ -117,7 +117,8 @@ function drawText(ctx: CanvasRenderingContext2D, b: Block, fontSize: number, alp
   const pair = b.pair;
   // Text: black on white, white on black; heavier as it resonates and solidifies.
   const weight = solid > 0.6 ? 700 : resonance > 0.3 ? 500 : 400;
-  ctx.fillStyle = solid > 0.5 ? theme.paper : theme.ink;
+  // On foil (dark mode) the text is near-black, and silver once the block turns black.
+  ctx.fillStyle = theme.dark ? (solid > 0.5 ? FOIL.light : FOIL.ink) : solid > 0.5 ? theme.paper : theme.ink;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `${weight} ${fontSize}px ${FONT}`;
@@ -147,6 +148,27 @@ function drawText(ctx: CanvasRenderingContext2D, b: Block, fontSize: number, alp
   ctx.globalAlpha = alpha * 0.5;
   // Inside the plate, clear of a cut top-left corner.
   ctx.fillText(b.lang === "tw" ? "臺" : "한", -b.w / 2 + unit * (b.cut === 0 ? 1.1 : 0.55), -b.h / 2 + unit * 0.7);
+}
+
+// A block's face: white → black as the pair solidifies (light mode); silver foil → black (dark mode).
+// Fills the current path (or the given rectangle) in the block's own frame.
+export function fillFace(ctx: CanvasRenderingContext2D, b: Block, solid: number, time: number, rect?: boolean) {
+  const draw = () => (rect ? ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h) : ctx.fill());
+  if (!theme.dark) {
+    ctx.fillStyle = mix(solid);
+    draw();
+    return;
+  }
+  ctx.fillStyle = foil(ctx, -b.w / 2, -b.h / 2, b.w / 2, b.h / 2, (Math.sin(time * 0.5 + b.phase) + 1) / 2);
+  draw();
+  const a = ctx.globalAlpha;
+  ctx.globalAlpha = a * 0.5;
+  ctx.fillStyle = grain(ctx)!;
+  draw();
+  ctx.globalAlpha = a * solid;
+  ctx.fillStyle = "#0d0d0d";
+  draw();
+  ctx.globalAlpha = a;
 }
 
 // Corners of a block on screen (its rectangle, turned).
@@ -292,8 +314,10 @@ export function drawField(
         solid,
         faceKey: [theme.dark, fontSize, Math.round(solid * 10), Math.round(resonance * 5), cracked, weight, b.w | 0].join("|"),
         paint: (c) => {
-          c.fillStyle = cracked ? hatchPattern(c)! : mix(solid);
-          c.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+          if (cracked) {
+            c.fillStyle = hatchPattern(c)!;
+            c.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+          } else fillFace(c, b, solid, 0, true);
           drawText(c, b, fontSize, 1, resonance, solid, unit);
         },
       });
@@ -332,9 +356,11 @@ export function drawField(
 
     // The plate: white → solid black as the pair solidifies; hatched and dashed once cracked.
     plate(ctx, b, unit);
-    ctx.fillStyle = cracked ? hatchPattern(ctx)! : mix(solid);
-    ctx.fill();
-    ctx.strokeStyle = theme.ink;
+    if (cracked) {
+      ctx.fillStyle = hatchPattern(ctx)!;
+      ctx.fill();
+    } else fillFace(ctx, b, solid, time);
+    ctx.strokeStyle = theme.dark ? "rgba(255, 255, 255, 0.4)" : theme.ink;
     ctx.lineWidth = 1.1 + solid * 1.4 + b.hover * 0.6 + pulse;
     if (cracked) ctx.setLineDash([4, 3]);
     ctx.stroke();

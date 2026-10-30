@@ -24,3 +24,37 @@ export function mix(t: number) {
   const ch = (shift: number) => Math.round(((a >> shift) & 255) * (1 - t) + ((b >> shift) & 255) * t);
   return `rgb(${ch(16)}, ${ch(8)}, ${ch(0)})`;
 }
+
+// Dark mode prints blocks and the wheel in silver foil: a metallic gradient whose bright band
+// drifts (shimmer 0…1), with fine grain on top. Text on foil is near-black.
+export const FOIL = { ink: "#161616", light: "#dcdcd8", side: "#a3a3a0" };
+
+export function foil(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number, shimmer: number) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  const s = 0.2 + shimmer * 0.6; // where the bright band sits
+  g.addColorStop(0, "#b4b4b1");
+  g.addColorStop(Math.max(0, s - 0.22), "#cfcfcc");
+  g.addColorStop(s, "#f1f1ee");
+  g.addColorStop(Math.min(1, s + 0.18), "#bdbdba");
+  g.addColorStop(1, "#d3d3d0");
+  return g;
+}
+
+let grainPattern: CanvasPattern | null = null;
+
+// Fine speckle, made once.
+export function grain(ctx: CanvasRenderingContext2D) {
+  if (grainPattern) return grainPattern;
+  const tile = document.createElement("canvas");
+  tile.width = tile.height = 96;
+  const g = tile.getContext("2d")!;
+  const img = g.createImageData(96, 96);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = Math.random() < 0.5 ? 0 : 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = Math.random() * 90;
+  }
+  g.putImageData(img, 0, 0);
+  grainPattern = ctx.createPattern(tile, "repeat");
+  return grainPattern;
+}

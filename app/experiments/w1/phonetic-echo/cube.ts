@@ -1,5 +1,5 @@
 import type { Block } from "./physics";
-import { mix, theme } from "./theme";
+import { FOIL, mix, theme } from "./theme";
 
 // 3D mode: a block becomes a white box cut into three horizontal slices, like a typographic
 // Rubik's cube. The whole box turns toward the cursor (the camera), and each slice twists on its
@@ -61,7 +61,7 @@ export function drawCube(
   const w = b.w;
   const h = b.h;
   const d = h * 0.65 * o.amount; // depth grows in as 3D turns on
-  const side = mix(0.04 + o.solid * 0.85);
+  const side = theme.dark ? (o.solid > 0.5 ? "#1a1a1a" : FOIL.side) : mix(0.04 + o.solid * 0.85);
   const line = o.solid > 0.5 ? theme.paper : theme.mid;
 
   // Each slice: its own twist (mostly still, now and then a swing), then the whole box's turn.

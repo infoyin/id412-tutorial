@@ -1269,3 +1269,17 @@
 .compassOn svg > circle {
   stroke-width: 1.6;
 }
+
+/* Dark mode: the title block is silver foil, like the blocks and the wheel. */
+.dark .tabTitle,
+.dark .tabTitle .tabBody {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(115deg, #b4b4b1 0%, #cfcfcc 30%, #f1f1ee 46%, #bdbdba 64%, #d3d3d0 100%);
+  color: #161616;
+  box-shadow: none;
+}
+
+.dark .tabTitle .about a {
+  color: #161616;
+}

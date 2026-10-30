@@ -1,5 +1,5 @@
 import { SETTINGS, TUNING } from "./settings";
-import { theme } from "./theme";
+import { FOIL, foil, grain, theme } from "./theme";
 import type { Entry } from "./words";
 
 // The paper wheel on the left edge, a little more than half hidden.
@@ -188,13 +188,25 @@ export class Wheel {
     ctx.save();
     ctx.translate(x, y);
 
+    // In dark mode the disk is silver foil (its sheen moves as it turns) with dark print on it.
+    const dark = theme.dark;
+    const inkIn = dark ? FOIL.ink : theme.ink;
+    const paperIn = dark ? FOIL.light : theme.paper;
+
     // Disk, rings.
-    ctx.fillStyle = theme.paper;
-    ctx.strokeStyle = theme.ink;
+    ctx.fillStyle = dark ? foil(ctx, -r, -r, r, r, (Math.sin(this.angle * 0.8) + 1) / 2) : theme.paper;
+    ctx.strokeStyle = inkIn;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fill();
+    if (dark) {
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = grain(ctx)!;
+      ctx.fill();
+      ctx.restore();
+    }
     ctx.stroke();
     ctx.lineWidth = 0.75;
     for (const k of [0.9, 0.62, 0.22]) {
@@ -218,7 +230,7 @@ export class Wheel {
     if (e > 0.01 && entries.length) {
       ctx.globalAlpha = e;
       const sel = this.selected * step + this.angle;
-      ctx.fillStyle = theme.ink;
+      ctx.fillStyle = inkIn;
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.9, sel - step / 2, sel + step / 2);
       ctx.arc(0, 0, r * 0.22, sel + step / 2, sel - step / 2, true);
@@ -243,7 +255,7 @@ export class Wheel {
       const a = i * step + this.angle;
       const flip = Math.cos(a) < 0;
       const selected = e > 0.5 && i === this.selected;
-      ctx.fillStyle = selected ? theme.paper : theme.ink;
+      ctx.fillStyle = selected ? paperIn : inkIn;
       for (const [text, radius, scale] of [
         [entry.taiwanese.written, 0.76, 1],
         [e > 0.5 ? entry.korean.hangul : "", 0.42, 0.9],
@@ -306,8 +318,8 @@ export class Wheel {
       ctx.globalAlpha = 1;
     }
 
-    // Hub text and the pointer notch at 3 o'clock.
-    ctx.fillStyle = theme.ink;
+    // Hub text (on the disk) and the pointer notch at 3 o'clock (outside it).
+    ctx.fillStyle = inkIn;
     ctx.font = font.replace("SIZE", String(Math.round(Math.max(r * 0.05, 10))));
     if (e > 0.5) {
       // A bold × and "Back", centred in the hub.
@@ -323,6 +335,7 @@ export class Wheel {
       ctx.fillText("⇣⇣ 換詞 · 새 단어", -r * 0.1, -r * 0.27);
       ctx.fillText("○ 對照 · 비교", -r * 0.1, r * 0.3);
     }
+    ctx.fillStyle = theme.ink;
     ctx.beginPath();
     ctx.moveTo(r + 4, 0);
     ctx.lineTo(r + 16, -7);
