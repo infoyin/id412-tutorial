@@ -473,14 +473,42 @@
   border-top: 1px solid currentColor;
 }
 
-/* The letter charts, side by side under the text. */
+/* The two INFO views: languages / letters. */
+.infoViews {
+  display: flex;
+  gap: 22px;
+  margin: 4px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid currentColor;
+}
+
+.infoViews button {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.infoViews button[aria-selected="true"] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.infoViews button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* The letter charts, side by side. */
 .infoCharts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 36px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid currentColor;
+  padding-top: 6px;
 }
 
 .info .lead p {
@@ -496,9 +524,9 @@
 }
 
 .info p {
-  margin: 0 0 7px;
-  font-size: 11.5px;
-  line-height: 1.6;
+  margin: 0 0 5px;
+  font-size: 11px;
+  line-height: 1.5;
   letter-spacing: 0.01em;
   color: inherit;
 }
@@ -795,7 +823,7 @@
 
 .letters {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
   gap: 4px;
   margin: 4px 0 8px;
 }
@@ -986,8 +1014,13 @@
 }
 
 /* The five tones: one card each. */
+/* Tones: a full-width row under both charts. */
+.tonesRow {
+  grid-column: 1 / -1;
+}
+
 .tonesTitle {
-  margin-top: 10px !important;
+  margin-top: 4px !important;
 }
 
 .tones {
@@ -997,12 +1030,14 @@
   margin: 6px 0 4px;
 }
 
+/* Big tone mark on the left, three short lines on the right. */
 .tones button {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-  padding: 6px 7px 7px;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  column-gap: 6px;
+  padding: 5px 7px 6px;
   border: 1px solid currentColor;
   background: none;
   font-weight: 700;
@@ -1011,9 +1046,10 @@
 }
 
 .tones b {
-  font-size: 20px;
+  grid-row: 1 / 4;
+  font-size: 40px;
   line-height: 1;
-  height: 20px;
+  text-align: center;
 }
 
 .tones span {
@@ -1022,6 +1058,7 @@
 
 .tones small {
   font-size: 9.5px;
+  line-height: 1.35;
   opacity: 0.7;
 }
 
