@@ -139,15 +139,24 @@ export function Overlay(p: Props) {
           {e.status === "false_friend" ? (
             <div className={styles.trap}>
               <p>同樣的漢字，不同的意思 · 같은 한자, 다른 뜻</p>
-              <p lang="zh-Hant">臺 {e.hanja}：{e.taiwanese.definition || `與華語「${e.hanja}」同義`}</p>
-              <p lang="ko">
-                한 {e.korean.hangul}：{e.korean.definition} ({e.korean.english})
+              <p lang="zh-Hant">
+                <b>臺 {e.hanja}</b> — {e.falseFriend?.twEnglish}　{e.taiwanese.definition || `與華語「${e.hanja}」同義`}
               </p>
-              <p>韓語辭典的中文翻譯 · 사전의 중국어 번역：「{e.korean.chinese}」</p>
+              <p lang="ko">
+                <b>한 {e.korean.hangul}</b> — {e.korean.english}　{e.korean.definition}
+              </p>
+              {e.falseFriend && (
+                <>
+                  <p lang="ko">→ {e.falseFriend.why.ko}</p>
+                  <p lang="zh-Hant">→ {e.falseFriend.why.zh}</p>
+                </>
+              )}
             </div>
           ) : (
             <>
-              <p className={styles.meaning}>{e.korean.english}</p>
+              <p className={styles.meaning}>
+                {e.korean.english} <small>· 臺語・韓語同義 · 같은 뜻</small>
+              </p>
               <p className={styles.small} lang="zh-Hant">
                 臺語：{e.taiwanese.definition || `臺華共同詞，與華語「${e.hanja}」同義`} — 教育部辭典
               </p>

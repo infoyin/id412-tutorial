@@ -49,6 +49,34 @@ export type Entry = {
     audio: { file: string; license: string; author: string; source: string } | null;
   };
   note: { ko: string; zh: string; en: string } | null; // ours, for a few pairs
+  falseFriend: { twEnglish: string; why: { zh: string; ko: string } } | null; // ours, false friends only
+};
+
+// False friends: the Taiwanese meaning in English, and how the two differ (written by us from
+// the two dictionaries' definitions, 2026-10-31; for Taiwanese and Korean readers).
+const FALSE_FRIEND_NOTES: Record<string, NonNullable<Entry["falseFriend"]>> = {
+  新聞: { twEnglish: "news (the report itself)", why: { zh: "臺語指報導的消息本身；韓語 신문 指刊登消息的報紙。", ko: "대만어는 소식(뉴스) 자체, 한국어 신문은 그것을 싣는 종이 신문입니다." } },
+  工夫: { twEnglish: "kung fu; skill, craft", why: { zh: "原意是花費的時間與功夫。臺語指武術、技藝；韓語 공부 成了「讀書、學習」。", ko: "본래 들인 시간과 노력. 대만어는 무술·솜씨, 한국어 공부는 ‘배우고 익힘’이 되었습니다." } },
+  點心: { twEnglish: "snack, light refreshment", why: { zh: "臺語指正餐之外的小吃；韓語 점심 是中午那一餐。", ko: "대만어는 끼니 사이의 간식, 한국어 점심은 낮에 먹는 끼니입니다." } },
+  料理: { twEnglish: "to handle, to take care of", why: { zh: "臺語指辦理、處理事情；韓語 요리 是烹調、做菜。", ko: "대만어는 일을 처리함, 한국어 요리는 음식을 만듦입니다." } },
+  安寧: { twEnglish: "peaceful, calm", why: { zh: "臺語形容安詳寧靜；韓語 안녕 從「平安」變成見面、道別的問候語。", ko: "대만어는 평온함, 한국어 안녕은 ‘평안’에서 만나고 헤어질 때의 인사말이 되었습니다." } },
+  便宜: { twEnglish: "cheap, inexpensive", why: { zh: "臺語（和華語一樣）指價格低；韓語 편의 是「方便」。", ko: "대만어는 값이 쌈, 한국어 편의는 ‘편리함’입니다." } },
+  人事: { twEnglish: "personnel matters", why: { zh: "臺語指機關中人員的任免調動；韓語 인사 最常用的意思是打招呼、問候。", ko: "대만어는 사람의 임용·이동, 한국어 인사는 흔히 ‘안부를 전하는 말’을 뜻합니다." } },
+  試驗: { twEnglish: "experiment", why: { zh: "臺語指實驗；韓語 시험 主要指考試。", ko: "대만어는 실험, 한국어 시험은 주로 시험(exam)입니다." } },
+  操心: { twEnglish: "to worry, to wear oneself out", why: { zh: "臺語指勞神、費心；韓語 조심 是小心、注意。", ko: "대만어는 마음 고생함, 한국어 조심은 ‘주의함’입니다." } },
+  千萬: { twEnglish: "by all means, be sure to", why: { zh: "臺語當副詞「務必」；韓語 천만 是數字一千萬。", ko: "대만어는 ‘부디, 꼭’, 한국어 천만은 숫자 10,000,000입니다." } },
+  階段: { twEnglish: "stage, phase", why: { zh: "臺語指事情發展的階段；韓語 계단 是樓梯。", ko: "대만어는 단계, 한국어 계단은 층계입니다." } },
+  新婦: { twEnglish: "daughter-in-law", why: { zh: "臺語指兒子的妻子（媳婦）；韓語 신부 是新娘。", ko: "대만어는 며느리, 한국어 신부는 결혼하는 여자입니다." } },
+  焦燥: { twEnglish: "dry", why: { zh: "臺語讀 ta-sò，指乾燥；韓語 초조 是焦慮、著急。", ko: "대만어는 건조함, 한국어 초조는 애가 타는 마음입니다." } },
+  豆乳: { twEnglish: "fermented tofu", why: { zh: "臺語指豆腐乳；韓語 두유 是豆漿。", ko: "대만어는 삭힌 두부(두부유), 한국어 두유는 콩 음료입니다." } },
+  經理: { twEnglish: "manager", why: { zh: "臺語指部門主管；韓語 경리 是會計、帳務工作。", ko: "대만어는 부서 책임자(매니저), 한국어 경리는 회계 업무입니다." } },
+  汽車: { twEnglish: "car, automobile", why: { zh: "臺語（和華語一樣）指汽車；韓語 기차 是「蒸汽車」，指火車。", ko: "대만어는 자동차, 한국어 기차는 ‘증기차’에서 온 열차입니다." } },
+  人間: { twEnglish: "the human world", why: { zh: "臺語（和華語一樣）指人世間；韓語 인간 指人、人類。", ko: "대만어는 사람 사는 세상, 한국어 인간은 ‘사람’입니다." } },
+  質問: { twEnglish: "to interrogate, to call to account", why: { zh: "臺語是質詢、責問；韓語 질문 是一般的提問。", ko: "대만어는 따져 물음, 한국어 질문은 보통의 물음입니다." } },
+  交代: { twEnglish: "to instruct, to tell someone to do", why: { zh: "臺語指囑咐、吩咐；韓語 교대 是輪班、交替。", ko: "대만어는 당부함, 한국어 교대는 번갈아 맡음입니다." } },
+  斟酌: { twEnglish: "careful, cautious", why: { zh: "臺語形容做事小心謹慎；韓語 짐작 是估計、猜想。", ko: "대만어는 조심스러움, 한국어 짐작은 어림잡아 헤아림입니다." } },
+  種種: { twEnglish: "all kinds of", why: { zh: "臺語指各種各樣；韓語 종종 是「有時、偶爾」。", ko: "대만어는 여러 가지, 한국어 종종은 ‘가끔’입니다." } },
+  境界: { twEnglish: "level of attainment", why: { zh: "臺語指學問或技藝達到的程度；韓語 경계 是邊界。", ko: "대만어는 도달한 경지, 한국어 경계는 경계선입니다." } },
 };
 
 // Short notes on what the two sounds share (written by us, 2026-10-30).
@@ -110,6 +138,7 @@ const toEntry = (p: Raw): Entry => ({
     audio: audioById.get(p.korean.sourceId) ?? null,
   },
   note: NOTES[p.hanja] ?? null,
+  falseFriend: p.status === "false_friend" ? (FALSE_FRIEND_NOTES[p.hanja] ?? null) : null,
 });
 
 export const ENTRIES: Entry[] = vocabulary.pairs.map(toEntry);

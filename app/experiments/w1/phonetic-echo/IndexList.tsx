@@ -56,8 +56,15 @@ function Detail({ e, playing, muted, onPlay }: { e: Entry } & Props) {
           <em>[{e.korean.pronunciation}]</em>
         </button>
       </div>
-      {e.status === "false_friend" && (
-        <p className={styles.trap}>≠ 偽友 · 가짜 친구 — 韓語辭典的中文翻譯是「{e.korean.chinese}」</p>
+      {e.falseFriend && (
+        <div className={styles.trap}>
+          <p>≠ 偽友 · 가짜 친구 · false friend</p>
+          <p>
+            <b>臺</b> {e.falseFriend.twEnglish} · <b>한</b> {e.korean.english}
+          </p>
+          <p lang="ko">→ {e.falseFriend.why.ko}</p>
+          <p lang="zh-Hant">→ {e.falseFriend.why.zh}</p>
+        </div>
       )}
       <dl>
         <dt>臺語 解說</dt>
@@ -65,7 +72,7 @@ function Detail({ e, playing, muted, onPlay }: { e: Entry } & Props) {
         <dt>한국어 뜻풀이</dt>
         <dd>{e.korean.definition}</dd>
         <dt>English</dt>
-        <dd>{e.korean.english}</dd>
+        <dd>{e.falseFriend ? `臺 ${e.falseFriend.twEnglish} · 한 ${e.korean.english}` : `${e.korean.english} — 臺語・韓語同義 · 같은 뜻`}</dd>
         {ex && (
           <>
             <dt>臺語 例句</dt>

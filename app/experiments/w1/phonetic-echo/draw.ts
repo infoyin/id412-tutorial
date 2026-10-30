@@ -64,6 +64,20 @@ function drawWithZhuyin(ctx: CanvasRenderingContext2D, text: string, zhuyin: str
   ctx.textAlign = "center";
 }
 
+// Split text into lines that fit `max` px (character by character, so it works for Hangul and Han).
+function wrap(ctx: CanvasRenderingContext2D, text: string, max: number) {
+  const lines: string[] = [];
+  let line = "";
+  for (const ch of text) {
+    if (ctx.measureText(line + ch).width > max && line) {
+      lines.push(line);
+      line = ch.trimStart();
+    } else line += ch;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 // First clause of a definition: "報社、廣播電臺…" → "報社".
 const short = (text: string, max = 12) => (text.split(/[。，、；;,]/)[0] ?? "").slice(0, max);
 
@@ -253,21 +267,21 @@ export function drawField(
     // Taiwanese: characters with 注音, Tâi-lô underneath.
     // Korean: Hangul, then the shared characters (they surface as the pair resonates),
     // then the Revised Romanization.
+    // On Korean blocks the lines open up as the characters appear, so before that the
+    // romanization sits as close as the Tâi-lô does.
     const korean = b.lang === "ko";
-    const mainY = korean ? -fontSize * 0.36 : -fontSize * 0.2;
+    const show = korean ? Math.max(resonance, solid) : 0;
+    const mainY = -fontSize * (0.2 + 0.16 * show);
     if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, mainY);
     else ctx.fillText(b.text, 0, mainY);
-    if (korean) {
-      const show = Math.max(resonance, solid);
-      if (show > 0.01) {
-        ctx.font = `500 ${Math.round(fontSize * 0.3)}px ${FONT}`;
-        ctx.globalAlpha = alpha * show;
-        ctx.fillText(pair.entry.hanja, 0, fontSize * 0.28);
-      }
+    if (show > 0.01) {
+      ctx.font = `500 ${Math.round(fontSize * 0.3)}px ${FONT}`;
+      ctx.globalAlpha = alpha * show;
+      ctx.fillText(pair.entry.hanja, 0, fontSize * 0.28);
     }
     ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
     ctx.globalAlpha = alpha * 0.75;
-    ctx.fillText(b.sub, 0, korean ? fontSize * 0.76 : fontSize * 0.62);
+    ctx.fillText(b.sub, 0, fontSize * (0.62 + 0.14 * show));
     ctx.globalAlpha = alpha;
 
     // Language tag in the corner.
@@ -286,15 +300,23 @@ export function drawField(
     const hovered = Math.max(pair.tw.hover, pair.ko.hover);
     if (t < 0 || pair.leaving || (t > 12 && hovered < 0.3)) continue;
     const e = pair.entry;
-    const lines = [
+    const ff = e.falseFriend;
+    const size = Math.max(12, Math.round(fontSize * 0.4));
+    const small = Math.round(size * 0.85);
+    const maxWidth = Math.min(460, width - 48);
+    // Bold lines: what each side means. Then why they differ, in Korean and Chinese, wrapped.
+    const heads = [
       "偽友 · 가짜 친구 · false friend",
-      `臺 ${e.hanja} — ${short(e.taiwanese.definition) || `同華語「${e.hanja}」`}`,
-      `한 ${e.korean.hangul} — ${short(e.korean.chinese, 8)} · ${short(e.korean.english, 18)}`,
+      `臺 ${e.hanja} ${e.taiwanese.tailo} — ${ff?.twEnglish ?? short(e.taiwanese.definition)}`,
+      `한 ${e.korean.hangul} ${e.korean.romanization} — ${short(e.korean.english, 24)}`,
     ];
-    const size = Math.max(12, Math.round(fontSize * 0.5));
+    ctx.font = `400 ${small}px ${FONT}`;
+    const notes = ff ? [...wrap(ctx, ff.why.ko, maxWidth - 24), ...wrap(ctx, ff.why.zh, maxWidth - 24)] : [];
+    const notesWidth = Math.max(0, ...notes.map((l) => ctx.measureText(l).width));
     ctx.font = `700 ${size}px ${FONT}`;
-    const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 24;
-    const h = lines.length * size * 1.5 + 16;
+    const lines = [...heads.map((text) => ({ text, bold: true })), ...notes.map((text) => ({ text, bold: false }))];
+    const w = Math.min(maxWidth, Math.max(notesWidth, ...heads.map((l) => ctx.measureText(l).width)) + 24);
+    const h = heads.length * size * 1.5 + notes.length * small * 1.5 + (notes.length ? 8 : 0) + 16;
     const x = Math.min(Math.max((pair.tw.x + pair.ko.x) / 2 - w / 2, 12), width - w - 12);
     const y = Math.min(Math.max(Math.min(pair.tw.y, pair.ko.y) - h - 40, 96), height - h - 12); // below the tabs
     ctx.globalAlpha = fade * Math.max(Math.min(1, t / 0.3, (12 - t) / 1.2), Math.min(1, (hovered - 0.3) * 3));
@@ -306,7 +328,13 @@ export function drawField(
     ctx.fillStyle = theme.ink;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    lines.forEach((l, i) => ctx.fillText(l, x + 12, y + 10 + i * size * 1.5));
+    let ly = y + 10;
+    lines.forEach((l, i) => {
+      if (!l.bold && lines[i - 1]?.bold) ly += 8; // a little space before the explanation
+      ctx.font = l.bold ? `700 ${size}px ${FONT}` : `400 ${small}px ${FONT}`;
+      ctx.fillText(l.text, x + 12, ly);
+      ly += (l.bold ? size : small) * 1.5;
+    });
   }
   ctx.globalAlpha = 1;
 }
