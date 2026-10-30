@@ -30,7 +30,7 @@ const GROUPS = [
 const NUMBER = new Map<string, number>();
 GROUPS.flatMap((g) => g.entries).forEach((e, i) => NUMBER.set(e.id, i + 1));
 // ALL comes first in the tabs and tiles: every word, in number order.
-const TABS = [{ key: "all", name: "ALL · 全部 · 전체", entries: GROUPS.flatMap((g) => g.entries) }, ...GROUPS];
+const TABS = [{ key: "all", name: "全部 · 전체 · ALL", entries: GROUPS.flatMap((g) => g.entries) }, ...GROUPS];
 
 type Props = {
   playing: Playing;
@@ -144,7 +144,12 @@ export function IndexList(props: Props) {
         <div className={styles.indexTiles}>
           {TABS.map((g) => (
             <button key={g.key} onClick={() => setGroup(g.key)}>
-              <b>{g.name}</b>
+              {/* Chinese and Korean on the first line, English whole on the second. */}
+              <b>
+                {g.name.slice(0, g.name.lastIndexOf(" · "))}
+                <br />
+                {g.name.slice(g.name.lastIndexOf(" · ") + 3)}
+              </b>
               <span>{g.entries.length}</span>
             </button>
           ))}

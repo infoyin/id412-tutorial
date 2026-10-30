@@ -118,6 +118,8 @@ export function drawField(
   playing: Playing,
   time: number,
   reduced: boolean,
+  // 3D view: amount 0…1 (animated on/off), and the point the "camera" looks from (the cursor).
+  depth: { amount: number; x: number; y: number } = { amount: 0, x: 0, y: 0 },
 ) {
   const { width, height } = world;
   ctx.fillStyle = theme.paper;
@@ -202,7 +204,32 @@ export function drawField(
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(b.x + (Math.random() - 0.5) * shake, b.y + (Math.random() - 0.5) * shake);
+
+    // 3D: the block becomes a thick slab. Its sides show on the side away from the camera point,
+    // longer the further away it is (a simple perspective), and nearer blocks look a bit bigger.
+    let near = 1;
+    if (depth.amount > 0.01) {
+      const span = Math.max(width, height);
+      const ox = ((b.x - depth.x) / span) * fontSize * 1.6 * depth.amount;
+      const oy = ((b.y - depth.y) / span) * fontSize * 1.6 * depth.amount;
+      const layers = 7;
+      for (let k = layers; k >= 1; k--) {
+        ctx.save();
+        ctx.translate((ox * k) / layers, (oy * k) / layers);
+        ctx.rotate(b.angle);
+        plate(ctx, b, unit);
+        ctx.fillStyle = mix(0.12 + 0.5 * (k / layers) * (1 - solid) + solid * 0.9);
+        ctx.fill();
+        ctx.strokeStyle = theme.ink;
+        ctx.lineWidth = k === layers ? 1 : 0.4;
+        ctx.stroke();
+        ctx.restore();
+      }
+      near = 1 + 0.07 * depth.amount * (1 - Math.min(Math.hypot(b.x - depth.x, b.y - depth.y) / span, 1));
+    }
+
     ctx.rotate(b.angle);
+    ctx.scale(near, near);
     if (speaking) ctx.scale(1 + pulse * 0.06, 1 + pulse * 0.06);
 
     // Lifted paper: a gray shadow plate under the held block.

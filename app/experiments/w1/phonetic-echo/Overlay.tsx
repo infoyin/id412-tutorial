@@ -24,6 +24,8 @@ type Props = {
   onToggleDark: () => void;
   scale: number;
   onScale: (scale: number) => void;
+  threeD: boolean;
+  onToggle3D: () => void;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -95,6 +97,19 @@ export function Overlay(p: Props) {
 
       {/* Block size: + on top, − below, a short vertical bar between. */}
       <div className={styles.sizeBar} data-size-bar>
+        <button
+          className={`${styles.compass} ${p.threeD ? styles.compassOn : ""}`}
+          onClick={p.onToggle3D}
+          aria-pressed={p.threeD}
+          aria-label="3D · 입체 · 立體"
+          title="3D · 입체 · 立體"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 4.5l2.6 7.5H9.4z" fill="currentColor" stroke="none" />
+            <path d="M12 19.5l-2.6-7.5h5.2z" />
+          </svg>
+        </button>
         <button onClick={() => p.onScale(p.scale + 0.1)} aria-label="bigger · 크게 · 放大" disabled={p.scale >= SIZE.max}>
           +
         </button>

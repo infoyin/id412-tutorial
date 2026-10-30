@@ -45,6 +45,8 @@ export default function PhoneticEcho() {
   const shownRef = useRef<Entry[]>([]);
   const flingRef = useRef<(strength: number, dir: number) => void>(() => {});
   const rescaleRef = useRef<(scale: number) => void>(() => {});
+  const threeDRef = useRef(false); // the compass button: 3D blocks
+  const [threeD, setThreeD] = useState(false);
   const [scale, setScaleState] = useState(SIZE.min); // block size from the size bar
   const [shown, setShown] = useState<Entry[]>([]);
   const [selectedId, setSelectedState] = useState<string | null>(null);
@@ -268,6 +270,7 @@ export default function PhoneticEcho() {
     let frame = 0;
     let last = performance.now();
     let shownSelected = -1;
+    let depthAmount = 0;
     let lastTooth = 0; // which gear tooth the wheel is on, for the ticks
     let lastTickAt = 0;
     const TOOTH = (Math.PI * 2) / 60;
@@ -292,7 +295,9 @@ export default function PhoneticEcho() {
       setCharge(wheel.held && !wheel.isOpen ? Math.max(wheel.pull, 0) : 0);
       // Block: a whoosh that follows the drag speed.
       setDrag(target === "block" ? Math.min(Math.hypot(pointer.vx, pointer.vy) / 2000, 1) : 0);
-      drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced);
+      depthAmount += ((threeDRef.current ? 1 : 0) - depthAmount) * (1 - Math.exp(-dt * 5));
+      const cam = pointer.inside ? pointer : { x: innerWidth / 2, y: innerHeight / 2 };
+      drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced, { amount: depthAmount, x: cam.x, y: cam.y });
       wheel.draw(ctx, innerWidth, innerHeight, shownRef.current, `400 SIZEpx ${FONT}`);
       // Turning the open wheel changes the annotation (state only changes when the sector does).
       if (wheel.isOpen && wheel.selected !== shownSelected) {
@@ -345,6 +350,11 @@ export default function PhoneticEcho() {
         onToggleSound={toggleSound}
         onToggleDark={() => applyDark(!dark)}
         scale={scale}
+        threeD={threeD}
+        onToggle3D={() => {
+          threeDRef.current = !threeDRef.current;
+          setThreeD(threeDRef.current);
+        }}
         onScale={(next: number) => {
           const v = Math.min(SIZE.max, Math.max(SIZE.min, Math.round(next / SIZE.step) * SIZE.step));
           setScaleState(v);

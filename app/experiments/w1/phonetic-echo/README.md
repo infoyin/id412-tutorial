@@ -13,7 +13,7 @@ A black-and-white typographic field of Taiwanese and Korean words that share Chi
 - `words.ts`: loads `vocabulary.json`; `Rotation` picks 6–10 pairs per set, mixing categories, avoiding recent ones.
 - Approaching partners are joined by a beam of light (glow band, bright core, streaks running inward); the hum, portal and crack sounds are synthesized live in `audio.ts` (original, not speech).
 - More synthesized sounds: gear ticks as the wheel turns, a charge while it is pulled down, a burst on a fling, a knock and whoosh when a block is grabbed, dragged or thrown.
-- Bottom right: a size bar (+ / −) scales blocks and text up to 1.6×; fewer pairs are shown when bigger (`pairCount`, `SIZE` in `settings.ts`). Top right: light/dark and sound icons.
+- Bottom right: a compass button turns 3D on (blocks become slabs whose sides face away from the cursor, like a camera); a size bar (+ / −) scales blocks and text up to 1.6×; fewer pairs are shown when bigger (`pairCount`, `SIZE` in `settings.ts`). Top right: light/dark and sound icons.
 - `audio.ts`: one voice at a time. Taiwanese = MOE recording. Korean = Lingua Libre recording if any, else browser `ko-KR` speech synthesis (never another language's voice). Mute stops both.
 - Blocks: Taiwanese words carry Mandarin 注音 beside each character (from the MOE revised Mandarin dictionary, by whole word so polyphones are right) and Tâi-lô below; Korean words carry Revised Romanization (`romanize.ts`, from krdict's pronunciation). Click a block to hear it.
 - Clicking the title opens a short About (ID412 Interactive Space mini project, credits). INFO fits one screen: text in three columns, the letter charts in a strip on the right. `Zhuyin.tsx` shows 注音 beside characters in the HTML (comparison note, INDEX details).
