@@ -197,7 +197,7 @@ export function Overlay(p: Props) {
           <b>聽 · 듣기 · Listen</b> 點你聽到的詞 · 들은 단어를 누르세요 · Click the word you hear
         </p>
       )}
-      {p.autoplay && <p className={styles.autoLabel}>▶ 自動播放 · 자동 재생 · Autoplay — 移動滑鼠即可開始 · Move the mouse to play</p>}
+      {p.autoplay && <p className={styles.autoLabel}>▶ 自動播放 · 자동 재생 · Autoplay — 點一下畫面開始 · 화면을 클릭하세요 · Click to play</p>}
 
       <div className={styles.toggles} data-toggles>
         {/* Poster: a 3:4 snapshot of the field (camera). */}

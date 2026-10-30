@@ -421,7 +421,8 @@ export default function PhoneticEcho() {
 
     // ---- Autoplay: after a while with no input the piece plays itself (for an exhibition
     // screen): pairs connect, the wheel spins, the grid and 3D come and go, a fling now and then.
-    // Any input stops it and puts grid / 3D back as they were.
+    // Only a click (or a key) stops it, and puts grid / 3D back as they were; that click does
+    // nothing else. Moving the mouse just restarts the countdown while it is not playing.
     const auto = { on: false, at: 0, step: 0, grid: false, threeD: false };
     const MOVES = ["pair", "turn", "pair", "grid", "pair", "grid", "3d", "pair", "fling", "3d"];
     let lastInput = performance.now();
@@ -433,9 +434,16 @@ export default function PhoneticEcho() {
       auto.grid = auto.threeD = false;
       setAutoplay(false);
     };
-    const onInput = () => {
+    const onInput = (e: Event) => {
+      if (auto.on && (e.type === "pointermove" || e.type === "wheel")) return;
       lastInput = performance.now();
-      stopAuto();
+      if (auto.on) {
+        stopAuto();
+        if (e.type === "pointerdown") {
+          e.stopPropagation(); // the click only ends autoplay
+          e.preventDefault();
+        }
+      }
     };
     const autoMove = () => {
       const move = MOVES[auto.step++ % MOVES.length];
@@ -455,7 +463,8 @@ export default function PhoneticEcho() {
       }
       if (move === "fling" && !world.grid) flingRef.current(0.8, 1);
     };
-    for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.addEventListener(ev, onInput);
+    // Capture phase, so the click that ends autoplay never reaches a block or the wheel.
+    for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.addEventListener(ev, onInput, true);
 
     let frame = 0;
     let last = performance.now();
@@ -524,7 +533,7 @@ export default function PhoneticEcho() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", onKey);
-      for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.removeEventListener(ev, onInput);
+      for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) window.removeEventListener(ev, onInput, true);
       clearTimeout(listen.timer);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerdown", onDown);
