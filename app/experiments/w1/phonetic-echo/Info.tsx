@@ -223,9 +223,9 @@ export function Info() {
 
             <section>
               <h3>● 한글 · 韓文字母 · Hangul</h3>
-              <p lang="zh-Hant">1443 年世宗大王創製，1446 年以《訓民正音》頒布。子音模仿發音器官（ㄱ 舌根、ㄴ 舌尖、ㅁ 嘴、ㅅ 牙、ㅇ 喉），母音由天（·）地（ㅡ）人（ㅣ）組成。</p>
-              <p lang="ko">1443년 세종대왕이 만들고 1446년 《훈민정음》으로 반포했습니다. 자음은 발음 기관을, 모음은 하늘(·)·땅(ㅡ)·사람(ㅣ)을 본떴습니다. 기본 24자, 모두 40자.</p>
-              <p lang="en">Created by King Sejong in 1443 and promulgated in 1446 as Hunminjeongeum. The consonants picture the speech organs; the vowels combine heaven (·), earth (ㅡ) and person (ㅣ). 24 basic letters, 40 in all.</p>
+              <p lang="zh-Hant">1443 年世宗大王創製，1446 年以《訓民正音》頒布。子音模仿發音器官（ㄱ 舌根、ㄴ 舌尖、ㅁ 嘴、ㅅ 牙、ㅇ 喉），母音由天（·）地（ㅡ）人（ㅣ）組成。朝鮮時代俗稱「諺文」，20 世紀初才定名為「한글」。</p>
+              <p lang="ko">1443년 세종대왕이 만들고 1446년 《훈민정음》으로 반포했습니다. 자음은 발음 기관을, 모음은 하늘(·)·땅(ㅡ)·사람(ㅣ)을 본떴습니다. 기본 24자, 모두 40자. 조선 시대에는 ‘언문’이라고도 불렸고, 20세기 초에 ‘한글’이라는 이름이 붙었습니다.</p>
+              <p lang="en">Created by King Sejong in 1443 and promulgated in 1446 as Hunminjeongeum. The consonants picture the speech organs; the vowels combine heaven (·), earth (ㅡ) and person (ㅣ). 24 basic letters, 40 in all. Once also called eonmun (諺文, “vernacular script”), it was named Hangul in the early 20th century.</p>
             </section>
 
             <section className={styles.sources}>
@@ -256,7 +256,7 @@ export function Info() {
             <p className={styles.cite}>點擊發音 · 누르면 들려요 · Click to hear · 以例字發音 (ㄅ → 玻) · 語音合成</p>
           </div>
           <div>
-            <h3>● 한글 (40) · 韓文 · Hangul</h3>
+            <h3>● 한글 (40) · 韓文字母 · Hangul</h3>
             <Letters letters={[...HANGUL.consonants, ...HANGUL.vowels]} language="ko" playing={playing} onPlay={play} />
             <p className={styles.cite}>누르면 들려요 · 點擊發音 · Click to hear · ㄱ → 가 · ㅏ → 아 · 음성 합성</p>
           </div>
