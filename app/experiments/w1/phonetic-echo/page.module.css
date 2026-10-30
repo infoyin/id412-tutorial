@@ -2,8 +2,8 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #101010;
-  color: #f0eee8;
+  background: #fbfbf9;
+  color: #111;
   font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
 }
 
@@ -15,197 +15,199 @@
   touch-action: none;
 }
 
-.root a {
+.root a,
+.root button {
   color: inherit;
-}
-
-/* ---- Title and instruction ---- */
-
-.title {
-  position: absolute;
-  top: 24px;
-  left: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  pointer-events: none;
-}
-
-.title span:last-child {
-  opacity: 0.5;
-  letter-spacing: 0.12em;
-}
-
-.intro {
-  position: absolute;
-  left: 28px;
-  bottom: 28px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 13px;
-  line-height: 1.5;
-  pointer-events: none;
-  transition: opacity 2s ease 1.5s;
-}
-
-.intro span:first-child {
-  font-size: 16px;
-}
-
-.intro span:not(:first-child) {
-  opacity: 0.5;
-}
-
-.faded {
-  opacity: 0;
-}
-
-/* ---- What a revealed pair shares ---- */
-
-.reveal {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  top: 32vh;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.revealInner {
-  max-width: 620px;
-  padding: 24px 48px 48px;
-  text-align: center;
-  background: radial-gradient(closest-side, rgba(16, 16, 16, 0.92) 70%, rgba(16, 16, 16, 0));
-  animation: appear 1.2s ease both;
-}
-
-.revealInner a {
-  pointer-events: auto;
-}
-
-.hanja {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.08em;
-}
-
-.caption {
-  margin: 10px 0 22px;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  opacity: 0.5;
-}
-
-.sounds {
-  display: flex;
-  justify-content: center;
-  gap: 56px;
-  margin-bottom: 20px;
-}
-
-.sounds div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sounds small {
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  opacity: 0.5;
-}
-
-.sounds strong {
-  font-size: 22px;
-  font-weight: 500;
-  color: #ff5a26;
+  font: inherit;
 }
 
 .latin {
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
-.sounds em {
-  font-style: normal;
-  font-size: 12px;
-  opacity: 0.6;
+/* ---- Title, instruction, sound ---- */
+
+.title {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  pointer-events: none;
 }
 
-.note {
-  margin: 0 0 6px;
-  font-size: 15px;
-  line-height: 1.6;
+.bar {
+  width: 96px;
+  height: 6px;
+  margin-bottom: 8px;
+  background: #111;
 }
 
-.noteSmall {
-  margin: 0 0 4px;
+.title span:last-child {
+  letter-spacing: 0.12em;
+  opacity: 0.55;
+}
+
+.intro {
+  position: absolute;
+  right: 28px;
+  bottom: 70px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   font-size: 12px;
   line-height: 1.5;
-  opacity: 0.6;
+  text-align: right;
+  pointer-events: none;
+  transition: opacity 2s ease 2s;
 }
 
-.definition {
-  margin: 16px 0 0;
-  font-size: 11px;
-  line-height: 1.6;
-  opacity: 0.45;
+.intro span:first-child {
+  font-size: 14px;
 }
 
-.audioLine {
-  margin: 10px 0 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-  font-size: 11px;
-  opacity: 0.6;
+.intro span:not(:first-child) {
+  opacity: 0.55;
 }
 
-@keyframes appear {
-  from { opacity: 0; transform: translateY(8px); }
+.faded {
+  opacity: 0;
 }
 
-/* ---- Sources ---- */
-
-.sourcesToggle {
+.sound {
   position: absolute;
   right: 28px;
   bottom: 24px;
   padding: 4px 0;
   border: none;
   background: none;
-  color: inherit;
-  font: inherit;
   font-size: 11px;
-  letter-spacing: 0.12em;
-  opacity: 0.45;
+  letter-spacing: 0.1em;
   cursor: pointer;
+  opacity: 0.6;
 }
 
-.sourcesToggle:hover,
-.sourcesToggle:focus-visible {
+.sound:hover,
+.sound:focus-visible {
   opacity: 1;
 }
 
-.sources {
+.live {
   position: absolute;
-  right: 28px;
-  bottom: 56px;
-  max-width: min(360px, calc(100vw - 56px));
-  font-size: 11px;
-  line-height: 1.6;
-  opacity: 0.8;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
-.sources p {
-  margin: 0 0 12px;
+/* ---- Annotation beside the open wheel ---- */
+
+.note {
+  position: absolute;
+  width: min(420px, calc(100vw - 32px));
+  animation: appear 0.9s ease 0.35s both;
+}
+
+.noteBelow {
+  left: 16px;
+  right: 16px;
+  width: auto;
+}
+
+.status {
+  margin: 0 0 14px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.hanja {
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #111;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.columns {
+  display: flex;
+  gap: 40px;
+  padding: 14px 0;
+  border-bottom: 0.5px solid #111;
+}
+
+.columns div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.columns small {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  opacity: 0.55;
+}
+
+.columns strong {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.columns em {
+  font-style: normal;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.meaning {
+  margin: 14px 0 6px;
+  font-size: 15px;
+}
+
+.soundNote {
+  margin: 14px 0 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.small {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.55;
+  opacity: 0.65;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 14px 0 0;
+  font-size: 12px;
+}
+
+.links button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.links button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(6px); }
 }
 
 /* ---- Keyboard fallback: hidden until focused ---- */
@@ -213,7 +215,7 @@
 .keys {
   position: absolute;
   left: 50%;
-  bottom: 24px;
+  bottom: 20px;
   transform: translateX(-50%);
   display: flex;
   flex-wrap: wrap;
@@ -230,33 +232,35 @@
 
 .keys button {
   padding: 6px 12px;
-  border: 1px solid rgba(240, 238, 232, 0.4);
-  background: #101010;
-  color: inherit;
-  font: inherit;
+  border: 1px solid #111;
+  background: #fbfbf9;
   font-size: 13px;
   cursor: pointer;
 }
 
-.keys button:focus-visible {
-  outline: 2px solid #ff5a26;
-  outline-offset: 2px;
+.keys button:focus-visible,
+.sound:focus-visible,
+.links button:focus-visible,
+.links a:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .intro,
-  .revealInner {
+  .note {
     transition: none;
     animation: none;
   }
 }
 
-@media (max-width: 600px) {
-  .sounds {
-    gap: 28px;
+@media (max-width: 760px) {
+  .hanja {
+    font-size: 44px;
   }
   .intro {
-    right: 28px;
-    bottom: 56px;
+    left: 28px;
+    align-items: flex-start;
+    text-align: left;
   }
 }
