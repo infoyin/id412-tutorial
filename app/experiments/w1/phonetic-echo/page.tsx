@@ -4,15 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import {
   closeEffects,
   crackSound,
+  flingSound,
   getPlaying,
+  grabSound,
   koreanVoiceStatus,
   onPlaying,
   playOne,
   playPair,
   portal,
+  setCharge,
+  setDrag,
   setHum,
   setMuted,
   stop,
+  throwSound,
+  tick,
   unlockEffects,
   type Lang,
   type Playing,
@@ -21,7 +27,7 @@ import { drawField, FONT, LATIN, zhuyinColumn } from "./draw";
 import { Menu } from "./Menu";
 import { Overlay } from "./Overlay";
 import { World, type Pointer } from "./physics";
-import { pairCount, TUNING } from "./settings";
+import { pairCount, SIZE, TUNING } from "./settings";
 import { setDark } from "./theme";
 import { Wheel } from "./wheel";
 import { Rotation, type Entry } from "./words";
@@ -38,6 +44,8 @@ export default function PhoneticEcho() {
   const wheelRef = useRef<Wheel | null>(null);
   const shownRef = useRef<Entry[]>([]);
   const flingRef = useRef<(strength: number, dir: number) => void>(() => {});
+  const rescaleRef = useRef<(scale: number) => void>(() => {});
+  const [scale, setScaleState] = useState(SIZE.min); // block size from the size bar
   const [shown, setShown] = useState<Entry[]>([]);
   const [selectedId, setSelectedState] = useState<string | null>(null);
   const selectedRef = useRef<string | null>(null); // the same, readable from the event handlers
@@ -101,6 +109,8 @@ export default function PhoneticEcho() {
     worldRef.current = world;
     wheelRef.current = wheel;
     let fontSize = 24;
+    let scale = SIZE.min;
+    const baseFont = () => Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.052, 20), 40);
     let lastFling = -Infinity;
 
     // Block size from its text.
@@ -142,7 +152,19 @@ export default function PhoneticEcho() {
       const now = performance.now() / 1000;
       if (now - lastFling < TUNING.flingCooldown) return;
       lastFling = now;
-      world.fling(strength, dir, rotation.next(pairCount(innerWidth, innerHeight)));
+      world.fling(strength, dir, rotation.next(pairCount(innerWidth, innerHeight, scale)));
+      flingSound(strength);
+    };
+
+    // The size bar: bigger text and blocks; fewer pairs when bigger, more when smaller again.
+    rescaleRef.current = (next) => {
+      scale = next;
+      fontSize = Math.round(baseFont() * scale);
+      world.blocks.forEach((b) => world.measure(b));
+      const n = pairCount(innerWidth, innerHeight, scale);
+      const now = world.current().length;
+      if (now > n) world.trim(n);
+      if (now < n) world.spawn(rotation.next(n - now), "edges");
     };
 
     const resize = () => {
@@ -150,18 +172,20 @@ export default function PhoneticEcho() {
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fontSize = Math.round(Math.min(Math.max(Math.min(innerWidth, innerHeight) * 0.052, 20), 40));
+      fontSize = Math.round(baseFont() * scale);
       world.resize(innerWidth, innerHeight);
       // Floating words stay out of the menu row (title, INFO, INDEX).
       const menu = document.querySelector("[data-menu]")?.getBoundingClientRect();
       world.keepOut = { w: menu?.right ?? 0, h: menu?.bottom ?? 0 };
+      const bar = document.querySelector("[data-size-bar]")?.getBoundingClientRect();
+      world.keepOutCorner = bar ? { w: innerWidth - bar.left, h: innerHeight - bar.top } : { w: 0, h: 0 };
       const closed = wheel.geometry(innerWidth, innerHeight, 0);
       world.left = closed.x + closed.r + 32;
       const g = wheel.geometry(innerWidth, innerHeight, 1);
       setPlace({ ...g.note, wide: g.wide });
     };
     resize();
-    world.spawn(rotation.next(pairCount(innerWidth, innerHeight)), "home");
+    world.spawn(rotation.next(pairCount(innerWidth, innerHeight, scale)), "home");
     document.fonts?.ready.then(() => world.blocks.forEach((b) => world.measure(b)));
     window.addEventListener("resize", resize);
 
@@ -198,6 +222,7 @@ export default function PhoneticEcho() {
       } else if (world.grab(e.clientX, e.clientY)) {
         target = "block";
         press = { x: e.clientX, y: e.clientY, t: performance.now() };
+        grabSound();
       }
       if (target) canvas.setPointerCapture(e.pointerId); // keep dragging even off the wheel
     };
@@ -217,6 +242,8 @@ export default function PhoneticEcho() {
         const b = world.held;
         const still = Math.hypot(e.clientX - press.x, e.clientY - press.y) < 6 && performance.now() - press.t < 350;
         if (b && still) playOne(b.pair.entry, b.lang);
+        const speed = Math.min(Math.hypot(pointer.vx, pointer.vy) / 2500, 1);
+        if (b && !still && speed > 0.25) throwSound(speed);
         world.release();
       }
       target = null;
@@ -241,6 +268,9 @@ export default function PhoneticEcho() {
     let frame = 0;
     let last = performance.now();
     let shownSelected = -1;
+    let lastTooth = 0; // which gear tooth the wheel is on, for the ticks
+    let lastTickAt = 0;
+    const TOOTH = (Math.PI * 2) / 60;
     const loop = (now: number) => {
       const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
@@ -252,6 +282,16 @@ export default function PhoneticEcho() {
       world.obstacle = { x: g.x, y: g.y, r: g.r };
       world.update(dt, pointer, reduced);
       setHum(world.activeCloseness() ** 1.5);
+      // Wheel: a click per gear tooth (at most ~30 per second), a charge while pulled down.
+      const tooth = Math.floor(wheel.angle / TOOTH);
+      if (tooth !== lastTooth && now - lastTickAt > 33) {
+        tick(Math.min(Math.abs(wheel.omega) / 20, 1));
+        lastTickAt = now;
+      }
+      lastTooth = tooth;
+      setCharge(wheel.held && !wheel.isOpen ? Math.max(wheel.pull, 0) : 0);
+      // Block: a whoosh that follows the drag speed.
+      setDrag(target === "block" ? Math.min(Math.hypot(pointer.vx, pointer.vy) / 2000, 1) : 0);
       drawField(ctx, world, fontSize, wheel.open, getPlaying(), now / 1000, reduced);
       wheel.draw(ctx, innerWidth, innerHeight, shownRef.current, `400 SIZEpx ${FONT}`);
       // Turning the open wheel changes the annotation (state only changes when the sector does).
@@ -304,6 +344,12 @@ export default function PhoneticEcho() {
         pairs={shown}
         onToggleSound={toggleSound}
         onToggleDark={() => applyDark(!dark)}
+        scale={scale}
+        onScale={(next: number) => {
+          const v = Math.min(SIZE.max, Math.max(SIZE.min, Math.round(next / SIZE.step) * SIZE.step));
+          setScaleState(v);
+          rescaleRef.current(v);
+        }}
         onPlay={(e: Entry, lang: Lang) => playOne(e, lang)}
         onStep={step}
         onOpen={() => openWheel(true)}

@@ -10,7 +10,8 @@ import type { Entry } from "./words";
 //
 // Sound effects (original, synthesized with Web Audio, not speech): a hum that rises while a
 // pair resonates, a "portal" sweep when a pair connects, a falling glitch when a false friend
-// cracks. The AudioContext is created by unlockEffects() on the first pointer press.
+// cracks, gear ticks as the wheel turns, a charging drone while it is pulled down, a burst when
+// it is flung, and a breathy whoosh while a block is dragged or thrown. The AudioContext is created by unlockEffects() on the first pointer press.
 
 export type Lang = "tw" | "ko";
 export type Playing = { id: string; lang: Lang } | null;
@@ -70,6 +71,8 @@ type Effects = {
   master: GainNode;
   noise: AudioBuffer;
   hum: { gain: GainNode; filter: BiquadFilterNode; oscs: OscillatorNode[] };
+  charge: { gain: GainNode; filter: BiquadFilterNode; oscs: OscillatorNode[] };
+  drag: { gain: GainNode; band: BiquadFilterNode };
 };
 let fx: Effects | null = null;
 
@@ -106,7 +109,97 @@ export function unlockEffects() {
     o.start();
     return o;
   });
-  fx = { ctx, master, noise, hum: { gain, filter, oscs } };
+  // Charge: a low saw pair that rises in pitch and brightness as the wheel is pulled.
+  const chargeGain = ctx.createGain();
+  chargeGain.gain.value = 0;
+  const chargeFilter = ctx.createBiquadFilter();
+  chargeFilter.type = "lowpass";
+  chargeFilter.Q.value = 12;
+  chargeFilter.connect(chargeGain);
+  chargeGain.connect(master);
+  const chargeOscs = [55, 55.6].map((f) => {
+    const o = ctx.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.value = f;
+    o.connect(chargeFilter);
+    o.start();
+    return o;
+  });
+
+  // Drag: looped noise through a band-pass, louder and brighter with speed.
+  const dragGain = ctx.createGain();
+  dragGain.gain.value = 0;
+  const dragBand = ctx.createBiquadFilter();
+  dragBand.type = "bandpass";
+  dragBand.Q.value = 1.5;
+  const dragSrc = ctx.createBufferSource();
+  dragSrc.buffer = noise;
+  dragSrc.loop = true;
+  dragSrc.connect(dragBand).connect(dragGain).connect(master);
+  dragSrc.start();
+
+  fx = {
+    ctx,
+    master,
+    noise,
+    hum: { gain, filter, oscs },
+    charge: { gain: chargeGain, filter: chargeFilter, oscs: chargeOscs },
+    drag: { gain: dragGain, band: dragBand },
+  };
+}
+
+// One gear tooth passing: a short bright click. speed 0…1 makes it sharper and louder.
+export function tick(speed: number) {
+  if (!fx || muted) return;
+  const { ctx, master } = fx;
+  const t = ctx.currentTime;
+  const o = ctx.createOscillator();
+  o.type = "square";
+  o.frequency.value = 1400 + speed * 1600 + Math.random() * 200;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.03 + speed * 0.05, t);
+  g.gain.exponentialRampToValueAtTime(0.0005, t + 0.025);
+  o.connect(g).connect(master);
+  o.start(t);
+  o.stop(t + 0.03);
+}
+
+// level 0…1: how hard the wheel is pulled down. 0 = silent.
+export function setCharge(level: number) {
+  if (!fx) return;
+  const t = fx.ctx.currentTime;
+  const { gain, filter, oscs } = fx.charge;
+  gain.gain.setTargetAtTime(level * 0.07, t, 0.06);
+  filter.frequency.setTargetAtTime(120 + level * 1800, t, 0.06);
+  oscs.forEach((o, i) => o.frequency.setTargetAtTime((i ? 55.6 : 55) * (1 + level * 2), t, 0.08));
+}
+
+// The wheel is flung: the charge is released as a rising burst.
+export function flingSound(strength: number) {
+  if (!fx || muted) return;
+  const s = Math.min(strength, 1.5) / 1.5;
+  sweep(150, 6000, 0.7, 0.25 + s * 0.25);
+  glide(80, 40, 0, 0.5, 0.15 + s * 0.15);
+}
+
+// speed 0…1 of the block being dragged. 0 = silent.
+export function setDrag(speed: number) {
+  if (!fx) return;
+  const t = fx.ctx.currentTime;
+  fx.drag.gain.gain.setTargetAtTime(speed * 0.12, t, 0.05);
+  fx.drag.band.frequency.setTargetAtTime(300 + speed * 2500, t, 0.05);
+}
+
+// A block is picked up: a soft low knock.
+export function grabSound() {
+  if (!fx || muted) return;
+  glide(260, 180, 0, 0.12, 0.1);
+}
+
+// A block is thrown: a short whoosh, stronger the faster it goes.
+export function throwSound(speed: number) {
+  if (!fx || muted) return;
+  sweep(600, 600 + speed * 3500, 0.35, 0.1 + speed * 0.2);
 }
 
 // level 0…1: how close the pair being brought together is. 0 = silent.

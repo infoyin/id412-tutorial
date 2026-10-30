@@ -41,6 +41,11 @@ export class Wheel {
   private samples: { x: number; y: number; t: number }[] = [];
   private moved = 0;
 
+  // Being dragged right now (for the charge sound).
+  get held() {
+    return this.dragging;
+  }
+
   private get step() {
     return (Math.PI * 2) / Math.max(this.count, 1);
   }

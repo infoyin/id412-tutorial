@@ -28,7 +28,11 @@ export const TUNING = {
   maxDpr: 2,
 };
 
-// How many pairs are on screen (12–20 word blocks).
-export function pairCount(width: number, height: number) {
-  return Math.round(Math.min(10, Math.max(6, (width * height) / 110000)));
+// How many pairs are on screen (12–20 word blocks at the default size; fewer when the blocks are
+// made bigger with the size bar, so they keep their spacing).
+export function pairCount(width: number, height: number, scale = 1) {
+  return Math.round(Math.min(10, Math.max(4, (width * height) / 110000 / (scale * scale))));
 }
+
+// The size bar: block scale from the default (smallest) up to this.
+export const SIZE = { min: 1, max: 1.6, step: 0.05 };

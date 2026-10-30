@@ -77,6 +77,7 @@ export class World {
   left = 0; // keep new homes right of this (the wheel)
   obstacle: Circle = { x: 0, y: 0, r: 0 };
   keepOut = { w: 0, h: 0 }; // the menu row in the top-left corner
+  keepOutCorner = { w: 0, h: 0 }; // the size bar in the bottom-right corner
   private pending: { at: number; entries: Entry[] } | null = null;
   private time = 0;
   measure: (b: Block) => void = () => {};
@@ -229,6 +230,23 @@ export class World {
     tw.spin -= 4 * SETTINGS.angularMomentum;
     ko.spin += 4 * SETTINGS.angularMomentum;
     this.onCrack(pair);
+  }
+
+  // Keep at most n pairs: the extra ones (never one being held) drift off and fade.
+  trim(n: number) {
+    const over = this.current().length - n;
+    if (over <= 0) return;
+    const extra = this.current().filter((p) => p.tw !== this.held && p.ko !== this.held).slice(-over);
+    for (const pair of extra) {
+      pair.leaving = true;
+      pair.docked = false;
+      for (const b of [pair.tw, pair.ko]) {
+        b.age = 0;
+        b.vx += (Math.random() - 0.5) * 300;
+        b.vy += (Math.random() - 0.5) * 300;
+      }
+    }
+    this.onChange(this.current().map((p) => p.entry));
   }
 
   // Topmost block under a point, in the block's own rotated frame.
@@ -509,6 +527,20 @@ export class World {
           b.y += oy;
           if (b.vy < 0) b.vy *= -bounce;
           if (Math.sin(b.drift) < 0) b.drift = -b.drift;
+        }
+      }
+      // Same for the size bar at the bottom right.
+      const cx = b.x + b.w / 2 + 8 - (this.width - this.keepOutCorner.w);
+      const cy = b.y + b.h / 2 + 8 - (this.height - this.keepOutCorner.h);
+      if (free && cx > 0 && cy > 0) {
+        if (cx < cy) {
+          b.x -= cx;
+          if (b.vx > 0) b.vx *= -bounce;
+          if (Math.cos(b.drift) > 0) b.drift = Math.PI - b.drift;
+        } else {
+          b.y -= cy;
+          if (b.vy > 0) b.vy *= -bounce;
+          if (Math.sin(b.drift) > 0) b.drift = -b.drift;
         }
       }
       // Keep out of the wheel.

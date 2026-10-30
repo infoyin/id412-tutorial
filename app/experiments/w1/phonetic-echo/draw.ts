@@ -123,16 +123,6 @@ export function drawField(
   ctx.fillStyle = theme.paper;
   ctx.fillRect(0, 0, width, height);
 
-  // Editorial rules.
-  ctx.strokeStyle = theme.ink;
-  ctx.lineWidth = 0.75;
-  ctx.beginPath();
-  ctx.moveTo(width - 28, 120);
-  ctx.lineTo(width - 28, height - 70);
-  ctx.moveTo(width * 0.55, height - 56);
-  ctx.lineTo(width - 28, height - 56);
-  ctx.stroke();
-
   const fade = 1 - dim * 0.94; // blocks step back in comparison mode
 
   // Tension lines between partners (under the blocks, whose fill hides the inside part).

@@ -1,5 +1,6 @@
 import type { Lang, Playing } from "./audio";
 import type { Entry } from "./words";
+import { SIZE } from "./settings";
 import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
 
@@ -21,6 +22,8 @@ type Props = {
   pairs: Entry[];
   onToggleSound: () => void;
   onToggleDark: () => void;
+  scale: number;
+  onScale: (scale: number) => void;
   onPlay: (entry: Entry, lang: Lang) => void;
   onStep: (delta: number) => void;
   onOpen: () => void;
@@ -89,6 +92,25 @@ export function Overlay(p: Props) {
         <span lang="zh-Hant">拖動詞語尋找配對；拉動、用力甩或點擊左邊的輪盤。</span>
         <span lang="en">Drag words to their pairs; pull, fling or click the wheel.</span>
       </p>
+
+      {/* Block size: + on top, − below, a short vertical bar between. */}
+      <div className={styles.sizeBar} data-size-bar>
+        <button onClick={() => p.onScale(p.scale + 0.1)} aria-label="bigger · 크게 · 放大" disabled={p.scale >= SIZE.max}>
+          +
+        </button>
+        <input
+          type="range"
+          min={SIZE.min}
+          max={SIZE.max}
+          step={SIZE.step}
+          value={p.scale}
+          onChange={(e) => p.onScale(Number(e.target.value))}
+          aria-label="block size · 크기 · 大小"
+        />
+        <button onClick={() => p.onScale(p.scale - 0.1)} aria-label="smaller · 작게 · 縮小" disabled={p.scale <= SIZE.min}>
+          −
+        </button>
+      </div>
 
       <div className={styles.toggles}>
         <button onClick={p.onToggleDark} aria-label={p.dark ? "light mode · 淺色 · 라이트 모드" : "dark mode · 深色 · 다크 모드"} title={p.dark ? "淺色 · 라이트" : "深色 · 다크"}>

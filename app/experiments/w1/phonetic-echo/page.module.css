@@ -46,8 +46,8 @@
 
 .intro {
   position: absolute;
-  right: 28px;
-  bottom: 70px;
+  right: 70px; /* clear of the size bar */
+  bottom: 28px;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -85,8 +85,8 @@
 /* Sound and light/dark: two icons, bottom right. */
 .toggles {
   position: absolute;
-  right: 22px;
-  bottom: 18px;
+  right: 18px;
+  top: 18px;
   display: flex;
   gap: 6px;
 }
@@ -1079,4 +1079,48 @@
 .about a {
   color: inherit;
   text-underline-offset: 3px;
+}
+
+/* Block size bar, bottom right: + / vertical slider / −. */
+.sizeBar {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sizeBar button {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sizeBar button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.sizeBar input {
+  writing-mode: vertical-lr;
+  direction: rtl; /* top = bigger */
+  width: 18px;
+  height: 90px;
+  margin: 0;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.sizeBar button:focus-visible,
+.sizeBar input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
