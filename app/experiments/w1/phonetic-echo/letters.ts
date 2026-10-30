@@ -43,6 +43,6 @@ export const TONES: Tone[] = [
   { letter: "ˉ", speak: "媽", label: "媽 mā", name: "一聲 · 1성", zh: "高而平", ko: "높고 평평하게", en: "high, level" },
   { letter: "ˊ", speak: "麻", label: "麻 má", name: "二聲 · 2성", zh: "由中往上揚", ko: "중간에서 위로 올리며", en: "rising" },
   { letter: "ˇ", speak: "馬", label: "馬 mǎ", name: "三聲 · 3성", zh: "先降再升", ko: "내려갔다 올라가며", en: "dips, then rises" },
-  { letter: "ˋ", speak: "罵", label: "罵 mà", name: "四聲 · 4성", zh: "由高往下降", ko: "위에서 아래로 떨어지며", en: "falling" },
+  { letter: "ˋ", speak: "罵", label: "罵 mà", name: "四聲 · 4성", zh: "由高往下降", ko: "위에서 떨어지며", en: "falling" },
   { letter: "˙", speak: "嗎", label: "嗎 ma", name: "輕聲 · 경성", zh: "又輕又短", ko: "가볍고 짧게", en: "light and short" },
 ];

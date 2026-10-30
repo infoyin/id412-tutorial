@@ -162,11 +162,11 @@ export function Info() {
           </div>
           <div className={styles.infoCol}>
             <section>
-              <h3>● 為何相像 · 왜 비슷할까 · Why they sound alike</h3>
+              <h3>● 為何相像 · 왜 비슷할까 · Why They Sound Alike?</h3>
               <p lang="zh-Hant">多數學者認為，韓國漢字音和臺語文讀音都可追溯到中古漢語（約隋唐）。兩邊都保留了韻尾，-t 在韓語則規律地變成 ㄹ；華語已失去 -p、-t、-k。</p>
               <p lang="ko">한국 한자음과 대만어 文讀은 모두 중세 중국어(대략 수·당)로 거슬러 올라간다고 보는 견해가 많습니다. 둘 다 받침을 지켰고, -t는 한국어에서 ㄹ이 됩니다.</p>
               <p lang="en">Many scholars trace both Sino-Korean readings and Taiwanese literary readings to Middle Chinese (roughly Sui–Tang). Both kept the syllable endings; Korean regularly turned -t into ㄹ (l), while Mandarin lost -p, -t, -k.</p>
-              <p className={styles.chartTitle}>臺語韻尾 → 받침 · Taiwanese endings → Korean finals · {ENTRIES.length}쌍</p>
+              <p className={styles.chartTitle}>臺語韻尾 → 받침 · Taiwanese Endings → Korean Finals · {ENTRIES.length}쌍</p>
               <div className={styles.finals}>
                 {finals.map(({ t, total, counts }) => (
                   <div key={t} className={styles.finalRow}>
@@ -186,10 +186,10 @@ export function Info() {
 
             <section>
               <h3>● 使用人口 · 사용 인구 · Speakers</h3>
-              <p className={styles.chartTitle}>韓語 · 약 7,720만 명 · Korean, about 77.2 million speakers</p>
+              <p className={styles.chartTitle}>韓語 · 약 7,720만 명 · Korean, About 77.2 Million Speakers</p>
               <Bar parts={[{ label: "南韓", value: 48.4 }, { label: "北韓", value: 23.3 }, { label: "中國", value: 2.7 }, { label: "其他", value: 2.8 }]} />
               <p className={styles.cite}>백만 명 · Ethnologue (Korea Times)</p>
-              <p className={styles.chartTitle}>臺灣 主要使用語言 · 주로 쓰는 언어 · Taiwan, main language used</p>
+              <p className={styles.chartTitle}>臺灣 主要使用語言 · 주로 쓰는 언어 · Taiwan, Main Language Used</p>
               <Bar parts={[{ label: "華語", value: 66.3 }, { label: "臺語", value: 31.7 }, { label: "客語", value: 1.5 }, { label: "其他", value: 0.5 }]} />
               <p className={styles.cite}>% · 2020 人口及住宅普查 (The News Lens 引述)</p>
             </section>
@@ -198,9 +198,9 @@ export function Info() {
           <div className={styles.infoCol}>
             <section>
               <h3>● 注音符號 · 주음부호 · Bopomofo · Zhuyin</h3>
-              <p lang="zh-Hant">英文 Bopomofo，取自前四個符號 ㄅㄆㄇㄈ。1913 年議定、1918 年公布，1930 年定名注音符號；37 個符號取自古漢字（ㄅ←勹）。一字由「聲母＋介音＋韻母」加聲調組成，寫在字右側：學 ㄒㄩㄝˊ。方塊上是華語讀音。</p>
-              <p lang="ko">보포모포(Bopomofo)는 첫 네 기호 ㄅㄆㄇㄈ에서 온 이름. 1913년 정하고 1918년 공포, 1930년 주음부호로 정착; 37개 기호는 옛 한자에서 왔습니다(ㄅ←勹). ‘성모+개음+운모’와 성조를 글자 오른쪽에 씁니다: 學 ㄒㄩㄝˊ.</p>
-              <p lang="en">Named after its first four symbols, ㄅㄆㄇㄈ (bo po mo fo). Agreed in 1913, published in 1918, named in 1930; its 37 symbols come from old character forms (ㄅ from 勹). A syllable is initial + medial + final plus a tone, written to the right of the character: 學 ㄒㄩㄝˊ. On the blocks it gives the Mandarin reading.</p>
+              <p lang="zh-Hant">英文稱 Bopomofo（取自前四個符號 ㄅㄆㄇㄈ）或 Zhuyin（注音）。1913 年議定、1918 年公布，1930 年定名注音符號；37 個符號取自古漢字（ㄅ←勹）。一字由「聲母＋介音＋韻母」加聲調組成，寫在字右側：學 ㄒㄩㄝˊ。方塊上是華語讀音。</p>
+              <p lang="ko">주음(注音, Zhuyin)은 영어로 보포모포(Bopomofo)라고도 하며, 첫 네 기호 ㄅㄆㄇㄈ에서 온 이름입니다. 1913년 정하고 1918년 공포, 1930년 주음부호로 정착; 37개 기호는 옛 한자에서 왔습니다(ㄅ←勹). ‘성모+개음+운모’와 성조를 글자 오른쪽에 씁니다: 學 ㄒㄩㄝˊ.</p>
+              <p lang="en">Zhuyin (注音), also called Bopomofo after its first four symbols ㄅㄆㄇㄈ (bo po mo fo). Agreed in 1913, published in 1918, named in 1930; its 37 symbols come from old character forms (ㄅ from 勹). A syllable is initial + medial + final plus a tone, written to the right of the character: 學 ㄒㄩㄝˊ. On the blocks it gives the Mandarin reading.</p>
             </section>
 
 
@@ -230,17 +230,17 @@ export function Info() {
       {view === "letters" && (
         <div className={styles.infoCharts}>
           <div>
-            <h3>● 注音符號 37 · 주음부호 · Bopomofo · Zhuyin</h3>
+            <h3>● 注音符號 (37) · 주음부호 · Bopomofo · Zhuyin</h3>
             <Letters letters={ZHUYIN} language="zh" playing={playing} onPlay={play} />
             <p className={styles.cite}>點擊發音 · 누르면 들려요 · Click to hear · 以例字發音 (ㄅ → 玻) · 語音合成</p>
           </div>
           <div>
-            <h3>● 한글 40자 · 韓文四十音 · Hangul 40</h3>
+            <h3>● 한글 (40) · 韓文 · Hangul</h3>
             <Letters letters={[...HANGUL.consonants, ...HANGUL.vowels]} language="ko" playing={playing} onPlay={play} />
             <p className={styles.cite}>누르면 들려요 · 點擊發音 · Click to hear · ㄱ → 가 · ㅏ → 아 · 음성 합성</p>
           </div>
           <div className={styles.tonesRow}>
-            <h3 className={styles.tonesTitle}>● 聲調 · 성조 · Tones — 同一個 ma，五種音高 · one ma, five pitches</h3>
+            <h3 className={styles.tonesTitle}>● 聲調 · 성조 · Tones — 同一個 ma，五種音高 · One Ma, Five Pitches</h3>
             <Tones playing={playing} onPlay={play} />
           </div>
         </div>

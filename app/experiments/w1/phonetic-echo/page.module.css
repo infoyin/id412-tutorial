@@ -512,8 +512,12 @@
 .infoCharts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 36px;
+  gap: 14px 36px; /* rows closer: the tones sit just under the charts */
   padding-top: 6px;
+}
+
+.infoCharts .cite {
+  margin: 2px 0 0 !important;
 }
 
 .info .lead p {
@@ -521,9 +525,14 @@
 }
 
 /* Headings: a paper-coloured band with ink text, so they stand apart from the body text. */
+/* Text centred in the band (the CJK fonts sit high in their line box). */
 .info h3 {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
   margin: 0 0 8px;
-  padding: 3px 8px;
+  padding: 4px 8px 2px;
+  line-height: 1.2;
   border: none;
   background: var(--paper);
   color: var(--ink);
@@ -1053,11 +1062,14 @@
   cursor: pointer;
 }
 
+/* The tone marks sit at the top of their glyph box; nudge them to the vertical middle. */
 .tones b {
   grid-row: 1 / 4;
+  align-self: center;
   font-size: 40px;
   line-height: 1;
   text-align: center;
+  transform: translateY(0.28em);
 }
 
 .tones span {
