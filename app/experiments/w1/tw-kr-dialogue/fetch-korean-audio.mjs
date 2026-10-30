@@ -1,17 +1,17 @@
 // Korean recordings from Lingua Libre (Wikimedia Commons), for the words in vocabulary.json.
 // krdict's own recordings are not used: their license is set per file and not stated.
 //
-//   node app/experiments/w1/phonetic-echo/fetch-korean-audio.mjs
+//   node app/experiments/w1/tw-kr-dialogue/fetch-korean-audio.mjs
 //
 // Keeps only CC0 / CC BY / CC BY-SA / public-domain files, saves them unmodified to
-// public/experiments/w1/phonetic-echo/audio/ko/<krdict id>.<ext>, and writes korean-audio.json
+// public/experiments/w1/tw-kr-dialogue/audio/ko/<krdict id>.<ext>, and writes korean-audio.json
 // (word, file, license, author, source page) next to this script.
 
 import fs from "fs";
 import path from "path";
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
-const OUT = path.join(HERE, "../../../../public/experiments/w1/phonetic-echo/audio/ko");
+const OUT = path.join(HERE, "../../../../public/experiments/w1/tw-kr-dialogue/audio/ko");
 const UA = { "User-Agent": "ID412 student project (Daehan Daehwa)" };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -51,7 +51,7 @@ for (const [word, title] of Object.entries(found)) {
   const file = `${id}.${info.url.split("?")[0].split(".").pop()}`;
   fs.writeFileSync(path.join(OUT, file), Buffer.from(await (await fetch(info.url, { headers: UA })).arrayBuffer()));
   const author = (info.extmetadata.Artist?.value ?? "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  credits.push({ word, krdictId: id, file: `/experiments/w1/phonetic-echo/audio/ko/${file}`, license, author, source: info.descriptionurl });
+  credits.push({ word, krdictId: id, file: `/experiments/w1/tw-kr-dialogue/audio/ko/${file}`, license, author, source: info.descriptionurl });
   console.log(word, file, license);
   await wait(2500);
 }

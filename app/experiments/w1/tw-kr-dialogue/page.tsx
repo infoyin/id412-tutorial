@@ -137,13 +137,13 @@ export default function PhoneticEcho() {
     setDark(value);
     setDarkState(value);
     try {
-      localStorage.setItem("phonetic-echo-dark", value ? "1" : "0");
+      localStorage.setItem("tw-kr-dialogue-dark", value ? "1" : "0");
     } catch {}
   };
   useEffect(() => {
     let saved = false;
     try {
-      saved = localStorage.getItem("phonetic-echo-dark") === "1";
+      saved = localStorage.getItem("tw-kr-dialogue-dark") === "1";
     } catch {}
     if (saved) applyDark(true);
   }, []);

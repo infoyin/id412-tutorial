@@ -7,7 +7,7 @@ Offline, standard library only. Inputs are the two official full-dictionary down
   3. Unicode Unihan_Variants.txt (from Unihan.zip)  https://www.unicode.org/Public/UCD/latest/ucd/
 
   4. (optional) sutiau-mp3.zip, the MOE recordings: the usable words' files are copied unmodified
-     to public/experiments/w1/phonetic-echo/audio/tw/ (renamed 6050(1).mp3 → 6050-1.mp3).
+     to public/experiments/w1/tw-kr-dialogue/audio/tw/ (renamed 6050(1).mp3 → 6050-1.mp3).
 
   5. (optional) dict-revised.json: 教育部《重編國語辭典修訂本》 (g0v/moedict-data, CC BY-ND 3.0 TW).
      Adds Mandarin 注音 (bopomofo) per character, from the whole word's reading so polyphones are
@@ -311,9 +311,9 @@ def main(ods_path, kr_folder, unihan_variants, mp3_zip=None, moe_mandarin=None):
 
     for p in usable + false_friends:
         name = p["taiwanese"]["audioFile"]  # e.g. 6050(1)
-        p["taiwanese"]["audio"] = "/experiments/w1/phonetic-echo/audio/tw/" + name.replace("(", "-").rstrip(")") + ".mp3"
+        p["taiwanese"]["audio"] = "/experiments/w1/tw-kr-dialogue/audio/tw/" + name.replace("(", "-").rstrip(")") + ".mp3"
     if mp3_zip:
-        out = os.path.join(HERE, "../../../../public/experiments/w1/phonetic-echo/audio/tw")
+        out = os.path.join(HERE, "../../../../public/experiments/w1/tw-kr-dialogue/audio/tw")
         os.makedirs(out, exist_ok=True)
         archive = zipfile.ZipFile(mp3_zip)
         for p in usable + false_friends:

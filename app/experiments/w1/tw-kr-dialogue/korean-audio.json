@@ -2,7 +2,7 @@
  {
   "word": "가수",
   "krdictId": "62256",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/62256.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/62256.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EA%B0%80%EC%88%98.wav"
@@ -10,7 +10,7 @@
  {
   "word": "결혼",
   "krdictId": "31665",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/31665.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/31665.wav",
   "license": "CC0",
   "author": "Speaker: 호로조 Recorder: 호로조",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-%ED%98%B8%EB%A1%9C%EC%A1%B0-%EA%B2%B0%ED%98%BC.wav"
@@ -18,7 +18,7 @@
  {
   "word": "공기",
   "krdictId": "22637",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/22637.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/22637.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EA%B3%B5%EA%B8%B0.wav"
@@ -26,7 +26,7 @@
  {
   "word": "공룡",
   "krdictId": "22844",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/22844.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/22844.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EA%B3%B5%EB%A3%A1.wav"
@@ -34,7 +34,7 @@
  {
   "word": "과학",
   "krdictId": "21353",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/21353.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/21353.wav",
   "license": "CC0",
   "author": "Speaker: Daniel Mietchen Recorder: Daniel Mietchen",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-Daniel_Mietchen-%EA%B3%BC%ED%95%99.wav"
@@ -42,7 +42,7 @@
  {
   "word": "국가",
   "krdictId": "62382",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/62382.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/62382.wav",
   "license": "CC0",
   "author": "Speaker: Jeebeen Recorder: 호로조",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-Jeebeen_(%ED%98%B8%EB%A1%9C%EC%A1%B0)-%EA%B5%AD%EA%B0%80.wav"
@@ -50,7 +50,7 @@
  {
   "word": "발음",
   "krdictId": "57199",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/57199.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/57199.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EB%B0%9C%EC%9D%8C.wav"
@@ -58,7 +58,7 @@
  {
   "word": "부정",
   "krdictId": "59805",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/59805.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/59805.wav",
   "license": "CC0",
   "author": "Speaker: 호로조 Recorder: 호로조",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-%ED%98%B8%EB%A1%9C%EC%A1%B0-%EB%B6%80%EC%A0%95.wav"
@@ -66,7 +66,7 @@
  {
   "word": "수도",
   "krdictId": "15622",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/15622.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/15622.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%88%98%EB%8F%84.wav"
@@ -74,7 +74,7 @@
  {
   "word": "식당",
   "krdictId": "36693",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/36693.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/36693.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%8B%9D%EB%8B%B9.wav"
@@ -82,7 +82,7 @@
  {
   "word": "여자",
   "krdictId": "27369",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/27369.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/27369.wav",
   "license": "CC0",
   "author": "Speaker: 호로조 Recorder: 호로조",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-%ED%98%B8%EB%A1%9C%EC%A1%B0-%EC%97%AC%EC%9E%90.wav"
@@ -90,7 +90,7 @@
  {
   "word": "우주",
   "krdictId": "26665",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/26665.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/26665.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%9A%B0%EC%A3%BC.wav"
@@ -98,7 +98,7 @@
  {
   "word": "유리",
   "krdictId": "70458",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/70458.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/70458.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%9C%A0%EB%A6%AC.wav"
@@ -106,7 +106,7 @@
  {
   "word": "음악",
   "krdictId": "71115",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/71115.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/71115.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%9D%8C%EC%95%85.wav"
@@ -114,7 +114,7 @@
  {
   "word": "의식",
   "krdictId": "24084",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/24084.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/24084.wav",
   "license": "CC BY-SA 4.0",
   "author": "Speaker: HappyMidnight Recorder: HappyMidnight",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-HappyMidnight-%EC%9D%98%EC%8B%9D.wav"
@@ -122,7 +122,7 @@
  {
   "word": "종교",
   "krdictId": "62099",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/62099.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/62099.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%A2%85%EA%B5%90.wav"
@@ -130,7 +130,7 @@
  {
   "word": "지구",
   "krdictId": "62416",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/62416.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/62416.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%A7%80%EA%B5%AC.wav"
@@ -138,7 +138,7 @@
  {
   "word": "천사",
   "krdictId": "77578",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/77578.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/77578.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%EC%B2%9C%EC%82%AC.wav"
@@ -146,7 +146,7 @@
  {
   "word": "평화",
   "krdictId": "71342",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/71342.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/71342.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%ED%8F%89%ED%99%94.wav"
@@ -154,7 +154,7 @@
  {
   "word": "형제",
   "krdictId": "73223",
-  "file": "/experiments/w1/phonetic-echo/audio/ko/73223.wav",
+  "file": "/experiments/w1/tw-kr-dialogue/audio/ko/73223.wav",
   "license": "CC0",
   "author": "Speaker: CHK2605 Recorder: CHK2605",
   "source": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-CHK2605-%ED%98%95%EC%A0%9C.wav"

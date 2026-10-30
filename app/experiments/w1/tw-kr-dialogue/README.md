@@ -2,7 +2,7 @@
 
 A black-and-white typographic field of Taiwanese and Korean words that share Chinese characters (感謝 / 감사), as outlined paper blocks. Drag a word to its partner: they attract, resonate, dock, fill black and are pronounced (Taiwanese, then Korean). The paper wheel at the left edge drives the field: drag it for gravity, fling it to scatter everything and bring new words, click it for the comparison wheel, where each word can be replayed. One or two pairs in each set are false friends (新聞 news / 신문 newspaper): they resonate like partners, then crack apart, hatched, with both meanings shown (12 s, and again on hover; also in the comparison wheel). Title, INFO and INDEX tabs at the top left: a short history with diagrams, and the full numbered word list in category columns with a details pane. Bottom right: light/dark and sound icons (`theme.ts` holds the canvas colours, CSS variables the rest).
 
-- Route: /experiments/w1/phonetic-echo
+- Route: /experiments/w1/tw-kr-dialogue
 - Week: W1 · Tech: Canvas 2D + HTML overlay, Web Speech API
 - Inputs: drag words; drag / fling / click the wheel; keyboard (Tab, Enter, ↑↓, Esc)
 - Parameters (`settings.ts`): gravityStrength ← wheel drag distance · flingImpulse ← wheel release speed (> flingSpeed 1500 px/s) · angularMomentum (wheel spin, block spin) · magneticStrength ← word drag speed · settlingDamping (drops at a fling, eases back)
@@ -35,7 +35,7 @@ Research: 陳彥伶〈語言親緣關係常見的幾個迷思：兼論語言與�
 Taiwanese text and recordings: MOE, CC BY-ND 3.0 TW (recordings unmodified, `public/…/audio/tw/`). Korean text: 국립국어원, CC BY-SA 2.0 KR. Korean recordings: Lingua Libre (`korean-audio.json`, CC0 / CC BY-SA 4.0). krdict's own recordings are not used: their license is not stated.
 
 ## Run
-pnpm dev → open /experiments/w1/phonetic-echo
+pnpm dev → open /experiments/w1/tw-kr-dialogue
 
 ## Status / next
 Works; checked in Chrome. Limits: Korean speech depends on the browser having a Korean voice; only 20 words have a human Korean recording; pairs are not human-reviewed.
