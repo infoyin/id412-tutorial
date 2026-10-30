@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Lang, Playing } from "./audio";
 import { ENTRIES, FALSE_FRIENDS, type Entry } from "./words";
+import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
 
 // INDEX: every pair as a numbered row (001. 時間 · 시간 →), grouped by category into blocks
@@ -40,7 +41,9 @@ function Detail({ e, playing, muted, onPlay }: { e: Entry } & Props) {
   return (
     <div className={styles.detail}>
       <p className={styles.detailNum}>{String(NUMBER.get(e.id)).padStart(3, "0")}.</p>
-      <p className={styles.detailHanja}>{e.hanja}</p>
+      <p className={styles.detailHanja}>
+        <Zhuyin text={e.hanja} zhuyin={e.taiwanese.zhuyin} />
+      </p>
       <div className={styles.detailWords}>
         <button className={on("tw") ? styles.wordOn : ""} onClick={() => onPlay(e, "tw")} disabled={muted}>
           <small>臺語 · 대만어</small>
@@ -119,7 +122,8 @@ export function IndexList(props: Props) {
         ))}
       </div>
       <aside className={styles.indexPane} aria-live="polite">
-        {selected ? <Detail e={selected} {...props} /> : <p className={styles.indexHint}>點一個詞 · 단어를 고르세요 →</p>}
+        {/* key: a new word re-mounts the box, so its entrance animation plays again */}
+        {selected ? <Detail key={selected.id} e={selected} {...props} /> : <p className={styles.indexHint}>點一個詞 · 단어를 고르세요 →</p>}
       </aside>
     </div>
   );

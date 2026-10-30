@@ -1,5 +1,6 @@
 import type { Lang, Playing } from "./audio";
 import type { Entry } from "./words";
+import { Zhuyin } from "./Zhuyin";
 import styles from "./page.module.css";
 
 // The HTML layer over the canvas: a small title, one instruction (한국어 · 中文 · English),
@@ -112,7 +113,7 @@ export function Overlay(p: Props) {
             {e.status === "false_friend" ? "≠ 偽友 · 가짜 친구 · false friend" : `● 辭典對應 · 사전 대응 · dictionary matched — ${e.category}`}
           </p>
           <p className={styles.hanja} lang="zh-Hant">
-            {e.hanja}
+            <Zhuyin text={e.hanja} zhuyin={e.taiwanese.zhuyin} />
           </p>
 
           <div className={styles.columns}>

@@ -250,23 +250,25 @@ export function drawField(
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = `${weight} ${fontSize}px ${FONT}`;
-    // Main word (with 注音 on Taiwanese blocks), then its romanization underneath:
-    // Tâi-lô for Taiwanese, Revised Romanization for Korean.
-    if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, -fontSize * 0.2);
-    else ctx.fillText(b.text, 0, -fontSize * 0.2);
-    ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
-    ctx.globalAlpha = alpha * 0.75;
-    ctx.fillText(b.sub, 0, fontSize * 0.62);
-    ctx.globalAlpha = alpha;
-    if (b.lang === "ko") {
-      // The shared characters surface on the Korean block as the pair resonates.
+    // Taiwanese: characters with 注音, Tâi-lô underneath.
+    // Korean: Hangul, then the shared characters (they surface as the pair resonates),
+    // then the Revised Romanization.
+    const korean = b.lang === "ko";
+    const mainY = korean ? -fontSize * 0.36 : -fontSize * 0.2;
+    if (b.zhuyin) drawWithZhuyin(ctx, b.text, b.zhuyin, ctx.font, fontSize, mainY);
+    else ctx.fillText(b.text, 0, mainY);
+    if (korean) {
       const show = Math.max(resonance, solid);
       if (show > 0.01) {
-        ctx.font = `400 ${Math.round(fontSize * 0.3)}px ${FONT}`;
+        ctx.font = `500 ${Math.round(fontSize * 0.3)}px ${FONT}`;
         ctx.globalAlpha = alpha * show;
-        ctx.fillText(pair.entry.hanja, 0, -fontSize * 0.88);
+        ctx.fillText(pair.entry.hanja, 0, fontSize * 0.28);
       }
     }
+    ctx.font = `400 ${Math.round(fontSize * 0.34)}px ${LATIN}`;
+    ctx.globalAlpha = alpha * 0.75;
+    ctx.fillText(b.sub, 0, korean ? fontSize * 0.76 : fontSize * 0.62);
+    ctx.globalAlpha = alpha;
 
     // Language tag in the corner.
     ctx.font = `400 ${Math.round(fontSize * 0.26)}px ${FONT}`;

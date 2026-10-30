@@ -14,6 +14,7 @@ A black-and-white typographic field of Taiwanese and Korean words that share Chi
 - Approaching partners are joined by a beam of light (glow band, bright core, streaks running inward); the hum, portal and crack sounds are synthesized live in `audio.ts` (original, not speech).
 - `audio.ts`: one voice at a time. Taiwanese = MOE recording. Korean = Lingua Libre recording if any, else browser `ko-KR` speech synthesis (never another language's voice). Mute stops both.
 - Blocks: Taiwanese words carry Mandarin 注音 beside each character (from the MOE revised Mandarin dictionary, by whole word so polyphones are right) and Tâi-lô below; Korean words carry Revised Romanization (`romanize.ts`, from krdict's pronunciation). Click a block to hear it.
+- Clicking the title opens a short About (ID412 Interactive Space mini project, credits). INFO fits one screen: text in three columns, the letter charts in a strip on the right. `Zhuyin.tsx` shows 注音 beside characters in the HTML (comparison note, INDEX details).
 - `letters.ts` + `Info.tsx`: INFO also covers the history of 注音 and 한글, with clickable charts of the 40 Hangul letters and the 37 注音 symbols + tones (browser speech synthesis).
 - `draw.ts`, `Overlay.tsx`: drawing; title, instruction, sound toggle, annotation (click a word to hear it).
 - `Menu.tsx` (tabs), `Info.tsx` (history, sources, three diagrams; the ending chart -m→ㅁ, -t→ㄹ… is counted live from the 460 pairs), `IndexList.tsx` (482 rows: meanings, examples, both pronunciations).
