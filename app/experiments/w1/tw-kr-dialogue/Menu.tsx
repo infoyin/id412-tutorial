@@ -41,25 +41,13 @@ function About() {
         <dd>Mini Project [ID412] Interactive Space</dd>
         <dt>Created by</dt>
         <dd>Yin Jie Chen · 진윤제</dd>
-        {/* One line, wrapping only at the "·" if the panel is too narrow for both halves. */}
-        <dd className={styles.wrapAtDot}>
-          <span>
-            Research Intern [at]{" "}
-            <a href="https://visual-instruments.kaist.ac.kr/" target="_blank" rel="noreferrer">
-              KAIST Visual Instruments Lab
-            </a>{" "}
-            ·
-          </span>{" "}
-          <span>Exchange Student [from] NTUST, Taiwan Tech</span>
-        </dd>
-        <dt>Source</dt>
         <dd>
-          <a href="https://www.sinica.edu.tw/cp/695" target="_blank" rel="noreferrer">陳彥伶〈語言親緣關係常見的幾個迷思〉中央研究院</a>
+          Research Intern [at]{" "}
+          <a href="https://visual-instruments.kaist.ac.kr/" target="_blank" rel="noreferrer">
+            KAIST Visual Instruments Lab
+          </a>
         </dd>
-        <dd>
-          <a href="https://tdr.lib.ntu.edu.tw/handle/123456789/52032" target="_blank" rel="noreferrer">申祐先《韓國漢字音歷史層次研究》臺大 2015</a>
-        </dd>
-        <dd>教育部《臺灣台語常用詞辭典》《重編國語辭典修訂本》 · 국립국어원《한국어기초사전》 · Lingua Libre</dd>
+        <dd>Exchange Student [from] NTUST, Taiwan Tech</dd>
       </dl>
     </div>
   );

@@ -1009,7 +1009,6 @@
 .about dd {
   grid-column: 2;
   margin: 0;
-  white-space: nowrap; /* each credit stays on one line */
 }
 
 /* ---- 注音 beside characters (HTML) ---- */
@@ -1478,14 +1477,6 @@
   fill: var(--paper);
   stroke: currentColor;
   stroke-width: 1.4;
-}
-
-.about dd.wrapAtDot {
-  white-space: normal;
-}
-
-.wrapAtDot span {
-  white-space: nowrap;
 }
 
 /* Top-right clock, left of the icons: Taipei, then Seoul, fading between them. */
