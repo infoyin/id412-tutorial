@@ -40,7 +40,7 @@ function About() {
         <dt>Project</dt>
         <dd>Mini Project [ID412] Interactive Space</dd>
         <dt>Created by</dt>
-        <dd>Yin Jie Chen · 진윤제 · 陳胤傑</dd>
+        <dd>Yin Jie Chen · 진윤제</dd>
         {/* One line, wrapping only at the "·" if the panel is too narrow for both halves. */}
         <dd className={styles.wrapAtDot}>
           <span>
